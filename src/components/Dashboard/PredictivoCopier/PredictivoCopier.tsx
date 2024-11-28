@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/context/store/rootReducer';
 import { AuthLayout } from '@/components/Layout/layout';
