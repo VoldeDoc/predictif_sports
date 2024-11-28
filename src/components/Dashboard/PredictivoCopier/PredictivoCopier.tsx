@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/context/store/rootReducer';
 import { AuthLayout } from '@/components/Layout/layout';
@@ -102,7 +102,7 @@ const PredictivoCopier = () => {
                         key={question.id}
                         label={question.label}
                         id={question.id}
-                        type={question.type}
+                        type={question.type as 'text' | 'select'}
                         options={question.options}
                         placeholder={question.placeholder}
                       />

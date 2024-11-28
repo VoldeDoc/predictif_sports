@@ -1,13 +1,13 @@
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
-interface podcast{
-    text:string;
-    author:string;
-    img:string;
-}
+// interface podcast{
+//     text:string;
+//     author:string;
+//     img:string;
+// }
 
-interface PodcastProps{
-    podcastData:podcast[];
-}
+// interface PodcastProps{
+//     podcastData:podcast[];
+// }
 
 export const PodcastData = [
     {
