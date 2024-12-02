@@ -26,7 +26,7 @@ const TypingEffect = () => {
         showCursor={false}
         loop={false}
       >
-        <h1 className="text-white font-bold sm:text-5xl text-xl"></h1>
+        <h1 className="text-white font-bold sm:text-6xl text-xl"></h1>
       </ReactTyped>
       <ReactTyped
         strings={["Bettors Use to Outsmart"]}
@@ -35,7 +35,7 @@ const TypingEffect = () => {
         showCursor={false}
         loop={false}
       >
-        <h1 className="text-white font-bold sm:text-5xl text-xl"></h1>
+        <h1 className="text-white font-bold sm:text-6xl text-xl"></h1>
       </ReactTyped>
       <ReactTyped
         strings={["the Bookmakers"]}
@@ -44,7 +44,7 @@ const TypingEffect = () => {
         showCursor={false}
         loop={false}
       >
-        <h1 className="text-white font-bold sm:text-5xl mb-3 text-xl"></h1>
+        <h1 className="text-white font-bold sm:text-6xl mb-3 text-xl"></h1>
       </ReactTyped>
     </div>
   );

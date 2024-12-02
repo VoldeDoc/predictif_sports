@@ -37,13 +37,13 @@ export default function Navbar() {
         className={`fixed ${scrolled ? "lg:top-0" : "lg:top-6"
           } lg:left-1/2 lg:transform lg:-translate-x-1/2 w-full z-10 bg-white shadow-md px-4 max-w-screen-xl mx-auto rounded-xl transition-all duration-300`}
       >
-        <nav className="container mx-auto flex justify-between items-center p-4">
+        <nav className="container mx-auto flex justify-between items-center py-4 px-10">
           <div className="flex items-center">
             <Link to="/">
               <img
                 src="assets/images/logo.png"
                 alt="navbar logo"
-                className="h-10"
+                className="h-12"
               />
             </Link>
           </div>

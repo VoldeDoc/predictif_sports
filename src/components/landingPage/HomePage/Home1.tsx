@@ -12,7 +12,7 @@ export default function Home1() {
                         <div className="text-center pb-7 sm:mr-32 mr-0">
                             <button className="rounded-2xl bg-white text-black-500 px-2 py-2 text-xs mb-5 " > <span className="text-[#B22234] font-bold">o</span> Fully Integrated Sport Prediction Apps</button>
                         </div>
-                        <div className="flex flex-col sm:flex-row justify-between sm:space-x-20 space-x-0 space-y-7">
+                        <div className="flex flex-col sm:flex-row justify-between sm:space-x-4 space-x-0 space-y-7">
 
                             <div className="text-center items-center flex justify-center">
                                 <img src="/assets/images/landingPage/man.svg" alt="" className="sm:h-96 h-52 " />
@@ -58,7 +58,7 @@ export default function Home1() {
 
                     <div className="sm:px-16 px-8 pb-20">
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-20 gap-x-8">
                             <div className="flex space-x-5">
                                 <div className="bg-[#B22234] rounded-full sm:w-32 sm:h-32 w-24 h-24 p-2 flex items-center justify-center hover:bg-black-500">
                                     <div className="outline outline-1 outline-white rounded-full sm:w-28 sm:h-28 w-20 h-20 flex items-center justify-center">
@@ -67,9 +67,10 @@ export default function Home1() {
                                 </div>
                                 <div>
                                     <h2 className="font-semibold text-2xl">Expert Insights</h2>
-                                    <p className="text-gray-700">A panel of seasoned sports analysts delivers </p>
-                                    <p className="text-gray-700">commentary on upcoming games, focusing on </p>
-                                    <p className="text-gray-700 pb-3"> team tactics, player form, and historical performance.</p>
+                                    <p className="text-gray-700">A panel of seasoned sports analysts delivers commentary on </p>
+                                    <p className="text-gray-700 pb-3">upcoming games, focusing on team tactics, player form, and historical performance.</p>
+                                  
+                                  
                                     <hr />
                                 </div>
                             </div>
@@ -83,8 +84,8 @@ export default function Home1() {
                                 <div>
                                     <h2 className="font-semibold text-2xl">Tactical Breakdown</h2>
                                     <p className="text-gray-700">A custom logo design is a crucial part of your </p>
-                                    <p className="text-gray-700">overall branding process. Your logo design is a</p>
-                                    <p className="text-gray-700 pb-3">significant.</p>
+                                    <p className="text-gray-700 lg:pb-8">overall branding process. Your logo design is a significant.</p>
+                                  
                                     <hr />
                                 </div>
                             </div>
@@ -96,9 +97,9 @@ export default function Home1() {
                                 </div>
                                 <div>
                                     <h2 className="font-semibold text-2xl">Metric Analysis</h2>
-                                    <p className="text-gray-700">Users can generate personalized reports that </p>
-                                    <p className="text-gray-700">combine expert analysis with their own betting</p>
-                                    <p className="text-gray-700 pb-3"> history and preferences.</p>
+                                    <p className="text-gray-700">Users can generate personalized reports that  combine expert</p>
+                                    <p className="text-gray-700 lg:pb-8"> analysis with their own betting history and preferences.</p>
+                                
                                     <hr />
                                 </div>
                             </div>
@@ -110,9 +111,9 @@ export default function Home1() {
                                 </div>
                                 <div>
                                     <h2 className="font-semibold text-2xl">Game Previews</h2>
-                                    <p className="text-gray-700">The feature emphasizes critical metrics such </p>
-                                    <p className="text-gray-700">as possession statistics, shooting accuracy, </p>
-                                    <p className="text-gray-700 pb-3">defensive efficiency, and advanced analytics.</p>
+                                    <p className="text-gray-700">The feature emphasizes critical metrics such as possession statistics, </p>
+                                    <p className="text-gray-700 pb-3">shooting accuracy, defensive efficiency, and advanced analytics.</p>
+                                 
                                     <hr />
                                 </div>
                             </div>
@@ -125,8 +126,8 @@ export default function Home1() {
                                 <div>
                                     <h2 className="font-semibold text-2xl">Customizable Reports</h2>
                                     <p className="text-gray">A custom logo design is a crucial part of your </p>
-                                    <p className="text-gray">overall branding process. Your logo design is a</p>
-                                    <p className="text-gray pb-3">significant.</p>
+                                    <p className="text-gray lg:pb-8">overall branding process. Your logo design is a significant.</p>
+                                   
                                     <hr />
                                 </div>
                             </div>
@@ -138,9 +139,9 @@ export default function Home1() {
                                 </div>
                                 <div>
                                     <h2 className="font-semibold text-2xl">Interactive Q&A Sessions</h2>
-                                    <p className="text-gray-700">Users can participate in live Q&A sessions with</p>
-                                    <p className="text-gray-700"> experts, allowing them to ask questions and </p>
-                                    <p className="text-gray-700 pb-3">seek clarification on tactics and metrics.</p>
+                                    <p className="text-gray-700">Users can participate in live Q&A sessions with experts, allowing </p>
+                                    <p className="text-gray-700 pb-3">them  to ask questions and seek clarification on tactics and metrics. </p>
+                                 
                                     <hr />
                                 </div>
                             </div>

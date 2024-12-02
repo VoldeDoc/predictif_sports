@@ -17,7 +17,7 @@ const signInFunction = async (data: LoginDataValues) => {
         setLoading(true);
         const res = await client.post("/login", data);
         const token = res.data.data.token;
-        const user = res.data.data.user;
+      const user = res.data.data.user;
         console.log(user);
   
         dispatch(setToken(token));
