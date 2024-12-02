@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavbarLinks from "@/components/Ui/navbarLinks";
 import ToggleBtn from "@/components/Ui/toggleButton";
@@ -12,7 +12,7 @@ import { MdDashboard } from "react-icons/md";
 
 export default function Navbar() {
   const [navbarOpen, setNavbarOpen] = useState(false);
-
+  const [scrolled, setScrolled] = useState(false);
   const handleToggle = () => {
     setNavbarOpen(!navbarOpen);
   };
@@ -20,9 +20,23 @@ export default function Navbar() {
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10); // Trigger the scroll effect
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
-      <header className="fixed top-0 w-full z-10 bg-white shadow-md">
+      <header
+        className={`fixed ${scrolled ? "lg:top-0" : "lg:top-6"
+          } lg:left-1/2 lg:transform lg:-translate-x-1/2 w-full z-10 bg-white shadow-md px-4 max-w-screen-xl mx-auto rounded-xl transition-all duration-300`}
+      >
         <nav className="container mx-auto flex justify-between items-center p-4">
           <div className="flex items-center">
             <Link to="/">
@@ -76,9 +90,8 @@ export default function Navbar() {
                         {({ active }) => (
                           <Link
                             to={"/dashboard"}
-                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${
-                              active ? "bg-blue-100 font-bold" : ""
-                            }`}
+                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-100 font-bold" : ""
+                              }`}
                           >
                             <MdDashboard className={"h-4 w-4"} />
                             <span>Dashboard</span>
@@ -89,9 +102,8 @@ export default function Navbar() {
                         {({ active }) => (
                           <Link
                             to={"/profile"}
-                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${
-                              active ? "bg-blue-100 font-bold" : ""
-                            }`}
+                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-100 font-bold" : ""
+                              }`}
                           >
                             <UserCircleIcon className={"h-4 w-4"} />
                             <span>Profile</span>
@@ -102,9 +114,8 @@ export default function Navbar() {
                         {({ active }) => (
                           <Link
                             to={"/settings"}
-                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${
-                              active ? "bg-blue-100 font-bold" : ""
-                            }`}
+                            className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-100 font-bold" : ""
+                              }`}
                           >
                             <CogIcon className={"h-4 w-4"} />
                             <span>Settings</span>
@@ -117,7 +128,7 @@ export default function Navbar() {
               </Menu>
             ) : (
               <Link to="/auth/signin">
-                <button className="bg-blue-900 text-white rounded px-4 py-2">
+                <button className="bg-black-500 text-white rounded px-8 py-2">
                   Login
                 </button>
               </Link>
@@ -129,15 +140,13 @@ export default function Navbar() {
         </nav>
         {/* Sidebar */}
         <div
-          className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity md:hidden ${
-            navbarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity md:hidden ${navbarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           onClick={handleToggle}
         ></div>
         <div
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform md:hidden ${
-            navbarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md transform transition-transform md:hidden ${navbarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between px-4 py-4 border-b">
@@ -179,9 +188,8 @@ export default function Navbar() {
                           {({ active }) => (
                             <Link
                               to="/dashboard"
-                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${
-                                active ? "bg-blue-500 text-white rounded" : ""
-                              }`}
+                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-500 text-white rounded" : ""
+                                }`}
                             >
                               Dashboard
                             </Link>
@@ -191,9 +199,8 @@ export default function Navbar() {
                           {({ active }) => (
                             <Link
                               to="/profile"
-                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${
-                                active ? "bg-blue-500 text-white rounded" : ""
-                              }`}
+                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-500 text-white rounded" : ""
+                                }`}
                             >
                               Profile
                             </Link>
@@ -203,9 +210,8 @@ export default function Navbar() {
                           {({ active }) => (
                             <Link
                               to="/settings"
-                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${
-                                active ? "bg-blue-500 text-white rounded" : ""
-                              }`}
+                              className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-500 text-white rounded" : ""
+                                }`}
                             >
                               Settings
                             </Link>
@@ -219,7 +225,7 @@ export default function Navbar() {
             ) : (
               <div className="px-4 py-4 border-t">
                 <Link to="/auth/signin">
-                  <button className="bg-blue-900 text-white w-full rounded px-4 py-2">
+                  <button className="bg-black-500 text-white w-full rounded px-8 py-2">
                     Login
                   </button>
                 </Link>

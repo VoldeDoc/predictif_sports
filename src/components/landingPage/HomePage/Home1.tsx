@@ -1,6 +1,7 @@
 import LandingPageLayout from "@/components/Layout/LandingPageLayout";
 import SportTeams from "./Tools/SportTeams";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import TypingEffect from "./Tools/Typing";
 
 export default function Home1() {
     return (
@@ -17,16 +18,7 @@ export default function Home1() {
                                 <img src="/assets/images/landingPage/man.svg" alt="" className="sm:h-96 h-52 " />
                             </div>
                             <div>
-                                <h1 className="text-white font-bold sm:text-5xl text-xl">
-                                    The Hidden Tool Smart
-                                </h1>
-                                <h1 className="text-white font-bold sm:text-5xl text-xl">
-                                    Bettors Use to Outsmart
-
-                                </h1>
-                                <h1 className="text-white font-bold sm:text-5xl mb-3 text-xl">
-                                    the Bookmakers
-                                </h1>
+                               <TypingEffect/>
                                 <p className="text-white text-sm">Predictivo™ assists thousands of game-loving bettors and</p>
                                 <p className="text-white text-sm">traders in making smarter, data-driven betting decisions every day.</p>
                             </div>
@@ -48,10 +40,10 @@ export default function Home1() {
                                 </p>
                             </div>
                         </div>
-                    </div>
                     <span className="col-sm-10">
                         <SportTeams />
                     </span>
+                    </div>
 
                 </div>
 
@@ -66,7 +58,7 @@ export default function Home1() {
 
                     <div className="sm:px-16 px-8 pb-20">
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                             <div className="flex space-x-5">
                                 <div className="bg-[#B22234] rounded-full sm:w-32 sm:h-32 w-24 h-24 p-2 flex items-center justify-center hover:bg-black-500">
                                     <div className="outline outline-1 outline-white rounded-full sm:w-28 sm:h-28 w-20 h-20 flex items-center justify-center">
@@ -77,8 +69,7 @@ export default function Home1() {
                                     <h2 className="font-semibold text-2xl">Expert Insights</h2>
                                     <p className="text-gray-700">A panel of seasoned sports analysts delivers </p>
                                     <p className="text-gray-700">commentary on upcoming games, focusing on </p>
-                                    <p className="text-gray-700">team tactics, player form, and historical </p>
-                                    <p className="text-gray-700 pb-3">performance.</p>
+                                    <p className="text-gray-700 pb-3"> team tactics, player form, and historical performance.</p>
                                     <hr />
                                 </div>
                             </div>
@@ -172,7 +163,7 @@ export default function Home1() {
                                     <h2 className="font-bold text-xl">Strategic Analysis (Your AI copilot)</h2>
 
                                 </div>
-                                <div className="bg-white rounded-xl shadow-lg px-4 py-4 items-center ">
+                                <div className="bg-white rounded-xl shadow-lg px-10 py-4 items-center ">
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">1</h1>
                                     </div>
@@ -183,7 +174,7 @@ export default function Home1() {
                                         their betting strategies.</p>
                                 </div>
 
-                                <div className="bg-black-500 text-white rounded-xl shadow-lg px-4 py-4  space-y-4 flex flex-col justify-between h-full">
+                                <div className="bg-black-500 text-white rounded-xl shadow-lg px-10 py-4  space-y-4 flex flex-col justify-between h-full">
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">2</h1>
                                     </div>
@@ -200,7 +191,7 @@ export default function Home1() {
                                     <p>This feature harnesses the power of artificial intelligence to analyze vast amounts of sports data, offering detailed reports and insights tailored for sports bettors. The goal is to empower users with actionable information to enhance their decision-making processes.</p>
                                 </div>
 
-                                <div className="bg-white text-black rounded-xl shadow-lg px-4 py-4  space-y-4 flex flex-col justify-between h-full">
+                                <div className="bg-white text-black rounded-xl shadow-lg px-10 py-4  space-y-4 flex flex-col justify-between h-full">
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">3</h1>
                                     </div>

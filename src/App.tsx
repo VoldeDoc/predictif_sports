@@ -26,6 +26,7 @@ import Strategies from "./pages/home/Strategic_analysis/index.tsx";
 import Expert from "./pages/home/Expert_analysis/index.tsx";
 import Heading from "./pages/home/Head_Head/index.tsx";
 import Fantasy from "./pages/home/Fantasy_league/index.tsx";
+import Survey from "./components/Dashboard/Survey/Survey.tsx";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -80,6 +81,7 @@ function App() {
               <Route path="/forum" element={<ForumT/>} />
               <Route path="/messages" element={<Message_Box/>} />
               <Route path="/groups" element={<Forum_groups/>} />
+              <Route path="/survey" element={<Survey/>} />
             
 
               {/* Ui */}

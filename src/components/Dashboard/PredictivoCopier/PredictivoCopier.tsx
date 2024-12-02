@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import   { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/context/store/rootReducer';
 import { AuthLayout } from '@/components/Layout/layout';
@@ -6,8 +6,7 @@ import moment from 'moment';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/themes/airbnb.css';
 import { BsCalendar2Date } from 'react-icons/bs';
-import Question from './questionnaire/questionStructure'; // Adjust the import path as necessary
-import { questionnaire } from './questionnaire/questions';  // Adjust the import path as necessary
+
 
 const PredictivoCopier = () => {
   const userdata = useSelector((state: RootState) => state.auth?.user);
@@ -44,7 +43,6 @@ const PredictivoCopier = () => {
   };
 
   const [dateRange, setDateRange] = useState<[Date, Date]>([today, fiveDaysAhead]);
-  const [currentStep, setCurrentStep] = useState(0);
 
   const handleDateChange = (dates: Date[]) => {
     if (dates.length === 2) {
@@ -52,13 +50,6 @@ const PredictivoCopier = () => {
     }
   };
 
-  const handleNextClick = () => {
-    setCurrentStep((prevStep) => prevStep + 1);
-  };
-
-  const handlePreviousClick = () => {
-    setCurrentStep((prevStep) => prevStep - 1);
-  };
 
   return (
     <AuthLayout>
@@ -89,66 +80,7 @@ const PredictivoCopier = () => {
           </div>
         </div>
 
-        <div className="px-8 sm:px-16 bg-white min-h-screen">
-          <div className="flex flex-col md:flex-row p-6">
-            {/* Form Section */}
-            <div className="w-full md:w-1/2 bg-white shadow-md rounded-lg p-6">
-              {questionnaire[currentStep] && (
-                <>
-                  <h2 className="text-lg font-bold mb-4">{questionnaire[currentStep].title}</h2>
-                  <form className="space-y-4">
-                    {questionnaire[currentStep].questions.map((question) => (
-                      <Question
-                        key={question.id}
-                        label={question.label}
-                        id={question.id}
-                        type={question.type as 'text' | 'select'}
-                        options={question.options}
-                        placeholder={question.placeholder}
-                      />
-                    ))}
-                  </form>
-                </>
-              )}
-              <div className="flex justify-between mt-4">
-                {currentStep > 0 && (
-                  <button
-                    type="button"
-                    onClick={handlePreviousClick}
-                    className="bg-gray-500 text-white py-2 px-4 rounded"
-                  >
-                    Previous
-                  </button>
-                )}
-                {currentStep < questionnaire.length - 1 && (
-                  <button
-                    type="button"
-                    onClick={handleNextClick}
-                    className="bg-blue-500 text-white py-2 px-4 rounded"
-                  >
-                    Next
-                  </button>
-                )}
-                {currentStep === questionnaire.length - 1 && (
-                  <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
-                    Submit
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Illustration Section */}
-            <div className="hidden md:flex md:w-1/2 items-center justify-center bg-blue-50">
-              <div className="relative bg-white p-6 rounded-lg shadow-md h-full flex items-center justify-center">
-                <img
-                  src="assets/images/dashboard/dashboard/undraw_online_organizer_re_156n 1.svg"
-                  alt="Illustration"
-                  className="max-w-xs mx-auto"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      
       </>
     </AuthLayout>
   );

@@ -6,14 +6,11 @@ import Textinput from "../Ui/Textinput";
 import Checkbox from "../Ui/CheckBox";
 import { useState } from "react";
 import Button from "../Ui/Button";
-import { Link, useNavigate } from "react-router-dom";
-import axiosClient from "@/services/axios-client";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "@/utils/Loading";
-import { setOtpMail } from "./store";
-import { AppDispatch } from "@/context/store";
-import { useDispatch } from "react-redux";
-
+import { SignUpDataValues } from "@/types";
+import useAuth from "@/hooks/useAuth";
 // Define the validation schema using yup
 const schema = yup.object().shape({
   username: yup
@@ -38,57 +35,39 @@ const schema = yup.object().shape({
     .required("Email is required"),
 });
 
-// Define the form values interface
-interface FormValues {
-  email: string;
-  username: string;
-  password: string;
-  password_confirmation: string;
-}
 
 const SignupComponent = () => {
-  const router = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
   const [rememberMe, setRememberMe] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const {signUpFunction,loading} =useAuth()
   const {
     register,
     handleSubmit,
     formState: { errors, touchedFields },
-  } = useForm<FormValues>({
+  } = useForm<SignUpDataValues>({
     resolver: yupResolver(schema),
     mode: "all",
   });
 
   // Handler for form submission
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      const client = axiosClient();
-      setLoading(true);
-      const res = await client.post("/auth/register", data);
-      const otp = res.data.data.otp;
-      dispatch(setOtpMail(data.email));
-      toast.success(`this is your otp : ${otp}`);
-      router("/auth/otp-verification");
-    } catch (error: any) {
-      const resError = error.response?.data;
-      const errorMessage = resError?.message || "An error occurred";
-      const errors: Record<string, string[]> | undefined = resError?.errors;
-      let formattedErrors = "";
-      if (errors) {
-        formattedErrors = Object.values(errors)
-          .flat()
-          .map((error: unknown) => `• ${String(error)}`)
-          .join("\n");
+  const onSubmit: SubmitHandler<SignUpDataValues> = async (data) => {
+    toast.promise(
+      signUpFunction(data),
+      {
+        pending: "Signing up...",
+        success: {
+          render({ data }) {
+            return <div>{data as string}</div>
+          },
+        }, 
+        error: {
+          render({ data }) {
+            return <div>{data as string}</div>
+          },
+        },
       }
-
-      toast.error(`${errorMessage}\n${formattedErrors}`);
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    )
   };
-
+ 
   if (loading) {
     return <Loading />;
   }

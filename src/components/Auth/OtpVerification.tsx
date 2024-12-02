@@ -56,7 +56,7 @@ const OtpVerification = () => {
     const enteredOtp = otp.join("");
     try {
       const client = axiosClient();
-     const res = await client.post("/auth/verify-otp", {
+     const res = await client.post("/verifyOtp", {
         email: otpMail,
         otp: enteredOtp,
       });
@@ -65,7 +65,7 @@ const OtpVerification = () => {
       setIsInvalid(false);
       dispatch(setToken(token));
       dispatch(setUser(user));
-      router("/dashboard");
+      router("/survey");
       toast.success("OTP verified successfully!");
       // Redirect or update state as needed
     } catch (error: any) {
@@ -85,9 +85,9 @@ const OtpVerification = () => {
     if (canResend) {
       try {
       
-        const res = await client.post("/auth/resend-otp", { email: otpMail });
+        const res = await client.post("/resendOtp", { email: otpMail });
         const otp = res.data.data.otp;
-        toast.success(`OTP resent successfully! = > ${otp}`);
+        toast.success(`OTP resent successfully!  ${otp}`);
         setTimeLeft(180);
         setCanResend(false);
       } catch (error:any) {

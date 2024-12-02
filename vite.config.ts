@@ -11,6 +11,7 @@ export default defineConfig({
       public: `${path.resolve(__dirname, "./public/")}`,
       pages: path.resolve(__dirname, "./src/pages"),
       types: `${path.resolve(__dirname, "./src/@types")}`,
+      hooks: `${path.resolve(__dirname, "./src/hooks")}`,
     },
   },
   plugins: [react(

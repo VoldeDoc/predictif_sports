@@ -7,13 +7,12 @@ import Checkbox from "../Ui/CheckBox";
 import { useState } from "react";
 
 import Button from "../Ui/Button";
-import { Link, useNavigate } from "react-router-dom";
-import axiosClient from "@/services/axios-client";
-import { AppDispatch } from "@/context/store";
-import { useDispatch } from "react-redux";
-import { setOtpMail, setToken, setUser } from "./store";
+import { Link } from "react-router-dom";
+
 import { toast } from "react-toastify";
 import Loading from "@/utils/Loading";
+import { LoginDataValues } from "@/types";
+import useAuth from "@/hooks/useAuth";
 
 // Define the validation schema using yup
 const schema = yup.object().shape({
@@ -28,58 +27,36 @@ const schema = yup.object().shape({
 });
 
 // Define the form values interface
-interface FormValues {
-  email: string;
-  password: string;
-}
 
 const SigninComponent = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const router = useNavigate();
   const [rememberMe, setRememberMe] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const { signInFunction, loading } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors, touchedFields },
-  } = useForm<FormValues>({
+  } = useForm<LoginDataValues>({
     resolver: yupResolver(schema),
     mode: "all",
   });
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    try {
-      setLoading(true);
-      const client = axiosClient();
-      const res = await client.post("/auth/login", data);
-      const token = res.data.data.token;
-      const user = res.data.data.user;
-      console.log(user);
-      
-      dispatch(setToken(token));
-      dispatch(setUser(user));
-      toast.success(`Login Successful ${user.username}`);
-      // Redirect to the dashboard or another page
-      router("/dashboard");
-    } catch (error: any) {
-      const resError = error.response?.data;
-      const errorMessage =
-        resError?.message || resError?.data || "An error occurred";
-      if (resError?.data === "Please verify your email before logging in.") {
-        const email = data.email;
-        console.log(email);
-        dispatch(setOtpMail(email));
-        toast.warning(
-          "Please verify your email before logging in.\n\n We just sent an OTP to your mail"
-        );
-        router("/auth/otp-verification");
-      } else {
-        // Show error message
-        toast.error(`${errorMessage}`);
+  const onSubmit: SubmitHandler<LoginDataValues> = async (data) => {
+    toast.promise(
+      signInFunction(data),
+      {
+        pending: "Signing in...",
+        success: {
+          render({ data }) {
+            return <div>{data as string}</div>
+          },
+        }, 
+        error: {
+          render({ data }) {
+            return <div>{data as string}</div>
+          },
+        },
       }
-    } finally {
-      setLoading(false);
-    }
+    )
   };
   if (loading) {
     return <Loading />;

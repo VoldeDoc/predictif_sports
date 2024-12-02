@@ -12,7 +12,8 @@
       "pages/*": ["/src/pages/*"],
       "components/*": ["/src/components/*"],
       "types/*": ["/src/@types/*"],
-      "public/*": ["/public/*"]
+      "public/*": ["/public/*"],
+      "hooks/*": ["/src/hooks/*"],
     },
 
     /* Bundler mode */

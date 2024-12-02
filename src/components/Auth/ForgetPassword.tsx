@@ -5,6 +5,7 @@ import { forget_password, logo } from "../../../public";
 import Textinput from "../Ui/Textinput";
 
 import Button from "../Ui/Button";
+import { ForgetPasswordDataValues } from "@/types";
 
 
 // Define the validation schema using yup
@@ -15,17 +16,14 @@ const schema = yup.object().shape({
     .required("Email is required"),
 });
 
-// Define the form values interface
-interface FormValues {
-  email: string;
-}
+
 
 const ForgetPassword = () => {
 
   const {
     register,
     formState: { errors, touchedFields },
-  } = useForm<FormValues>({
+  } = useForm<ForgetPasswordDataValues>({
     resolver: yupResolver(schema),
     mode: "all",
   });
