@@ -179,6 +179,9 @@ export default function Home1() {
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">2</h1>
                                     </div>
+                                    <div className="text-center flex justify-center pb-5">
+                                        <img src="assets/images/landingPage/bi_columns-gap.svg" alt="" className="w-20 h-20" />
+                                    </div>
                                     <p className="">Encourages ongoing learning through expert engagement, helping bettors refine their understanding of sports tactics and metrics over time.</p>
                                 </div>
 
@@ -195,6 +198,9 @@ export default function Home1() {
                                 <div className="bg-white text-black rounded-xl shadow-lg px-10 py-4  space-y-4 flex flex-col justify-between h-full">
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">3</h1>
+                                    </div>
+                                    <div className="text-center flex justify-center pb-5">
+                                        <img src="assets/images/landingPage/bet_6570181 1.svg" alt="" className="w-20 h-20" />
                                     </div>
                                     <p className="">Bridges the gap between data and actionable insights, empowering users to make informed decisions.</p>
                                 </div>

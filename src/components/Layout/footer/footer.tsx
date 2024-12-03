@@ -2,7 +2,7 @@ import { LuUser2 } from "react-icons/lu";
 export default function Footer() {
   return (
     <>
-      <footer className="w-full py-14 px-5 text-center sm:text-left text-white bg-dark">
+      <footer className="w-full py-14 sm:px-16 px-8 text-center sm:text-left text-white bg-dark">
         <div className="container mx-auto">
           <div className="flex flex-wrap pb-11 mb-11">
             <div className="w-full lg:w-1/2 pb-5">
@@ -20,7 +20,7 @@ export default function Footer() {
                   <input
                     type="text"
                     placeholder="Enter Your email "
-                    className="w-full py-2 pl-10 pr-3 rounded-xl text-white bg-transparent border border-white  "
+                    className="sm:w-80 w-full py-2 pl-10 pr-3 rounded-xl text-white bg-transparent border border-white  "
                   />
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                     <LuUser2 className="text-gray-400" />

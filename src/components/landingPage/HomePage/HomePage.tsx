@@ -179,6 +179,9 @@ export default function Home() {
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">2</h1>
                                     </div>
+                                    <div className="text-center flex justify-center pb-5">
+                                        <img src="assets/images/landingPage/bi_columns-gap.svg" alt="" className="w-20 h-20" />
+                                    </div>
                                     <p className="">Encourages ongoing learning through expert engagement, helping bettors refine their understanding of sports tactics and metrics over time.</p>
                                 </div>
 
@@ -195,6 +198,9 @@ export default function Home() {
                                 <div className="bg-white text-black rounded-xl shadow-lg px-10 py-4  space-y-4 flex flex-col justify-between h-full">
                                     <div className="rounded-full bg-blue-800 w-14 h-14 flex justify-center items-center">
                                         <h1 className="text-white font-semibold text-3xl ">3</h1>
+                                    </div>
+                                    <div className="text-center flex justify-center pb-5">
+                                        <img src="assets/images/landingPage/bet_6570181 1.svg" alt="" className="w-20 h-20" />
                                     </div>
                                     <p className="">Bridges the gap between data and actionable insights, empowering users to make informed decisions.</p>
                                 </div>
@@ -219,7 +225,7 @@ export default function Home() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/users-wm.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/data.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
                                     <h1 className="font-semibold text-3xl pb-4">Data Analytics</h1>
@@ -233,7 +239,7 @@ export default function Home() {
 
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/opening-times.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/model.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
                                     <h1 className="font-semibold text-3xl pb-4">Predictive Modeling</h1>
@@ -246,7 +252,7 @@ export default function Home() {
                             </div>
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/users-wm.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/cust.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
                                     <h1 className="font-semibold text-3xl pb-4">Customized Reports</h1>
@@ -260,7 +266,7 @@ export default function Home() {
 
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/opening-times.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/risk.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
                                     <h1 className="font-semibold text-3xl pb-4">Risk Assessment</h1>
@@ -274,28 +280,28 @@ export default function Home() {
 
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/users-wm.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/insight.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
-                                    <h1 className="font-semibold text-3xl pb-4">Risk Assessments</h1>
-                                    <p className="text-gray-700 pb-5">The feature assesses risk levels associated with different betting options, allowing users to make informed choices about where to place their bets.
+                                    <h1 className="font-semibold text-3xl pb-4">User-Friendly Interface</h1>
+                                    <p className="text-gray-700 pb-5">An intuitive dashboard displays all relevant information in a clear, concise format, making it easy for users to navigate through various insights and reports.
                                     </p>
                                     <p className="text-gray-700">
-                                        Users receive alerts on high-risk bets and can adjust their strategies accordingly.
+                                    Users can filter data based on specific leagues, teams, or player performances.
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex space-x-4">
                                 <div>
-                                    <img src="assets/images/landingPage/opening-times.svg" alt="" className="w-20 h-20" />
+                                    <img src="assets/images/landingPage/inter.svg" alt="" className="w-20 h-20" />
                                 </div>
                                 <div>
                                     <h1 className="font-semibold text-3xl pb-4">Expert Insights</h1>
-                                    <p className="text-gray-700 pb-5">he AI curates insights from expert analysts, combining statistical data with expert opinions to provide a well-rounded view of upcoming games and events.
+                                    <p className="text-gray-700 pb-5">The AI curates insights from expert analysts, combining statistical data with expert opinions to provide a well-rounded view of upcoming games and events.
                                     </p>
                                     <p className="text-gray-700">
-                                        Users can access historical expert predictions and outcomes to refine their strategies
+                                     Users can access historical expert predictions and outcomes to refine their strategies
                                     </p>
                                 </div>
                             </div>
