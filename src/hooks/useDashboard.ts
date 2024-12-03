@@ -7,21 +7,32 @@ function useDashBoardManagement() {
     const [loading, setLoading] = useState(false)
     const client = axiosClient()
     const router = useNavigate()
-    const surveyQuestions = async (data:SurveyDataValues)=>{
-        try{
+    const surveyQuestions = async (data: SurveyDataValues) => {
+        try {
             setLoading(true)
-            const res = await client.post('/user/sportsBettingQuestionnaire',data)
+            const token = JSON.parse(localStorage.getItem('token') || '')
+            if (!token) {
+                throw new Error("No token found");
+            }
+
+            console.log(token);
+            const res = await client.post('/user/sportsBettingQuestionnaire', data, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
             const questions = res.data.data
             console.log(questions);
-            router('/dashboard')
+            router('/progress-survey')
             return Promise.resolve("survey filled successfully!")
         }
-        catch(error:any){
+        catch (error: any) {
             const resError = error.response?.data
             const errorMessage = resError?.message || resError?.data || "An error occurred"
+            console.log(errorMessage);
             return Promise.reject(`${errorMessage}`)
         }
-        finally{
+        finally {
             setLoading(false)
         }
     }

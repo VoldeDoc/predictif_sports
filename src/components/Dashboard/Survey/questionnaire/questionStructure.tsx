@@ -14,12 +14,20 @@ interface QuestionProps {
 const Question: React.FC<QuestionProps> = ({ label, id, type, options, placeholder, register, errors }) => {
   const [showAdditionalInput, setShowAdditionalInput] = React.useState(false);
 
-  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement  >) => {
     const selectedValue = event.target.value;
     if (selectedValue.includes('please specify') || selectedValue.includes('describe') || selectedValue.includes('elaborate')) {
       setShowAdditionalInput(true);
     } else {
       setShowAdditionalInput(false);
+    }
+  };
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = event.target.checked;
+    const value = event.target.value;
+    if (value.includes('please specify')) {
+      setShowAdditionalInput(isChecked);
     }
   };
 
@@ -45,7 +53,7 @@ const Question: React.FC<QuestionProps> = ({ label, id, type, options, placehold
       {/* Select Input */}
       {type === 'select' && options && (
         <>
-          <select
+          <select                                                 
             id={id.toString()}
             {...register(id.toString())}
             onChange={handleSelectChange}
@@ -63,7 +71,7 @@ const Question: React.FC<QuestionProps> = ({ label, id, type, options, placehold
 
           {/* Additional Input */}
           {showAdditionalInput && (
-            <input
+            <input 
               type="text"
               id={`${id.toString()}-additional`}
               {...register(`${id.toString()}-additional`)}
@@ -81,14 +89,24 @@ const Question: React.FC<QuestionProps> = ({ label, id, type, options, placehold
             <label key={index} className="block">
               <input
                 type="checkbox"
-                value={option}
+                value={option}  
                 {...register(id.toString())}
+                onChange={ handleCheckboxChange }
                 className="mr-2"
               />
               {option}
             </label>
           ))}
-        </div>
+           {showAdditionalInput && (
+          <input
+            type="text"
+            id={`${id.toString()}-additional`}
+            {...register(`${id.toString()}-additional`)}
+            className="mt-2 block w-full border-[#DBDCDE] shadow-sm bg-[#F4F5F9] p-3 text-gray-800 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            placeholder="Please specify"
+          />
+        )}
+        </div>      
       )}
 
       {/* Error and Success Feedback */}

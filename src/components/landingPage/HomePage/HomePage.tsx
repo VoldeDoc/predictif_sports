@@ -92,7 +92,7 @@ export default function Home() {
                             <div className="flex space-x-5">
                                 <div className="bg-[#0C21C1] rounded-full sm:w-32 sm:h-32 w-24 h-24 p-2 flex items-center justify-center hover:bg-black-500">
                                     <div className="outline outline-1 outline-white rounded-full sm:w-28 sm:h-28 w-20 h-20 flex items-center justify-center">
-                                        <img src="assets/images/landingPage/icon-park_market-analysis (1).svg" alt="" className="sm:w-20 sm:h-20 w-12 h-12" />
+                                        <img src="assets/images/landingPage/Group.svg" alt="" className="sm:w-20 sm:h-20 w-12 h-12" />
                                     </div>
                                 </div>
                                 <div>
@@ -134,7 +134,7 @@ export default function Home() {
                             <div className="flex space-x-5">
                                 <div className="bg-[#0C21C1] rounded-full sm:w-32 sm:h-32 w-24 h-24 p-2 flex items-center justify-center hover:bg-black-500">
                                     <div className="outline outline-1 outline-white rounded-full sm:w-28 sm:h-28 w-20 h-20 flex items-center justify-center">
-                                        <img src="assets/images/landingPage/carbon_ibm-aiops-insights.svg" alt="" className="sm:w-20 sm:h-20 w-12 h-12" />
+                                        <img src="assets/images/landingPage/qa 2.svg" alt="" className="sm:w-20 sm:h-20 w-12 h-12" />
                                     </div>
                                 </div>
                                 <div>
