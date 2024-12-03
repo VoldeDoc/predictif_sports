@@ -1,5 +1,4 @@
 import { LuUser2 } from "react-icons/lu";
-import Logo from "@/components/Logo/Logo";
 export default function Footer() {
   return (
     <>
