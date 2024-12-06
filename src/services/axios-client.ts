@@ -2,19 +2,18 @@ import axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 
 const apiURL = import.meta.env.VITE_BASE_URL;
 
+const axiosClient = (): AxiosInstance => {
+  const token = JSON.parse(localStorage.getItem("token") || "null");
 
-const axiosClient = (token: string | null = null): AxiosInstance => {
   const headers = token
     ? {
         Authorization: `Bearer ${token}`,
-        
         "Content-Type": "application/json;charset=utf-8",
       }
     : {
-      "Content-Type": "application/json;charset=utf-8",
+        "Content-Type": "application/json;charset=utf-8",
       };
 
-    
   const client = axios.create({
     baseURL: apiURL,
     headers,
@@ -23,7 +22,7 @@ const axiosClient = (token: string | null = null): AxiosInstance => {
   });
 
   client.interceptors.request.use((config: any) => {
-    const token = localStorage.getItem("ACCESS_TOKEN");
+    const token = JSON.parse(localStorage.getItem("token") || "null");
     config.headers = config.headers || {};
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -39,7 +38,7 @@ const axiosClient = (token: string | null = null): AxiosInstance => {
       try {
         const { response } = error;
         if (response?.status === 401) {
-          localStorage.removeItem("ACCESS_TOKEN");
+          localStorage.removeItem("token");
         }
       } catch (e) {
         console.error(e);

@@ -1,10 +1,20 @@
+import useDashBoardManagement from '@/hooks/useDashboard';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProgressPage: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState(0);
   const router = useNavigate();
+  const { isquestionnaireFilled} = useDashBoardManagement();
+
+  useEffect(() => {
+    if (isquestionnaireFilled ) {
+      toast.info("Survey already filled");
+      router("/dashboard");
+    }
+  }, [isquestionnaireFilled, router]);
 
   useEffect(() => {
     const stages = [

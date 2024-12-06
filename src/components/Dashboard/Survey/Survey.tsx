@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Question from "./questionnaire/questionStructure";
 import { questionnaire } from "./questionnaire/questions";
 import * as yup from "yup";
@@ -8,10 +8,19 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { SurveyDataValues } from "@/types";
 import { toast } from "react-toastify";
 import Loading from "@/utils/Loading";
+import { useNavigate } from "react-router-dom";
 
 export default function Survey() {
   const [currentStep, setCurrentStep] = useState(0);
-  const { surveyQuestions, loading } = useDashBoardManagement();
+  const { surveyQuestions, loading, isquestionnaireFilled } = useDashBoardManagement();
+  const router = useNavigate()
+
+  useEffect(() => {
+    if (isquestionnaireFilled ) {
+      toast.info("Survey already filled");
+      router("/dashboard");
+    }
+  }, [isquestionnaireFilled, router]);
 
   const handlePreviousClick = () => {
     setCurrentStep((prevStep) => Math.max(prevStep - 1, 0));

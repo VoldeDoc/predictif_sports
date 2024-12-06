@@ -43,3 +43,19 @@ export interface ForgetPasswordDataValues {
     comments_sport_bet?: string; // ID 26
   }
   
+  export interface createGroupValues{
+    name:string;
+    description:string;
+  }
+
+  export interface sendMessageValues{
+    group_id : number;
+    message : string;
+  }
+
+
+  export interface editMessageValues{
+    group_id : number;
+    message : string;
+    message_id : number;
+  }

@@ -1,5 +1,5 @@
 import { AuthLayout } from "@/components/Layout/layout";
-import Button from '@/components/Ui/Button'; // Import the Button component
+import Button from '@/components/Ui/Button'; 
 import { RootState } from "@/context/store/rootReducer";
 import { FaCalendarDay } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -35,6 +35,7 @@ const Forum = () => {
               icon={FaCalendarDay}
               iconPosition="right"
               className="bg-red-800 text-white px-8 md:px-16 py-2 shadow-md flex items-center space-x-2"
+              link="/all-groups"
             />
           </a>
           </div>

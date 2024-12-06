@@ -26,8 +26,17 @@ import Strategies from "./pages/home/Strategic_analysis/index.tsx";
 import Expert from "./pages/home/Expert_analysis/index.tsx";
 import Heading from "./pages/home/Head_Head/index.tsx";
 import Fantasy from "./pages/home/Fantasy_league/index.tsx";
-import Survey from "./components/Dashboard/Survey/Survey.tsx";
 import ProgressPage from "./components/Dashboard/Survey/Tool/progressModal.tsx";
+import SurveyPage from "./pages/dashboard/survey/index.tsx";
+import CreateGroup from "./pages/dashboard/create_grouo/index.tsx";
+import User_group from "./pages/dashboard/user_group/index.tsx";
+import ALl_Groups from "./pages/dashboard/all_groups/index.tsx";
+import GroupSettingsPage from "./components/Dashboard/ForumGroup.tsx/Tool/Setting.tsx";
+import Update_Group from "./pages/dashboard/update_group/index.tsx";
+import AddRoles from "./pages/dashboard/add_roles/index.tsx";
+import Add_Members from "./pages/dashboard/add_members/index.tsx";
+import AllUsersPage from "./components/Dashboard/ForumGroup.tsx/group/AllUsers.tsx";
+import RemoveMember from "./components/Dashboard/ForumGroup.tsx/group/RemoveMember.tsx";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -82,8 +91,17 @@ function App() {
               <Route path="/forum" element={<ForumT/>} />
               <Route path="/messages" element={<Message_Box/>} />
               <Route path="/groups" element={<Forum_groups/>} />
-              <Route path="/survey" element={<Survey/>} />
+              <Route path="/survey" element={<SurveyPage/>} />
               <Route path="/progress-survey" element={<ProgressPage/>} />
+              <Route path="/create-group" element={<CreateGroup/>} />
+              <Route path="/user-group/:id" element={<User_group/>} />
+              <Route path="/settings/:id" element={<GroupSettingsPage/>} />
+              <Route path="/all-groups" element={<ALl_Groups/>} />
+              <Route path="/user/update-group/:id" element={<Update_Group/>} />
+              <Route path="/user/add-members/:id" element={<Add_Members/>} />
+              <Route path="/user/role/:id" element={<AddRoles/>} />
+              <Route path="/user/all-users/:id" element={<AllUsersPage/>} />
+              <Route path="/user/remove-users/:id" element={<RemoveMember/>} />
             
 
               {/* Ui */}
