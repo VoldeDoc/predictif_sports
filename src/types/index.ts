@@ -59,3 +59,7 @@ export interface ForgetPasswordDataValues {
     message : string;
     message_id : number;
   }
+
+  export interface deleteMessageValues{
+    group_id:number
+  }

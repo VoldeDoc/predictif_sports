@@ -9,7 +9,7 @@ import { Modal } from "flowbite-react";
 export default function GroupSettingsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { getGroupUsers, deleteGroup, leaveGroup } = useDashBoardManagement();
+    const { getGroupUsers, deleteGroup, leaveGroup,LockChat,OpenChat } = useDashBoardManagement();
     const [isChatLocked, setIsChatLocked] = useState(false);
     const [groupUsers, setGroupUsers] = useState<{ group_id: number; user_id: number; role: string; joined_at: string }[]>([]);
     const [showAdminMessage, setShowAdminMessage] = useState(false);
@@ -68,9 +68,21 @@ export default function GroupSettingsPage() {
         )
     };
 
-    const handleToggleChatLock = () => {
-        setIsChatLocked((prev) => !prev);
-        console.log(isChatLocked ? "Unlocking chat..." : "Locking chat...");
+    const handleToggleChatLock = async () => {
+       try {
+           if (isChatLocked) {
+               await OpenChat(Number(id));
+               setIsChatLocked(false);
+               toast.success("Chat unlocked successfully.");
+           } else {
+               await LockChat(Number(id));
+               setIsChatLocked(true);
+               toast.success("Chat locked successfully.");
+           }
+       } catch (error) {
+           toast.error("Failed to toggle chat lock.");
+       }
+
     };
 
     const renderAdminButtons = () => {
@@ -102,8 +114,7 @@ export default function GroupSettingsPage() {
                         link={`/user/update-group/${id}`}
                     />
                     <Button
-                        text="Lock Chat"
-                        iconPosition="right"
+                        text={isChatLocked ? "Open Chat" : "Lock Chat"}                   
                         className="bg-black-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
                         onClick={handleToggleChatLock}
                     />

@@ -214,9 +214,10 @@ function useDashBoardManagement() {
     }
 
 
-    // const DeleteMessage = async (group_Id: number) => {
+    // const DeleteMessage = async (data) => {
     //     try {
     //         setLoading(false)
+    //         const delsms = await client.delete('/forum/messages/delete',data)
     //     }
     //     catch {
 
@@ -224,12 +225,42 @@ function useDashBoardManagement() {
     // }
 
 
+    const LockChat = async (group_Id : number) => {
+        try {
+            setLoading(true)
+            const locked = await client.post('/forum/groups/close-chat' , {group_id : group_Id})
+            const result = locked.data?.data
+            console.log(result)
+            return result
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error("Error editing message", errorMessage)
+        } finally {
+            setLoading(false)
+        }
+    }
 
+const OpenChat = async (group_id : number) => {
+    try {
+        setLoading(true)    
+        const OpenChat = await client.post("/forum/groups/reopen-chat" , {group_id:group_id})
+        const result = OpenChat.data?.data
+        return result
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error("Error editing message", errorMessage)
+    }
+    finally{
+        setLoading(false)
+    }
+}
     return {
         loading,
+        isquestionnaireFilled,
         surveyQuestions,
         CreateGroup,
-        isquestionnaireFilled,
         getUserGroupById,
         getGroupUsers,
         getAllGroups,
@@ -239,6 +270,8 @@ function useDashBoardManagement() {
         sendMessage,
         getMessage,
         EditMessage,
+        LockChat,
+        OpenChat,
     };
 }
 

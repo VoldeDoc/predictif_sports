@@ -37,6 +37,7 @@ import AddRoles from "./pages/dashboard/add_roles/index.tsx";
 import Add_Members from "./pages/dashboard/add_members/index.tsx";
 import AllUsersPage from "./components/Dashboard/ForumGroup.tsx/group/AllUsers.tsx";
 import RemoveMember from "./components/Dashboard/ForumGroup.tsx/group/RemoveMember.tsx";
+import GeneralStrategyPage from "./pages/dashboard/general_strategy/index.tsx";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,7 @@ function App() {
               <Route path="/user/role/:id" element={<AddRoles/>} />
               <Route path="/user/all-users/:id" element={<AllUsersPage/>} />
               <Route path="/user/remove-users/:id" element={<RemoveMember/>} />
+              <Route path="/user/general/strategy" element={<GeneralStrategyPage/>} />
             
 
               {/* Ui */}

@@ -27,7 +27,21 @@ export default function UserGroupPage() {
     const [users, setUsers] = useState<{ id: number; username: string; avatar?: string }[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
-    // const [isChatLocked, setIsChatLocked] = useState(false);
+    const [isChatLocked, setIsChatLocked] = useState(false);
+
+    const checkIfChatIsLocked = async () => {
+        try {
+            const groupData = await getUserGroupById(Number(id));
+            setIsChatLocked(groupData.is_chat_closed);
+        } catch (error) {
+            console.error("Failed to check if chat is locked", error);
+        }
+    };
+
+    useEffect(() => {
+        checkIfChatIsLocked();
+    }, [id]);
+
     const [dropdownVisible, setDropdownVisible] = useState<number | null>(null);
     const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
     const [editingMessageText, setEditingMessageText] = useState("");
@@ -41,6 +55,8 @@ export default function UserGroupPage() {
         const fetchGroupData = async () => {
             try {
                 const groupData = await getUserGroupById(Number(id));
+                console.log(groupData);
+                
                 const groupUsers = await getGroupUsers(Number(id));
                 const groupMessagesResponse = await getMessage(Number(id));
 
@@ -231,7 +247,7 @@ export default function UserGroupPage() {
                     </div>
 
                     {/* Message Input */}
-                    {/* {!isChatLocked && ( */}
+                    {!isChatLocked ? (
                         <div className="bg-white border-t border-gray-300 p-4">
                             <div className="flex items-center space-x-4">
                                 <input
@@ -249,12 +265,12 @@ export default function UserGroupPage() {
                                 </button>
                             </div>
                         </div>
-                    {/* )} */}
-                    {/* {isChatLocked && (
+                    ) : (
                         <div className="bg-gray-300 text-center p-4">
                             <p className="text-gray-700">Chat is locked by the group admin.</p>
                         </div>
-                    )} */}
+                    )}
+                
                 </div>
             </div>
         </AuthLayout>
