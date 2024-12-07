@@ -23,6 +23,7 @@ export default function GeneralStrategy() {
                             {/* <div className="absolute top-10 transform -translate-y-1/2 left-20 w-40 border-t-2 border-gray-400"></div>
                             <div className="absolute top-10 transform -translate-y-1/2 left-[290px] w-[200px] border-t-2 border-gray-400"></div>
                             <div className="absolute top-10 transform -translate-y-1/2 right-[235px] w-[200px] border-t-2 border-gray-400"></div> */}
+                            
                             <div className="flex  justify-between space-x-5">
                                 <div>
                                     <div className="rounded-full bg-gray-300 w-10 h-10 px-2 py-2  text-center items-center text-gray-400">1</div>
