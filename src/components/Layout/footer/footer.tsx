@@ -39,7 +39,7 @@ export default function Footer() {
           <div className="flex flex-wrap mb-11 py-11">
             <div className="w-full lg:w-1/2 pb-5">
               <div className="flex sm:justify-start justify-center ">
-                <img src="assets/images/logo.png" alt="Logo" />
+                <img src="assets/images/dashboard/dashboard/Transparent Logo 7.svg" alt="Logo" />
               </div>
 
             </div>
