@@ -118,7 +118,7 @@ export default function Navbar() {
                       <Menu.Item>
                         {({ active }) => (
                           <Link
-                            to={"/profile"}
+                            to={"/user/profile"}
                             className={`flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-100 font-bold" : ""
                               }`}
                           >
@@ -214,7 +214,7 @@ export default function Navbar() {
                     leaveFrom="transform scale-100 opacity-100"
                     leaveTo="transform scale-95 opacity-0"
                   >
-                    <Menu.Items className="absolute left-0 mt-2 w-full bg-white rounded-md shadow-lg">
+                    <Menu.Items className="absolute left-0 bottom-10 mt-2 w-full bg-white rounded-md shadow-lg">
                       <div className="py-1">
                         <Menu.Item>
                           {({ active }) => (
@@ -230,7 +230,7 @@ export default function Navbar() {
                         <Menu.Item>
                           {({ active }) => (
                             <Link
-                              to="/profile"
+                              to="/user/profile"
                               className={`block px-4 py-2 text-gray-700 hover:bg-gray-100 ${active ? "bg-blue-500 text-white rounded" : ""
                                 }`}
                             >

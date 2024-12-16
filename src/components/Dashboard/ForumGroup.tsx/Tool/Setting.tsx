@@ -22,7 +22,6 @@ export default function GroupSettingsPage() {
                 if (response) {
                     const pivotData = response.map((user: any) => user.pivot);
                     setGroupUsers(pivotData);
-                    console.log("Pivot data:", pivotData);
                 } else {
                     console.error("Response data is undefined");
                 }
@@ -47,7 +46,7 @@ export default function GroupSettingsPage() {
         } catch (error) {
             toast.error("Failed to leave the group.");
         }
-    }, [ id, leaveGroup]);
+    }, [groupUsers]);
 
     const handleDeleteGroup = useCallback(async () => {
         toast.promise(
@@ -82,49 +81,50 @@ export default function GroupSettingsPage() {
         } catch (error) {
             toast.error("Failed to toggle chat lock.");
         }
-    }, [id, isChatLocked, LockChat, OpenChat]);
+    }, [isChatLocked, id]);
 
     const renderAdminButtons = useMemo(() => {
-        return groupUsers.map((user) => (
-            (user.role === "admin" || user.role === "moderator") && (
-                <div key={user.user_id} className="space-y-2">
-                    <Button
-                        text="Add members"
-                        iconPosition="right"
-                        className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        link={`/user/add-members/${id}`}
-                    />
-                    <Button
-                        text="Assign Role"
-                        iconPosition="right"
-                        className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        link={`/user/role/${id}`}
-                    />
-                    <Button
-                        text="Remove User"
-                        iconPosition="right"
-                        className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        link={`/user/remove-users/${id}`}
-                    />
-                    <Button
-                        text="Update group"
-                        iconPosition="right"
-                        className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        link={`/user/update-group/${id}`}
-                    />
-                    <Button
-                        text={isChatLocked ? "Open Chat" : "Lock Chat"}
-                        className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        onClick={handleToggleChatLock}
-                    />
-                    <Button
-                        text="Delete group"
-                        className="!bg-gray-300 !text-red-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
-                        onClick={() => setShowDeleteModal(true)}
-                    />
-                </div>
-            )
-        ));
+        const isAdminOrModerator = groupUsers.some((user) => user.role === "admin" || user.role === "moderator");
+        if (!isAdminOrModerator) return null;
+
+        return (
+            <div className="space-y-2">
+                <Button
+                    text="Add members"
+                    iconPosition="right"
+                    className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    link={`/user/add-members/${id}`}
+                />
+                <Button
+                    text="Assign Role"
+                    iconPosition="right"
+                    className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    link={`/user/role/${id}`}
+                />
+                <Button
+                    text="Remove User"
+                    iconPosition="right"
+                    className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    link={`/user/remove-users/${id}`}
+                />
+                <Button
+                    text="Update group"
+                    iconPosition="right"
+                    className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    link={`/user/update-group/${id}`}
+                />
+                <Button
+                    text={isChatLocked ? "Open Chat" : "Lock Chat"}
+                    className="!bg-gray-300 !text-black-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    onClick={handleToggleChatLock}
+                />
+                <Button
+                    text="Delete group"
+                    className="!bg-gray-300 !text-red-500 font-semibold px-8 w-full py-2 shadow-md flex items-center space-x-2"
+                    onClick={() => setShowDeleteModal(true)}
+                />
+            </div>
+        );
     }, [groupUsers, id, isChatLocked, handleToggleChatLock]);
 
     return (

@@ -3,7 +3,7 @@ import StackBarChart from "../Chart/stack-bar";
 import SelectMonth from "../SelectMonth";
 import PastResultChat from "../Chart/PastResultChat";
 import Card from "../Ui/Card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GroupCard from "../Ui/GroupCard";
 import { IoEyeOutline } from "react-icons/io5";
 import { FaRegCalendarCheck } from "react-icons/fa";
@@ -17,7 +17,9 @@ import Flatpickr from "react-flatpickr";
 import moment from "moment-timezone";
 import { RootState } from "@/context/store/rootReducer";
 import { useSelector } from "react-redux";
-import FeaturesList from "../DashboardComponents/FeaturesList";
+import useDashBoardManagement from "@/hooks/useDashboard";
+import PlanCard from "../DashboardComponents/planCard";
+import { toast } from "react-toastify";
 
 const timeZone = "Africa/Lagos";
 const getGreeting = (timeZone: string) => {
@@ -32,6 +34,7 @@ const getGreeting = (timeZone: string) => {
     return "Good evening";
   }
 };
+
 const today = new Date();
 const fiveDaysAhead = new Date();
 fiveDaysAhead.setDate(today.getDate() + 5);
@@ -44,6 +47,50 @@ const Dashboard = () => {
     today,
     fiveDaysAhead,
   ]);
+  interface Plan {
+    plan: {
+      name: string;
+      amount: number;
+      en_id: string;
+    };
+    feature: {
+      feature_label: string;
+    }[];
+  }
+  
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const { getSubsriptionPlans,subsricbeToPlan } = useDashBoardManagement();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getSubsriptionPlans();
+        console.log(data);
+        setPlans(data[0]); 
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
+const handleSubscribeToPlan = async (planId: string) => {
+  toast.promise(
+    subsricbeToPlan(planId),
+    {
+      pending: "Subscribing to plan...",
+      success: {
+        render({ data }) {
+          return <div>{data as string}</div>;
+        },
+      },
+      error: {
+        render({ data }) {
+          return <div>{data as string}</div>;
+        },
+      },
+    }
+  );
+}
 
   const handleDateChange = (dates: Date[]) => {
     if (dates.length === 2) {
@@ -86,6 +133,46 @@ const Dashboard = () => {
   };
 
   const [selectedTab, setSelectedTab] = useState("monthly");
+
+  const basicPlanData = plans.find(plan => plan.plan.name === "Basic Plan");
+  const premiumPlanData = plans.find(plan => plan.plan.name === "Premium Plan");
+  const advancedPlanData = plans.find(plan => plan.plan.name === "Advanced Plan");
+
+
+  const basicPlan = basicPlanData ? {
+    title: basicPlanData.plan.name,
+    price: `£${(basicPlanData.plan.amount / 100).toFixed(2)}`,
+    en_key: basicPlanData.plan.en_id,
+    features: basicPlanData.feature.map(f => ({
+      name: f.feature_label,
+      isAvailable: true,
+    })),
+  } : null;
+
+  const premiumPlan = premiumPlanData ? {
+    title: premiumPlanData.plan.name,
+    price: `£${(premiumPlanData.plan.amount / 100).toFixed(2)}`,
+    en_key: premiumPlanData.plan.en_id,
+    features: premiumPlanData.feature.map(f => ({
+      name: f.feature_label,
+      isAvailable: true,
+    })),
+  } : null;
+
+  const advancedPlan = advancedPlanData ? {
+    title: advancedPlanData.plan.name,
+    price: `£${(advancedPlanData.plan.amount / 100).toFixed(2)}`,
+    en_key: advancedPlanData.plan.en_id,
+    features: advancedPlanData.feature.map(f => ({
+      name: f.feature_label,
+      isAvailable: true,
+    })),
+  } : null;
+
+  const availableFeatures = (plan: Plan) => plan.feature.map(f => ({
+    name: f.feature_label,
+    isAvailable: true,
+  }));
 
   return (
     <AuthLayout>
@@ -266,151 +353,52 @@ const Dashboard = () => {
 
           {/* Monthly Tab Content */}
           {selectedTab === "monthly" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-              <div className="border-2 rounded-lg p-6 text-center">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Basic
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£7</h1>
-                <p className="mb-3">User/Month</p>
-                <FeaturesList
-                  features={[
-                    { name: "Back testing" },
-                    { name: "Valuebet finder" },
-                    { name: "Streaks and Trends" },
-                    { name: "Chat support" },
-                    { name: "Smart AI bots", isAvailable: false },
-                    { name: "Zero Limitations", isAvailable: false },
-                    { name: "Pre match odds", isAvailable: false },
-                    { name: "Fixtures", isAvailable: false },
-                    { name: "Lineup", isAvailable: false },
-                  ]}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-center">
+              {basicPlan && (
+                <PlanCard
+                  features={availableFeatures(basicPlanData!)}
+                  title={basicPlan.title}
+                  price={basicPlan.price}
+                  buttonText="Choose Plan"
+                  buttonClass="bg-blue-300"
+                  onSubscribe={() => handleSubscribeToPlan(basicPlan.en_key)}
                 />
-                <button className="mt-4 px-4 py-2 bg-blue-300 border-2 rounded-lg text-md">
-                  Choose Plan
-                </button>
-              </div>
-
-              <div className="border-2 rounded-lg p-6 bg-blue-700 text-white shadow-md text-center">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Advanced
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£12</h1>
-                <p className="mb-3">User/Month</p>
-                <FeaturesList
-                  features={[
-                    { name: "League" },
-                    { name: "Livescore" },
-                    { name: "Head 2 Head" },
-                    { name: "Top scorers" },
-                    { name: "Player transfers" },
-                    { name: "In-play odds" },
-                    { name: "Sideline news" },
-                    { name: "Statistics", isAvailable: false },
-                    { name: "Prematch news", isAvailable: false },
-                  ]}
+              )}
+              {premiumPlan && (
+                <PlanCard
+                  features={availableFeatures(premiumPlanData!)}
+                  title={premiumPlan.title}
+                  price={premiumPlan.price}
+                  buttonText="Choose Plan"
+                  buttonClass="bg-blue-300"
+                  onSubscribe={() => handleSubscribeToPlan(premiumPlan.en_key)}
                 />
-                <button className="mt-4 px-4 py-2 text-slate-900 bg-white border-2 rounded-lg text-md">
-                  Choose Plan
-                </button>
-              </div>
-
-              <div className="border-2 rounded-lg p-6 text-center">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Premium
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£25</h1>
-                <p className="mb-3">User/Month</p>
-                <FeaturesList
-                  features={[
-                    { name: "League" },
-                    { name: "Livescore" },
-                    { name: "Top scorers" },
-                    { name: "Injuries" },
-                    { name: "In-play" },
-                    { name: "Pre-match" },
-                    { name: "Statistics" },
-                  ]}
+              )}
+              {advancedPlan && (
+                <PlanCard
+                  features={availableFeatures(advancedPlanData!)}
+                  title={advancedPlan.title}
+                  price={advancedPlan.price}
+                  buttonText="Choose Plan"
+                  buttonClass="bg-blue-300"
+                  onSubscribe={() => handleSubscribeToPlan(advancedPlan.en_key)}
                 />
-                <button className="mt-20 px-4 py-2 bg-blue-300 border-2 rounded-lg text-md mb-auto">
-                  Choose Plan
-                </button>
-              </div>
+              )}
             </div>
           )}
 
           {/* Yearly Tab Content */}
           {selectedTab === "yearly" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-center">
-              <div className="border-2 rounded-lg p-6">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Basic
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£70</h1>
-                <p className="mb-3">User/Year</p>
-                <FeaturesList
-                  features={[
-                    { name: "Back testing" },
-                    { name: "Valuebet finder" },
-                    { name: "Streaks and Trends" },
-                    { name: "Chat support" },
-                    { name: "Smart AI bots", isAvailable: false },
-                    { name: "Zero Limitations", isAvailable: false },
-                    { name: "Pre match odds", isAvailable: false },
-                    { name: "Fixtures", isAvailable: false },
-                    { name: "Lineup", isAvailable: false },
-                  ]}
-                />
-                <button className="mt-4 px-4 py-2 bg-blue-300 border-2 rounded-lg text-md">
-                  Choose Plan
-                </button>
-              </div>
-
-              <div className="border-2 rounded-lg p-6 bg-blue-700 text-white shadow-md text-center">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Advanced
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£120</h1>
-                <p className="mb-3">User/Year</p>
-                <FeaturesList
-                  features={[
-                    { name: "League" },
-                    { name: "Livescore" },
-                    { name: "Head 2 Head" },
-                    { name: "Top scorers" },
-                    { name: "Player transfers" },
-                    { name: "In-play odds" },
-                    { name: "Sideline news" },
-                    { name: "Statistics", isAvailable: false },
-                    { name: "Prematch news", isAvailable: false },
-                  ]}
-                />
-                <button className="mt-4 px-4 py-2 bg-white text-slate-900 border-2 rounded-lg text-md mb-auto">
-                  Choose Plan
-                </button>
-              </div>
-
-              <div className="border-2 rounded-lg p-6 text-center">
-                <button className="px-4 py-2 border-2 rounded-lg font-bold text-xl mb-3">
-                  Premium
-                </button>
-                <h1 className="text-4xl font-bold mb-2">£250</h1>
-                <p className="mb-3">User/Year</p>
-                <FeaturesList
-                  features={[
-                    { name: "League" },
-                    { name: "Livescore" },
-                    { name: "Top scorers" },
-                    { name: "Injuries" },
-                    { name: "In-play" },
-                    { name: "Pre-match" },
-                    { name: "Statistics" },
-                  ]}
-                />
-                <button className=" px-4 py-2 bg-blue-300 border-2 rounded-lg text-md mt-20 ">
-                  Choose Plan
-                </button>
-              </div>
+              <PlanCard
+                title={basicPlan?.title || ""}
+                price={`£${(parseInt(basicPlan?.price.slice(1) || "0") * 12).toFixed(2)}`}
+                features={availableFeatures(basicPlanData!)}
+                buttonText="Choose Plan"
+                buttonClass="bg-blue-300"
+                onSubscribe={() => handleSubscribeToPlan(basicPlan!.en_key)}
+              />
+              {/* Add other PlanCards here if needed */}
             </div>
           )}
         </div>

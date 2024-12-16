@@ -149,7 +149,7 @@ function useDashBoardManagement() {
             const group = await client.post(`/forum/groups/users/leave`, { group_id: groupId });
             const result = group.data.data;
             console.log(result);
-            router(`/all-groups`);
+            router(`user/all-groups`);
             return Promise.resolve("You have left the group!");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -294,7 +294,7 @@ function useDashBoardManagement() {
         }
     }
 
-    const AssignRole = async (data: AssignMemberRoleValues) => {   
+    const AssignRole = async (data: AssignMemberRoleValues) => {
         try {
             setLoading(true);
             const assignRole = await client.post("/forum/groups/role/users", data);
@@ -314,14 +314,14 @@ function useDashBoardManagement() {
 
 
     const RemoveUserFromGroup = async (data: addMembersValues) => {
-      try {
-          setLoading(true)
-          const removeUser = await client.delete("/forum/groups/users/remove", {data})
-          const res = removeUser.data?.data
-          console.log(res);
+        try {
+            setLoading(true)
+            const removeUser = await client.delete("/forum/groups/users/remove", { data })
+            const res = removeUser.data?.data
+            console.log(res);
             router(`/user/user-group/${data.group_id}`)
-          return Promise.resolve(`Users removed from group ${data.group_id}`)
-      }
+            return Promise.resolve(`Users removed from group ${data.group_id}`)
+        }
         catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occured"
@@ -331,24 +331,76 @@ function useDashBoardManagement() {
         finally {
             setLoading(false)
         }
-    }   
-
-const deleteMessage = async (data : deleteMessageValues) => {
-    try {
-        setLoading(true);
-        const response = await client.delete("/forum/messages/delete", { data });
-        const result = response?.data.data;
-        console.log(result);
-        return result;
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error("Error deleting message:", errorMessage);
-        return Promise.reject(`${errorMessage}`);
-    } finally {
-        setLoading(false);
     }
-}
+
+    const deleteMessage = async (data: deleteMessageValues) => {
+        try {
+            setLoading(true);
+            const response = await client.delete("/forum/messages/delete", { data });
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error("Error deleting message:", errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getSubsriptionPlans = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/subscription/plans')
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error("Error deleting message:", errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const subsricbeToPlan = async (data: string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/subscription/user/${data}`)
+            const result = response?.data.data;
+            console.log(result);
+            return Promise.resolve("Subscribed to plan successfully");
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error("Error subsribing", errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+    const getUserPlan = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/subscription/userPlans')
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error("Error deleting message:", errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
     return {
         loading,
         username,
@@ -371,6 +423,9 @@ const deleteMessage = async (data : deleteMessageValues) => {
         AssignRole,
         RemoveUserFromGroup,
         deleteMessage,
+        getSubsriptionPlans,
+        subsricbeToPlan,
+        getUserPlan,
     };
 }
 

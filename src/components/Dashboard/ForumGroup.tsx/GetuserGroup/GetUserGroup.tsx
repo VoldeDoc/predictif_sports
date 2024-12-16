@@ -11,12 +11,13 @@ type Message = {
   message: string;
   sender_id: number;
   is_sender: boolean;
+  dateTime: string;
   sender_details: {
     id: number;
     username: string;
     email: string;
   };
-  created_at: string;
+
 };
 
 export default function UserGroupPage() {
@@ -204,16 +205,18 @@ export default function UserGroupPage() {
                       />
                       {dropdownVisible === message.id && (
                         <div className="absolute right-0 mt-2 w-20 bg-white border border-gray-300 rounded-md shadow-lg z-30">
-                          <button
-                            onClick={() => {
+                            {new Date().getTime() - new Date(message.dateTime).getTime() <= 4 * 60 * 1000 && (
+                            <button
+                              onClick={() => {
                               setEditingMessageId(message.id);
                               setEditingMessageText(message.message);
                               setDropdownVisible(null);
-                            }}
-                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Edit
-                          </button>
+                              }}
+                              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Edit
+                            </button>
+                            )}
                           <button
                             onClick={() => {
                               setDropdownVisible(null);
@@ -221,9 +224,9 @@ export default function UserGroupPage() {
                             }}
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            Delete for me
+                            Delete 
                           </button>
-                          <button
+                          {/* <button
                             onClick={() => {
                               setDropdownVisible(null);
                               handleDeleteMessage(message.id, "all");
@@ -231,7 +234,7 @@ export default function UserGroupPage() {
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
                             Delete for all
-                          </button>
+                          </button> */}
                         </div>
                       )}
                     </div>
@@ -256,7 +259,7 @@ export default function UserGroupPage() {
                           {message.sender_details?.username === username ? "You" : message.sender_details?.username}
                         </p>
                         <p>{message.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">{formatTimestamp(message.created_at)}</p>
+                        <p className="text-xs text-gray-500 mt-1">{formatTimestamp(message.dateTime)}</p>
                       </>
                     )}
                   </div>

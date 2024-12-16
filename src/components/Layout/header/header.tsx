@@ -4,11 +4,11 @@ import {
   ChevronDownIcon,
   CogIcon,
   CreditCardIcon,
-  PencilIcon,
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { Menu, Popover, Transition } from "@headlessui/react";
 import { BellIcon } from "@heroicons/react/24/outline";
+import { CgProfile } from "react-icons/cg";
 import { Link } from "react-router-dom";
 import { user } from "../../../../public";
 import SearchModal from "./Tools/SearchModal";
@@ -172,14 +172,14 @@ export const Header = ({ showNav, setShowNav }: Props) => {
                 <div className="p-1">
                   <Menu.Item>
                     <Link
-                      to={"/profile"}
+                      to={"/user/profile"}
                       className={
                         "flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 group"
                       }
                     >
-                      <PencilIcon className={"h-4 w-4 text-gray-700"} />
+                      <CgProfile className={"h-4 w-4 text-gray-700"}/>
                       <span className={"group-hover:text-orange-500"}>
-                        Edit profile
+                        View profile
                       </span>
                     </Link>
                   </Menu.Item>

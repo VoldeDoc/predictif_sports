@@ -46,6 +46,7 @@ import ForgetPassword from './components/Auth/ForgetPassword.tsx';
 import Change_Password from './pages/auth/changpassword.tsx';
 import Change_PasswordEmail from './pages/auth/changepasswordemail.tsx';
 import OtpChangePwdVerification from './components/Auth/OtpChangePassword.tsx';
+import User_Profile from './pages/dashboard/user_profile/index.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -87,6 +88,7 @@ function App() {
 
               {/* Dashboard */}
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard_T /></ProtectedRoute>} />
+              <Route path="/user/profile" element={<ProtectedRoute><User_Profile /></ProtectedRoute>} />
               <Route path="/auth/change-passwordmail" element={<ProtectedRoute><Change_PasswordEmail /></ProtectedRoute>} />
               <Route path="/auth/change-password" element={<ProtectedRoute><Change_Password /></ProtectedRoute>} />
               <Route path="/auth/otp-changepwd" element={<OtpChangePwdVerification />} />
