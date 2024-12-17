@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function AllGroupsPage() {
-    const { getAllGroups } = useDashBoardManagement(); // Ensure this method exists in your hook
+    const { getAllGroups } = useDashBoardManagement(); 
     const [groups, setGroups] = useState<{ id: number; name: string; description: string; img?: string }[]>([]);
     const [loading, setLoading] = useState(true);
 

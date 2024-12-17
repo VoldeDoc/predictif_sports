@@ -141,7 +141,7 @@ const handleSubscribeToPlan = async (planId: string) => {
 
   const basicPlan = basicPlanData ? {
     title: basicPlanData.plan.name,
-    price: `£${(basicPlanData.plan.amount / 100).toFixed(2)}`,
+    price: `£${(basicPlanData.plan.amount)}`,
     en_key: basicPlanData.plan.en_id,
     features: basicPlanData.feature.map(f => ({
       name: f.feature_label,

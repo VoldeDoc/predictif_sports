@@ -1,269 +1,170 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EllipsisVerticalIcon } from "@heroicons/react/24/solid";
-import { BiCommentDots } from "react-icons/bi";
-import { TbUserHeart } from "react-icons/tb";
 import { Dropdown } from "flowbite-react";
+import useDashBoardManagement from '@/hooks/useDashboard';
+import { useParams } from 'react-router-dom';
+import { BiSend } from 'react-icons/bi';
 
-interface CommentData {
+type Message = {
   id: number;
   message: string;
-  time: string;
-  userName: string;
-}
-
-interface MessageData {
-  id: number;
-  name: string;
-  date: string;
-  bgColor: string;
-  message: string;
-  likes: number;
-  comments: CommentData[];
-}
-
-const initialMessages: MessageData[] = [
-  {
-    id: 1,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-green-900",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 2,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-yellow-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 3,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-red-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 4,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-blue-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 5,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-purple-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 6,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-pink-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 7,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-orange-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 8,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-teal-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 9,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-indigo-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-  {
-    id: 10,
-    name: "Nelson Sikki",
-    date: "4 days ago",
-    bgColor: "bg-gray-500",
-    message: "How do you know your learners are retaining knowledge in appropriate volumes and timeframes? That’s right: You throw in assessments, and see if the students “catch your drift”. Obviously, there is a boring We could use many eloquent metaphors, yet it all boils down to the same: Keep your message",
-    likes: 7,
-    comments: []
-  },
-];
-
-const RecentMsg: React.FC = () => {
-  const [messages, setMessages] = useState<MessageData[]>(initialMessages);
-  const [visibleMessageId, setVisibleMessageId] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [commentText, setCommentText] = useState<string>('');
-  const messagesPerPage = 3;
-
-  const toggleVisibility = (id: number) => {
-    setVisibleMessageId(visibleMessageId === id ? null : id);
+  sender_id: number;
+  is_sender: boolean;
+  dateTime: string;
+  sender_details: {
+    id: number;
+    username: string;
+    email: string;
   };
+};
 
-  const nextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-  };
+type RecentMsgProps = {
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+};
 
-  const prevPage = () => {
-    setCurrentPage((prevPage) => (prevPage > 0 ? prevPage - 1 : 0));
-  };
+const RecentMsg: React.FC<RecentMsgProps> = ({ messages, setMessages }) => {
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingMessageText, setEditingMessageText] = useState<string>('');
+  
+  const { id } = useParams<{ id: string }>();
+  const { getMessage, EditMessage, deleteMessage } = useDashBoardManagement();
 
-  const addComment = (messageId: number) => {
-    if (commentText.trim() === '') return;
-
-    const newComment: CommentData = {
-      id: Date.now(),
-      message: commentText,
-      time: new Date().toLocaleTimeString(),
-      userName: "John Doe", // Replace with actual user name
+  // Fetch messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await getMessage(Number(id));
+        setMessages(response.messages || []);
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
     };
+    fetchMessages();
+  }, [id, getMessage]);
 
-    setMessages((prevMessages) =>
-      prevMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, comments: [...msg.comments, newComment] } : msg
-      )
-    );
+  const formatTimestamp = (timestamp: string) =>
+    new Date(timestamp).toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+      day: "numeric",
+      month: "short",
+    });
 
-    setCommentText('');
-    setVisibleMessageId(null);
+  const handleEditMessage = async (messageId: number) => {
+    if (!editingMessageText.trim()) return;
+
+    try {
+      await EditMessage({
+        group_id: Number(id),
+        message: editingMessageText,
+        message_id: messageId,
+      });
+
+      // Refresh messages after edit
+      const updatedMessagesResponse = await getMessage(Number(id));
+      setMessages(updatedMessagesResponse.messages || []);
+
+      setEditingMessageId(null);
+      setEditingMessageText('');
+    } catch (error) {
+      console.error("Failed to edit message:", error);
+    }
   };
 
-  const deleteMessage = (messageId: number) => {
-    setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== messageId));
+  const handleDeleteMessage = async (messageId: number, deleteType: "me" | "all") => {
+    try {
+      await deleteMessage({
+        message_id: messageId,
+        group_id: Number(id),
+        delete_type: deleteType,
+      });
+
+      // Refresh messages after delete
+      const updatedMessagesResponse = await getMessage(Number(id));
+      setMessages(updatedMessagesResponse.messages || []);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
   };
 
-  const deleteComment = (messageId: number, commentId: number) => {
-    setMessages((prevMessages) =>
-      prevMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, comments: msg.comments.filter((comment) => comment.id !== commentId) } : msg
-      )
-    );
-  };
-
-  const getInitials = (name: string) => {
-    const initials = name.split(' ').map((n) => n[0]).join('');
-    return initials.toUpperCase();
-  };
-
-  const startIndex = currentPage * messagesPerPage;
-  const endIndex = startIndex + messagesPerPage;
-  const displayedMessages = messages.slice(startIndex, endIndex);
+  const getInitials = (name: string) =>
+    name.split(' ').map((n) => n[0].toUpperCase()).join('');
 
   return (
+    <div className="bg-white rounded-lg px-5 py-4 my-4 max-h-96 overflow-y-auto">
+      {messages.map((msg) => {
+        const isEditable = new Date().getTime() - new Date(msg.dateTime).getTime() <= 5 * 60 * 1000;
 
-
-    <div className="bg-white rounded-lg px-5 py-4 my-4">
-
-      {displayedMessages.map((msg) => (
-        <div key={msg.id}>
-          <div className="flex justify-between">
-            <div className="flex space-x-10">
-              <div className={`${msg.bgColor} rounded-full w-12 h-12 flex items-center justify-center`}>
-                <p className="text-white text-center">ES</p>
-              </div>
-              <div>
-                <p className="font-bold">{msg.name}</p>
-                <p className="text-sm text-gray-500">{msg.date}</p>
-              </div>
-            </div>
-            <div>
-              <Dropdown label="" placement="left-start" dismissOnClick={false} renderTrigger={() => <EllipsisVerticalIcon className="w-9 h-9 font-semibold" />}>
-                <Dropdown.Item onClick={() => toggleVisibility(msg.id)}>Add</Dropdown.Item>
-                <Dropdown.Item onClick={() => deleteMessage(msg.id)}>Delete</Dropdown.Item>
-              </Dropdown>
-            </div>
-          </div>
-          <div className="pl-20 py-4">
-            <p className="text-sm font-normal">{msg.message}</p>
-            <div className="flex space-x-4 items-center mb-8">
-              <p className="flex items-center space-x-1">
-                <TbUserHeart className="w-4 h-4" /> <span>{msg.likes}</span>
-              </p>
-              <p className="flex items-center space-x-1 cursor-pointer hover:text-red-600" onClick={() => toggleVisibility(msg.id)}>
-                <BiCommentDots className="w-6 h-6" /> <span>{msg.comments.length} comments</span>
-              </p>
-            </div>
-            {visibleMessageId === msg.id && (
-              <div className="mt-4">
-                <div className="bg-white flex flex-col sm:flex-row rounded-lg space-y-4 sm:space-y-0 sm:space-x-6 py-6 px-3 justify-between items-center ">
-                  <div className="hidden sm:flex bg-blue-900 rounded-full w-12 h-12 items-center justify-center flex-shrink-0">
-                    <p className="text-white text-center">ES</p>
-                  </div>
-
-                  <div className="w-full sm:w-auto flex-grow">
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Message"
-                      className="w-full p-2 border rounded-lg bg-[#F9F9F9]"
-                      rows={1.4} // Adjust the number of rows as needed
-                    ></textarea>
-                  </div>
-
-                  <button onClick={() => addComment(msg.id)} className="px-5 bg-blue-800 rounded-lg text-white flex-shrink-0">Post</button>
+        return (
+          <div key={msg.id} className="mb-6">
+            <div className="flex justify-between">
+              <div className="flex space-x-10">
+                <div className="bg-gray-300 rounded-full w-12 h-12 flex items-center justify-center">
+                  <p className="text-white text-center">{getInitials(msg.sender_details.username)}</p>
+                </div>
+                <div>
+                  <p className="font-bold">{msg.sender_details.username}</p>
+                  <p className="text-sm text-gray-500">{formatTimestamp(msg.dateTime)}</p>
                 </div>
               </div>
-            )}
-            {visibleMessageId === msg.id && (
-              <div className="mt-4">
-                {msg.comments.map((comment) => (
-                  <div key={comment.id} className="flex justify-between items-center mt-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-gray-300 rounded-full w-8 h-8 flex items-center justify-center">
-                        <p className="text-white text-center">{getInitials(comment.userName)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm">{comment.message}</p>
-                        <p className="text-xs text-gray-500">{comment.time}</p>
-                      </div>
-                    </div>
-                    <Dropdown label="" placement="left-start" dismissOnClick={false} renderTrigger={() => <EllipsisVerticalIcon className="w-5 h-5 font-semibold" />}>
-                      <Dropdown.Item onClick={() => deleteComment(msg.id, comment.id)}>Delete</Dropdown.Item>
-                    </Dropdown>
-                  </div>
-                ))}
-              </div>
-            )}
+              <Dropdown
+                label=""
+                placement="left-start"
+                dismissOnClick={false}
+                renderTrigger={() => (
+                  <EllipsisVerticalIcon className="w-9 h-9 cursor-pointer" />
+                )}
+              >
+                {isEditable && (
+                  <Dropdown.Item
+                    onClick={() => {
+                      setEditingMessageId(msg.id);
+                      setEditingMessageText(msg.message);
+                    }}
+                  >
+                    Edit
+                  </Dropdown.Item>
+                )}
+                <Dropdown.Item onClick={() => handleDeleteMessage(msg.id, "all")}>
+                  Delete
+                </Dropdown.Item>
+              </Dropdown>
+            </div>
+
+            <div className="pl-20 py-4">
+              {editingMessageId === msg.id ? (
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={editingMessageText}
+                    onChange={(e) => setEditingMessageText(e.target.value)}
+                    className="border rounded px-2 py-1 flex-grow"
+                  />
+                  <button
+                    onClick={() => handleEditMessage(msg.id)}
+                    className="bg-blue-500 text-white px-2 py-1 rounded"
+                  >
+                    <BiSend />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingMessageId(null);
+                      setEditingMessageText('');
+                    }}
+                    className="bg-gray-500 text-white px-2 py-1 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm font-normal">{msg.message}</p>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
-      <div className="flex justify-center py-4 space-x-4">
-        {currentPage > 0 && (
-          <button onClick={prevPage} className="underline cursor-pointer hover:text-blue-800">
-            View previous comments
-          </button>
-        )}
-        {endIndex < messages.length && (
-          <button onClick={nextPage} className="underline cursor-pointer hover:text-blue-800">
-            View more comments
-          </button>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
 };

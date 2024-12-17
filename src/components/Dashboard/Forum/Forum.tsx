@@ -1,17 +1,11 @@
 import { AuthLayout } from "@/components/Layout/layout";
 import Button from '@/components/Ui/Button'; 
-import { RootState } from "@/context/store/rootReducer";
 import { FaCalendarDay } from "react-icons/fa";
-import { useSelector } from "react-redux";
-import { user } from "../../../../public"
-import NewsForum, { ForumData } from "@/components/DashboardComponents/newsForum";
+import NewsForum from "@/components/DashboardComponents/newsForum";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import Meetups, { ForumMeetupsData } from "@/components/DashboardComponents/meetups";
-import Podcast, { PodcastData } from "@/components/DashboardComponents/podcas";
 import { useState } from "react";
 const Forum = () => {
-  const userdata = useSelector((state: RootState) => state.auth?.user);
-  const username = userdata?.username;
   const [isMeetupsEnlarged, setIsMeetupsEnlarged] = useState(false);
 
   const handleMeetupsClick = () => {
@@ -30,11 +24,11 @@ const Forum = () => {
           </div>
           <div className="flex justify-start md:justify-end w-full md:w-auto mb-4 md:mb-10">
             <Button
-              text="View group"
+              text="Create group"
               icon={FaCalendarDay}
               iconPosition="right"
               className="bg-red-800 text-white px-8 md:px-16 py-2 shadow-md flex items-center space-x-2"
-              link="/user/all-groups"
+              link="/create-group"
             />
           </div>
         </div>
@@ -44,7 +38,7 @@ const Forum = () => {
         <div className="flex flex-wrap mt-10 space-x-6">
 
           <div className="w-full lg:w-7/12">
-
+{/* 
             <div className="bg-blue-800 flex rounded-xl space-x-6 py-4 px-3 justify-between">
               <div className="img hidden md:block">
 
@@ -86,11 +80,11 @@ const Forum = () => {
                 />
               </div>
 
-            </div>
+            </div> */}
 
             {!isMeetupsEnlarged && (
               <div>
-                <NewsForum forumData={ForumData} />
+                <NewsForum  />
               </div>
             )}
           </div>
@@ -103,14 +97,14 @@ const Forum = () => {
               <Meetups meetupsData={ForumMeetupsData} />
             </div>
 
-            {!isMeetupsEnlarged && (
+            {/* {!isMeetupsEnlarged && (
               <div className="bg-white rounded-lg px-4 py-4 my-8">
                 <p className="font-semibold">
                   Podcasts <ArrowRightIcon className="inline-block mr-2 w-4" />
                 </p>
                 <Podcast podcastData={PodcastData} />
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

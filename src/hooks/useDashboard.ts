@@ -111,7 +111,7 @@ function useDashBoardManagement() {
             const group = await client.put(`/forum/groups/${id}`, data);
             const result = group.data.data;
             console.log(result);
-            router(`/user-group/${result.id}`);
+            router(`/forum/messages/${result.id}`);
             return Promise.resolve("Group updated successfully!");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -130,7 +130,7 @@ function useDashBoardManagement() {
             const group = await client.delete(`/forum/groups/${id}`);
             const result = group.data.data;
             console.log(result);
-            router(`/all-groups`);
+            router(`/forum`);
             return Promise.resolve("Group deleted successfully!");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -149,7 +149,7 @@ function useDashBoardManagement() {
             const group = await client.post(`/forum/groups/users/leave`, { group_id: groupId });
             const result = group.data.data;
             console.log(result);
-            router(`user/all-groups`);
+            router(`/forum`);
             return Promise.resolve("You have left the group!");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -282,7 +282,7 @@ function useDashBoardManagement() {
             const addUser = await client.post("/forum/groups/users", data)
             const res = addUser.data?.data
             console.log(res);
-            router(`/user/user-group/${data.group_id}`)
+            router(`/forum/messages/${data.group_id}`)
             return Promise.resolve(`Users Added to group ${data.group_id}`)
         } catch (error: any) {
             const resError = error.response?.data;
@@ -319,7 +319,7 @@ function useDashBoardManagement() {
             const removeUser = await client.delete("/forum/groups/users/remove", { data })
             const res = removeUser.data?.data
             console.log(res);
-            router(`/user/user-group/${data.group_id}`)
+            router(`/forum/messages/${data.group_id}`)
             return Promise.resolve(`Users removed from group ${data.group_id}`)
         }
         catch (error: any) {

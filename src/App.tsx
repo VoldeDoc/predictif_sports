@@ -98,7 +98,7 @@ function App() {
               <Route path="/daily-predictivo" element={<ProtectedRoute><Daily_predictivo /></ProtectedRoute>} />
               <Route path="/fixtures" element={<ProtectedRoute><FixturesT /></ProtectedRoute>} />
               <Route path="/forum" element={<ProtectedRoute><ForumT /></ProtectedRoute>} />
-              <Route path="/messages" element={<ProtectedRoute><Message_Box /></ProtectedRoute>} />
+              <Route path="/forum/messages/:id" element={<ProtectedRoute><Message_Box /></ProtectedRoute>} />
               <Route path="/groups" element={<ProtectedRoute><Forum_groups /></ProtectedRoute>} />
               <Route path="/survey" element={<ProtectedRoute><SurveyPage /></ProtectedRoute>} />
               <Route path="/progress-survey" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
