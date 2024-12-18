@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import useDashBoardManagement from "@/hooks/useDashboard";
 import PlanCard from "../DashboardComponents/planCard";
 import { toast } from "react-toastify";
+import { useNavigate, useParams } from "react-router-dom";
 
 const timeZone = "Africa/Lagos";
 const getGreeting = (timeZone: string) => {
@@ -42,6 +43,7 @@ fiveDaysAhead.setDate(today.getDate() + 5);
 const Dashboard = () => {
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
+  const {id} = useParams<{id: string}>();
   const [activeTab, setActiveTab] = useState("goals");
   const [dateRange, setDateRange] = useState<[Date, Date]>([
     today,
@@ -60,6 +62,8 @@ const Dashboard = () => {
   
   const [plans, setPlans] = useState<Plan[]>([]);
   const { getSubsriptionPlans,subsricbeToPlan } = useDashBoardManagement();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -80,6 +84,7 @@ const handleSubscribeToPlan = async (planId: string) => {
       pending: "Subscribing to plan...",
       success: {
         render({ data }) {
+          setIsModalOpen(true);
           return <div>{data as string}</div>;
         },
       },
@@ -403,6 +408,24 @@ const handleSubscribeToPlan = async (planId: string) => {
           )}
         </div>
       </div>
+
+      {/* Custom Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6  w-[600px] h-[300px]">
+            <h2 className="text-xl font-bold mb-4">Complete Your Subscription</h2>
+            <p className="mb-4">Please fill out the form to complete your subscription.</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => navigate(`/user/subscription-form/${id}`)}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 };

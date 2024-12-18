@@ -65,7 +65,7 @@ export default function MessageBox() {
             <div className="py-4 px-6 ">
                 <div className="flex flex-col-reverse md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 md:space-x-24">
                     <div className="max-w-full md:max-w-xl py-6">
-                        <h2 className="text-2xl md:text-4xl text-black-700 font-bold">Message Box</h2>
+                        <h2 className="text-2xl md:text-4xl text-black-700 font-bold">Group Chat</h2>
                     </div>
                     <div className="flex justify-start md:justify-end w-full md:w-auto mb-4 md:mb-10">
                         <button

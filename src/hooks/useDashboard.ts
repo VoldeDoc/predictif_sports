@@ -360,7 +360,7 @@ function useDashBoardManagement() {
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error("Error deleting message:", errorMessage);
+            console.error( errorMessage);
         } finally {
             setLoading(false);
         }
@@ -394,12 +394,56 @@ function useDashBoardManagement() {
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error("Error deleting message:", errorMessage);
+            console.error(errorMessage);
         } finally {
             setLoading(false);
         }
     }
 
+    const getTeamCountry = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/user/getCountry')
+            const result = response?.data.data;
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+    const getTeamLeague = async (data:string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/user/getLeague/${data}`)
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error( errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+    const getTeam = async (data:string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/user/getTeam/${data}`)
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error( errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return {
         loading,
@@ -426,6 +470,9 @@ function useDashBoardManagement() {
         getSubsriptionPlans,
         subsricbeToPlan,
         getUserPlan,
+        getTeamCountry,
+        getTeamLeague,
+        getTeam,
     };
 }
 

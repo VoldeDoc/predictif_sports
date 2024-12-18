@@ -92,7 +92,7 @@ const Forum = () => {
           <div className={`transition-transform duration-1000 transform ${isMeetupsEnlarged ? 'w-full h-screen' : 'w-full lg:w-4/12'}`}>
             <div className="bg-white rounded-lg px-4 py-4" onClick={handleMeetupsClick}>
               <button className="font-semibold transition-transform duration-300 transform hover:scale-105 hover:bg-blue-600 active:scale-95 rounded-lg px-2 py-2 hover:text-white">
-                Meetups <ArrowRightIcon className="inline-block mr-2 w-6" />
+                Last Messages <ArrowRightIcon className="inline-block mr-2 w-6" />
               </button>
               <Meetups meetupsData={ForumMeetupsData} />
             </div>

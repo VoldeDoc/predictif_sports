@@ -4,18 +4,23 @@ import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const links = [
   {
-    title: "Home",
+    title: "Scores",
     url: "/",
     dropdown: [
       { title: "Home 1", url: "/home" },
       { title: "Home 2", url: "/home2" },
     ],
   },
-  { title: "About", url: "/experts" },
-  { title: "Feature", url: "/feat" },
-  { title: "Blog", url: "/strategies" },
-  { title: "Contact", url: "/head" },
-  { title: "Fantasy", url: "/fantasy" },
+  { title: "News",
+     url: "/experts",
+     dropdown:[
+    { title: "The boot Room", url: "/home" },
+    { title: "Strategic Analysis", url: "/home2" },
+  ] },
+  { title: "Analysis", url: "/feat" },
+  { title: "Forum", url: "/strategies" },
+  { title: "Head2Head", url: "/head" },
+  { title: "Fantasy League", url: "/fantasy" },
 ];
 
 export default function NavbarLinks() {

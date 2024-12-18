@@ -47,6 +47,7 @@ import Change_Password from './pages/auth/changpassword.tsx';
 import Change_PasswordEmail from './pages/auth/changepasswordemail.tsx';
 import OtpChangePwdVerification from './components/Auth/OtpChangePassword.tsx';
 import User_Profile from './pages/dashboard/user_profile/index.tsx';
+import SubscriptionFormTeam from './components/DashboardComponents/SubsriptionForm.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -106,6 +107,7 @@ function App() {
 
               {/* Protected Routes */}
               <Route path="/user/user-group/:id" element={<ProtectedRoute><User_group /></ProtectedRoute>} />
+              <Route path="/user/subscription-form/:id" element={<ProtectedRoute><SubscriptionFormTeam /></ProtectedRoute>} />
               <Route path="/user/settings/:id" element={<ProtectedRoute><GroupSettingsPage /></ProtectedRoute>} />
               <Route path="/user/all-groups" element={<ProtectedRoute><ALl_Groups /></ProtectedRoute>} />
               <Route path="/user/update-group/:id" element={<ProtectedRoute><Update_Group /></ProtectedRoute>} />

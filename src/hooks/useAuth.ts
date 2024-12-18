@@ -51,9 +51,10 @@ const signUpFunction = async (data: SignUpDataValues) => {
     setLoading(true);
     const res = await client.post("/register", data);
     const otp = res.data.data.otp;
+    console.log(otp);
     dispatch(setOtpMail(data.email));
     router("/auth/otp-verification");
-    return Promise.resolve(`this is your otp : ${otp}`);
+    return Promise.resolve(`this is your otp `);
   } catch (error: any) {
     const resError = error.response?.data;
     const errorMessage = resError?.message || "An error occurred";
