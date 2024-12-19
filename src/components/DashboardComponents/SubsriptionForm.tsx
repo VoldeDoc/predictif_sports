@@ -7,7 +7,7 @@ interface DropdownProps {
   label: string;
   options: { id: string; name: string; logo?: string }[];
   selected: string;
-  onSelect: (value: string) => void;
+  onSelect: (id: string, name: string) => void;
 }
 
 const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
@@ -31,7 +31,7 @@ const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
               key={option.id || `option-${index}`}
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
               onClick={() => {
-                onSelect(option.name);
+                onSelect(option.id, option.name);
                 setOpen(false);
               }}
             >
@@ -48,8 +48,11 @@ const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
 function SubscriptionFormTeam() {
   const [currentSelection, setCurrentSelection] = useState({
     country: "",
+    countryId: "", 
     league: "",
+    leagueId: "",  
     team: "",
+    teamId: "",  // Keep team ID separately
   });
   const [teamSelections, setTeamSelections] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
@@ -70,34 +73,34 @@ function SubscriptionFormTeam() {
   }, []);
 
   useEffect(() => {
-    if (currentSelection.country) {
+    if (currentSelection.countryId) {
       (async () => {
         try {
-          const response = await getTeamLeague(currentSelection.country);
-          console.log("Leagues:", response);
-          setLeagues(response || []);
+          const response = await getTeamLeague(currentSelection.countryId);
+          console.log("Leagues response:", response);
+          setLeagues(response.flat() || []);
         } catch (error) {
           console.error("Failed to fetch leagues", error);
           setLeagues([]);
         }
       })();
     }
-  }, [currentSelection.country]);
+  }, [currentSelection.countryId]);
 
   useEffect(() => {
-    if (currentSelection.league) {
+    if (currentSelection.leagueId) {
       (async () => {
         try {
-          const response = await getTeam(currentSelection.league);
-          console.log("Teams:", response);
-          setTeams(response || []);
+          const response = await getTeam(currentSelection.leagueId);
+          console.log("Teams response:", response);
+          setTeams(response.flat() || []);
         } catch (error) {
           console.error("Failed to fetch teams", error);
           setTeams([]);
         }
       })();
     }
-  }, [currentSelection.league]);
+  }, [currentSelection.leagueId]);
 
   const addTeamSelection = () => {
     if (!currentSelection.country || !currentSelection.league || !currentSelection.team) {
@@ -111,12 +114,12 @@ function SubscriptionFormTeam() {
     }
 
     setTeamSelections([...teamSelections, currentSelection]);
-    setCurrentSelection({ country: "", league: "", team: "" });
+    setCurrentSelection({ country: "", countryId: "", league: "", leagueId: "", team: "", teamId: "" });
   };
 
   return (
     <AuthLayout>
-      <div className="max-w-5xl mx-auto p-8 bg-white shadow-lg rounded-lg flex flex-col md:flex-row">
+      <div className="max-w-5xl mx-auto p-8 bg-white shadow-lg rounded-lg flex flex-col md:flex-row mb-20">
         <div className="md:w-2/3 md:pr-8">
           <h1 className="text-3xl font-bold mb-6 text-gray-700">
             Select Football Teams To Follow
@@ -131,21 +134,53 @@ function SubscriptionFormTeam() {
                 logo: country.logo,
               }))}
               selected={currentSelection.country}
-              onSelect={(value) => setCurrentSelection({ ...currentSelection, country: value, league: "", team: "" })}
+              onSelect={(id, name) => {
+                setCurrentSelection({
+                  ...currentSelection,
+                  country: name,
+                  countryId: id, 
+                  league: "",
+                  leagueId: "",
+                  team: "",
+                  teamId: "",
+                });
+              }}
             />
 
             <Dropdown
               label="Select League"
-              options={leagues.map((league) => ({ id: league.id, name: league.name }))}
+              options={leagues.map((league) => ({
+                id: league.id,
+                name: league.name,
+                logo: league.logo,
+              }))}
               selected={currentSelection.league}
-              onSelect={(value) => setCurrentSelection({ ...currentSelection, league: value, team: "" })}
+              onSelect={(id, name) => {
+                setCurrentSelection({
+                  ...currentSelection,
+                  league: name,
+                  leagueId: id,
+                  team: "",
+                  teamId: "",
+                });
+              }}
             />
 
             <Dropdown
               label="Select Team"
-              options={teams.map((team) => ({ id: team.id, name: team.name, logo: team.logo }))}
+              options={teams.map((team) => ({
+                id: team.id,
+                name: team.name,
+                logo: team.logo,
+              }))}
               selected={currentSelection.team}
-              onSelect={(value) => setCurrentSelection({ ...currentSelection, team: value })}
+              onSelect={(id, name) => {
+                setCurrentSelection({
+                  ...currentSelection,
+                  team: name,
+                  teamId: id,
+                });
+              }}
             />
 
             <button
@@ -162,7 +197,7 @@ function SubscriptionFormTeam() {
           <h2 className="text-2xl font-semibold mb-4">Selected Teams</h2>
           <div className="space-y-4">
             {teamSelections.map((selection, index) => {
-              const teamInfo = teams.find((team) => team.name === selection.team);
+              const teamInfo = teams.find((team) => team.id === selection.teamId);
               return (
                 <div key={index} className="relative p-4 bg-gray-100 rounded-lg shadow-md flex items-center space-x-4">
                   {teamInfo?.logo && (
