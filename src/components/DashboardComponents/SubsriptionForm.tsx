@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { FiChevronDown, FiX } from "react-icons/fi";
 import { AuthLayout } from "../Layout/layout";
 import useDashBoardManagement from "@/hooks/useDashboard";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 interface DropdownProps {
   label: string;
@@ -45,21 +47,21 @@ const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
   );
 };
 
-function SubscriptionFormTeam() {
+export default function SubscriptionFormTeam() {
   const [currentSelection, setCurrentSelection] = useState({
     country: "",
     countryId: "", 
     league: "",
     leagueId: "",  
     team: "",
-    teamId: "",  // Keep team ID separately
+    teamId: "",  
   });
   const [teamSelections, setTeamSelections] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
   const [leagues, setLeagues] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
 
-  const { getTeamCountry, getTeam, getTeamLeague } = useDashBoardManagement();
+  const { getTeamCountry, getTeam, getTeamLeague, submmitClub } = useDashBoardManagement();
 
   useEffect(() => {
     (async () => {
@@ -77,7 +79,6 @@ function SubscriptionFormTeam() {
       (async () => {
         try {
           const response = await getTeamLeague(currentSelection.countryId);
-          console.log("Leagues response:", response);
           setLeagues(response.flat() || []);
         } catch (error) {
           console.error("Failed to fetch leagues", error);
@@ -92,7 +93,6 @@ function SubscriptionFormTeam() {
       (async () => {
         try {
           const response = await getTeam(currentSelection.leagueId);
-          console.log("Teams response:", response);
           setTeams(response.flat() || []);
         } catch (error) {
           console.error("Failed to fetch teams", error);
@@ -115,6 +115,27 @@ function SubscriptionFormTeam() {
 
     setTeamSelections([...teamSelections, currentSelection]);
     setCurrentSelection({ country: "", countryId: "", league: "", leagueId: "", team: "", teamId: "" });
+  };
+
+  const handleSubmit = async () => {
+    if (teamSelections.length === 0) {
+      alert("Please select at least one team.");
+      return;
+    }
+
+  const teamIds = teamSelections.map(selection => selection.teamId);
+  const payload = {
+    club: JSON.stringify(teamIds)
+  };;
+
+    toast.promise(
+      submmitClub(payload),
+      {
+        pending: 'Submitting...',
+        success: 'Teams submitted successfully!',
+        error: 'Failed to submit teams'
+      }
+    );
   };
 
   return (
@@ -215,10 +236,16 @@ function SubscriptionFormTeam() {
               );
             })}
           </div>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 mt-6"
+          >
+            Submit
+          </button>
         </div>
       </div>
     </AuthLayout>
   );
 }
 
-export default SubscriptionFormTeam;

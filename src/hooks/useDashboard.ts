@@ -338,13 +338,11 @@ function useDashBoardManagement() {
             setLoading(true);
             const response = await client.delete("/forum/messages/delete", { data });
             const result = response?.data.data;
-            console.log(result);
             return result;
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
             console.error("Error deleting message:", errorMessage);
-            return Promise.reject(`${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -444,6 +442,24 @@ function useDashBoardManagement() {
             setLoading(false);
         }
     }
+    const submmitClub = async (payload: { club: string }) => {
+        try {
+            setLoading(true);
+            const response = await client.post('/user/submitSelection', payload);
+            const result = response?.data.data;
+            console.log(result);
+            router('/user/profile')
+            return Promise.resolve("Club submitted successfully");
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
 
     return {
         loading,
@@ -473,6 +489,7 @@ function useDashBoardManagement() {
         getTeamCountry,
         getTeamLeague,
         getTeam,
+        submmitClub
     };
 }
 

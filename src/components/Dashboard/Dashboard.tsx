@@ -139,14 +139,14 @@ const handleSubscribeToPlan = async (planId: string) => {
 
   const [selectedTab, setSelectedTab] = useState("monthly");
 
-  const basicPlanData = plans.find(plan => plan.plan.name === "Basic Plan");
-  const premiumPlanData = plans.find(plan => plan.plan.name === "Premium Plan");
+  const basicPlanData = plans.find(plan => plan.plan.name === "Basic");
+  const premiumPlanData = plans.find(plan => plan.plan.name === "upper");
   const advancedPlanData = plans.find(plan => plan.plan.name === "Advanced Plan");
 
 
   const basicPlan = basicPlanData ? {
     title: basicPlanData.plan.name,
-    price: `£${(basicPlanData.plan.amount)}`,
+    price: `£${(basicPlanData.plan.amount).toFixed(2)}`,
     en_key: basicPlanData.plan.en_id,
     features: basicPlanData.feature.map(f => ({
       name: f.feature_label,
@@ -156,7 +156,7 @@ const handleSubscribeToPlan = async (planId: string) => {
 
   const premiumPlan = premiumPlanData ? {
     title: premiumPlanData.plan.name,
-    price: `£${(premiumPlanData.plan.amount / 100).toFixed(2)}`,
+    price: `£${(premiumPlanData.plan.amount).toFixed(2)}`,
     en_key: premiumPlanData.plan.en_id,
     features: premiumPlanData.feature.map(f => ({
       name: f.feature_label,
@@ -166,7 +166,7 @@ const handleSubscribeToPlan = async (planId: string) => {
 
   const advancedPlan = advancedPlanData ? {
     title: advancedPlanData.plan.name,
-    price: `£${(advancedPlanData.plan.amount / 100).toFixed(2)}`,
+    price: `£${(advancedPlanData.plan.amount).toFixed(2)}`,
     en_key: advancedPlanData.plan.en_id,
     features: advancedPlanData.feature.map(f => ({
       name: f.feature_label,
