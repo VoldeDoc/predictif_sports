@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "@/services/axios-client";
-import { addMembersValues, AssignMemberRoleValues, createGroupValues, deleteMessageValues, editMessageValues, sendMessageValues, SurveyDataValues } from "@/types";
+import { addMembersValues, AssignMemberRoleValues, createGroupValues, createStrategyValues, deleteMessageValues, editMessageValues, sendMessageValues, SurveyDataValues } from "@/types";
 import { useState } from "react";
 import { RootState } from "@/context/store/rootReducer";
 import { toast } from "react-toastify";
@@ -38,7 +38,7 @@ function useDashBoardManagement() {
             const group = await client.post("/forum/groups", data);
             const result = group.data.data;
             console.log(result);
-            router(`/user-group/${result.id}`);
+            router(`/forum/messages/${result.id}`);
             return Promise.resolve("Group created successfully!");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -358,7 +358,7 @@ function useDashBoardManagement() {
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error( errorMessage);
+            console.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -387,7 +387,6 @@ function useDashBoardManagement() {
             setLoading(true)
             const response = await client.get('/subscription/userPlans')
             const result = response?.data.data;
-            console.log(result);
             return result;
         } catch (error: any) {
             const resError = error.response?.data;
@@ -412,32 +411,30 @@ function useDashBoardManagement() {
             setLoading(false);
         }
     }
-    const getTeamLeague = async (data:string) => {
+    const getTeamLeague = async (data: string) => {
         try {
             setLoading(true)
             const response = await client.get(`/user/getLeague/${data}`)
             const result = response?.data.data;
-            console.log(result);
             return result;
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error( errorMessage);
+            console.error(errorMessage);
         } finally {
             setLoading(false);
         }
     }
-    const getTeam = async (data:string) => {
+    const getTeam = async (data: string) => {
         try {
             setLoading(true)
             const response = await client.get(`/user/getTeam/${data}`)
             const result = response?.data.data;
-            console.log(result);
             return result;
         } catch (error: any) {
             const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error( errorMessage);
+            console.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -448,7 +445,6 @@ function useDashBoardManagement() {
             const response = await client.post('/user/submitSelection', payload);
             const result = response?.data.data;
             console.log(result);
-            router('/user/profile')
             return Promise.resolve("Club submitted successfully");
         } catch (error: any) {
             const resError = error.response?.data;
@@ -459,8 +455,261 @@ function useDashBoardManagement() {
             setLoading(false);
         }
     };
-    
 
+    const getClubFollowed = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get("/user/getClubFollowing")
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const unFollowClub = async (id: string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/user/unfollowingClub/${id}`)
+            console.log(response.data);
+            return Promise.resolve("unfollowed")
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const submitPlayer = async (club: string, payload: { players: string }) => {
+        try {
+            setLoading(true);
+            const response = await client.post('/user/submitClubPlayerSelection', {
+                club,
+                players: payload.players
+            });
+            const result = response?.data.data;
+            console.log(result);
+            return Promise.resolve("Player submitted successfully");
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const getPlayer = async (data: string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/user/getClubPlayer/${data}`)
+            const result = response?.data.data;
+            console.log(result);
+            return result;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getPlayerFollowed = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get("/user/getClubPlayerFollowing")
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const unFollowPlayer = async (id: string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`/user/unfollowingClubPlayer/${id}`)
+            console.log(response);
+            return Promise.resolve('unfollowed player')
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getStrategyItem = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get('/user/getStrategyItem')
+            return res?.data?.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const createStrategies = async (data: createStrategyValues) => {
+        try {
+            setLoading(true)
+            const res = await client.post('/user/strategiesCreate', data)
+            console.log(res.data)
+            router('/user/strategies')
+            return Promise.resolve("Strategy created successfully")
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getMyStrategies = async (type: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMyStrategy/${type}`)
+            return res?.data?.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const deleteStrategies = async (id: string) => {
+        try {
+            setLoading(true)
+            await client.get(`/user/deleteMyStrategy/${id}`)
+            return Promise.resolve()
+        }
+        catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getMatchAlert = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/user/getMatchAlert')
+            return response?.data?.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+const getLastMessagesForGroups = async ()=>{
+    try {
+        setLoading(true)
+        const response = await client.get('/forum/messages/lastUser')
+        return response?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
+const getLastMessagesForGroupsById = async ()=>{
+    try {
+        setLoading(true)
+        const response = await client.get('/forum/messages/last')
+        return response?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
+const saveUserWidget = async (widget_state: string ) => {
+    try {
+        setLoading(true);
+        const response = await client.post('/updateUserWidget', { widget_state });
+        return response?.data.data;
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+};
+
+const getUserWidget = async ()=>{
+try {
+    setLoading(true)
+    const response = await client.get('/getUserDetails')
+    return response?.data.data
+} catch (error: any) {
+    const resError = error.response?.data;
+    const errorMessage = resError?.message || resError?.data || "An error occurred";
+    console.error(errorMessage);
+} finally {
+    setLoading(false);
+}
+
+}
+
+
+const updateUserOnboarding = async (onboarding_state: string ) => {
+    try {
+        setLoading(true);
+        const response = await client.post('/updateUserOnboarding', { onboarding_state });
+        return response?.data.data;
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+};
     return {
         loading,
         username,
@@ -489,7 +738,23 @@ function useDashBoardManagement() {
         getTeamCountry,
         getTeamLeague,
         getTeam,
-        submmitClub
+        submmitClub,
+        getClubFollowed,
+        unFollowClub,
+        getPlayer,
+        submitPlayer,
+        getPlayerFollowed,
+        unFollowPlayer,
+        getStrategyItem,
+        createStrategies,
+        getMyStrategies,
+        deleteStrategies,
+        getMatchAlert,
+        getLastMessagesForGroups,
+        getLastMessagesForGroupsById,
+        saveUserWidget,
+        getUserWidget,
+        updateUserOnboarding,
     };
 }
 

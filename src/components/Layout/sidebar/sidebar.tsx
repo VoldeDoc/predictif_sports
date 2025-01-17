@@ -36,7 +36,7 @@ const MENU_ITEMS = [
   {
     name: "InPlay Alerts",
     icon: UsersIcon,
-    path: "/inplay-alerts",
+    path: "/match-schedule",
   },
   {
     name: "Fixtures",

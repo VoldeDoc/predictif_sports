@@ -1,5 +1,7 @@
+import { RootState } from '@/context/store/rootReducer';
 import useDashBoardManagement from '@/hooks/useDashboard';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -7,12 +9,13 @@ const ProgressPage: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState(0);
   const router = useNavigate();
-  const { isquestionnaireFilled} = useDashBoardManagement();
-
+  const userdata = useSelector((state: RootState) => state.auth?.user);
+  const { isquestionnaireFilled,updateUserOnboarding } = useDashBoardManagement();
+  const id = userdata?.id;
   useEffect(() => {
-    if (isquestionnaireFilled ) {
+    if (isquestionnaireFilled) {
       toast.info("Survey already filled");
-      router("/dashboard");
+      router(`/dashboard`);
     }
   }, [isquestionnaireFilled, router]);
 
@@ -34,9 +37,10 @@ const ProgressPage: React.FC = () => {
           setStage(stage + 1);
           setProgress(0);
         } else {
-          setTimeout(() => {
-            router('/dashboard'); 
-          }, 2000);
+            setTimeout(async () => {
+              await updateUserOnboarding('subscription');
+              router(`/user/subscribe-plan/${id}`);
+            }, 2000);
         }
       }
     }, stages[stage].duration / 4);

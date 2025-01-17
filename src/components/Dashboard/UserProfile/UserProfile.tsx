@@ -1,6 +1,7 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthLayout } from '@/components/Layout/layout';
 import useDashBoardManagement from '@/hooks/useDashboard';
+import { toast } from 'react-toastify';
 
 interface Plan {
   id: number;
@@ -13,58 +14,137 @@ interface Plan {
   created_at: string;
 }
 
+interface Club {
+  id:string
+  club_id: string;
+  club_name: string;
+}
+
+interface Player {
+  id:string;
+  player_id: string;
+  name: string;
+  photo: string;
+  position: string;
+  current_club_name: string;
+}
+
 function UserProfile() {
-  const { getUserPlan, username} = useDashBoardManagement();
+  const { getUserPlan, username, getClubFollowed, unFollowClub, getPlayerFollowed, unFollowPlayer } = useDashBoardManagement();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
 
   useEffect(() => {
     (async () => {
       const data = await getUserPlan();
-      setPlans(data[0]);
-      console.log(data);
+      setPlans(data[0] || []);
+      const clubsFollowed = await getClubFollowed();
+      setClubs(clubsFollowed[0] || []);
+      const playersFollowed = await getPlayerFollowed();
+      setPlayers(playersFollowed[0] || []);
     })();
   }, []);
 
+  const handleRemoveClub = async (id: string) => {
+    toast.promise(
+      unFollowClub(id).then(async () => {
+        const clubsFollowed = await getClubFollowed();
+        setClubs(clubsFollowed[0] || []);
+      }),
+      {
+        pending: "Removing club...",
+        success: "Club removed successfully",
+        error: "Failed to remove club",
+      }
+    );
+};
+
+  const handleRemovePlayer = async (player_id: string) => {
+    toast.promise(
+      unFollowPlayer(player_id).then(async()=>{
+        const playerFollowed = await getPlayerFollowed()
+        setPlayers(playerFollowed[0] || {})
+      }), 
+      {
+          pending: "Removing Player...",
+          success: "Player Removed successfully",
+          error:"Failed to remove Player"
+      }
+  );
+  };
+
   return (
     <AuthLayout>
-      <div className="min-h-screen flex items-center justify-center bg-white p-4">
-        <div className="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
-          <div className="flex items-center space-x-6 mb-8">
-            {/* {profileImage ? (
-              <img src={profileImage} alt="Profile Avatar" className="w-20 h-20 rounded-full border-4 border-blue-500" />
-            ) : (
-              <div className="w-20 h-20 rounded-full border-4 border-blue-500 flex items-center justify-center bg-gray-200">
-                <span className="text-gray-500">No Image</span>
-              </div>
-            )} */}
-            <div>
-              <h1 className="text-2xl font-extrabold text-gray-900">{username}</h1>
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+        <div className="bg-white p-10 rounded-lg shadow-2xl max-w-3xl w-full">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-extrabold text-gray-900">Welcome, {username}</h1>
+            <p className="text-gray-600 mt-2">Here is your account overview</p>
           </div>
 
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Subscription Plans</h2>
-          <ul className="space-y-4">
-            {plans.map((plan) => (
-              <li key={plan.id} className="border-b pb-4 mb-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700">Plan:</span>
-                  <span className="text-gray-900 font-bold">{plan.plan}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700">Status:</span>
-                  <span className={`font-bold ${plan.status === 'pending' ? 'text-yellow-600' : 'text-green-600'}`}>{plan.status}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700">Amount:</span>
-                  <span className="text-gray-900 font-bold">${plan.amount}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700">Created At:</span>
-                  <span className="text-gray-900 font-bold">{new Date(plan.created_at).toLocaleDateString()}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {/* Subscription Plans Section */}
+          <section className="mb-10">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Your Subscription Plans</h2>
+            <div className="space-y-6">
+              {plans.length > 0 ? (
+                plans.map((plan) => (
+                  <div key={plan.id} className="bg-gray-100 p-6 rounded-lg shadow-md flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">{plan.plan}</h3>
+                      <p className="text-sm text-gray-500">{new Date(plan.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-lg font-bold ${plan.status === 'pending' ? 'text-yellow-500' : 'text-green-600'}`}>{plan.status}</span>
+                      <p className="text-sm text-gray-700">Amount: ${plan.amount}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600">No active plans found.</p>
+              )}
+            </div>
+          </section>
+
+          {/* Clubs Followed Section */}
+          <section className="mb-10">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Clubs You Follow</h2>
+            <div className="space-y-6">
+              {clubs.length > 0 ? (
+                clubs.map((club) => (
+                  <div key={club.club_id} className="bg-white p-5 rounded-lg shadow flex justify-between items-center border-l-4 border-blue-500">
+                    <h3 className="text-lg font-bold text-gray-700">{club.club_name}</h3>
+                    <button onClick={() => handleRemoveClub(club.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Unfollow</button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600">You're not following any clubs yet.</p>
+              )}
+            </div>
+          </section>
+
+          {/* Players Followed Section */}
+          <section className="mb-10">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Players You Follow</h2>
+            <div className="space-y-6">
+              {players.length > 0 ? (
+                players.map((player) => (
+                  <div key={player.player_id} className="bg-white p-5 rounded-lg shadow flex justify-between items-center border-l-4 border-green-500">
+                    <div className="flex items-center">
+                      {player.photo && <img src={player.photo} alt={player.name} className="w-12 h-12 rounded-full mr-4" />}
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-700">{player.name}</h3>
+                        <p className="text-sm text-gray-500">{player.position} - {player.current_club_name}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => handleRemovePlayer(player.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Unfollow</button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600">You're not following any players yet.</p>
+              )}
+            </div>
+          </section>
         </div>
       </div>
     </AuthLayout>

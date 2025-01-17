@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
   username: string;
+  id : string;
   email: string;
   is_questionnaire_filled: string;
 }

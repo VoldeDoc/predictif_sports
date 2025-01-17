@@ -1,90 +1,66 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import useDashBoardManagement from "@/hooks/useDashboard";
 
-interface Meetup {
-  month: string;
-  day: number;
-  title: string;
-  location: string;
-  img: string;
-  types: string[];
+interface Message {
+  id: number;
+  message: string;
+  group_id: number;
+  sender_id: number;
+  created_at: string;
+  updated_at: string;
+  deleted_by: string | null;
 }
 
-interface MeetupsProps {
-  meetupsData: Meetup[];
-}
+const LastMessages: React.FC = () => {
+  const { getLastMessagesForGroups } = useDashBoardManagement();
+  const [messages, setMessages] = useState<Message[]>([]);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getLastMessagesForGroups();
+        setMessages(response?.messages || []);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    })();
+  }, []);
 
-
-export const ForumMeetupsData = [
-  {
-    month: "Apr",
-    day: 10,
-    title: "Startup Pitch Night",
-    location: "Startup Hub • New York, USA",
-    img: "/assets/images/dashboard/dashboard/comp.png",
-    types: ["Pitch", "Networking", "Startup"]
-  },
-  {
-    month: "May",
-    day: 22,
-    title: "Developer Conference 2023",
-    location: "Dev Center • Berlin, Germany",
-    img: "/assets/images/dashboard/dashboard/comp.png",
-    types: ["Conference", "Tech", "Developer"]
-  },
-  {
-    month: "May",
-    day: 22,
-    title: "Developer Conference 2023",
-    location: "Dev Center • Berlin, Germany",
-    img: "/assets/images/dashboard/dashboard/comp.png",
-    types: ["Conference", "Tech", "Developer"]
-  },
-  // Add more meetups as needed
-];
-
-
-const Meetups: React.FC<MeetupsProps> = ({ meetupsData }) => {
   return (
-    <div>
-      {meetupsData.map((meetup, index) => (
-        <div key={index} className="flex space-between py-4 space-x-2">
-          <div className="date bg-blue-800 text-white text-xl rounded-lg py-2 px-2 text-center font-semibold space-y-4">
-            <p>{meetup.month}</p>
-            <p>{meetup.day}</p>
-          </div>
-          <div>
-            <p className="company font-semibold">{meetup.title}</p>
-            <div className="flex space-x-2 py-1">
-              <div>
-                <img
-                  src={meetup.img}
-                  alt=""
-                  width={18}
-                  height={18}
-                  className="rounded-full mr-1 shadow-md"
-                />
+    <div className="p-6 bg-gray-100 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Last Messages</h2>
+      {messages.length === 0 ? (
+        <p className="text-gray-500">No messages available.</p>
+      ) : (
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className="flex items-start bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex-shrink-0 bg-blue-600 text-white rounded-lg w-16 h-16 flex items-center justify-center font-bold text-lg">
+                {msg.id}
               </div>
-              <div>
-                <p className="text-sm text-gray-500">{meetup.location}</p>
-              </div>
-            </div>
-            <div className="meetup-type flex space-x-4 py-1">
-              {meetup.types.map((type, typeIndex) => (
-                <p
-                  key={typeIndex}
-                  className="text-sm text-gray-300 bg-black-500 px-2 py-2 rounded-lg overflow-hidden text-ellipsis whitespace-nowrap"
-                  style={{ maxWidth: "100px" }} // Adjust the max-width as needed
-                >
-                  {type}
+              <div className="flex-1 ml-4">
+                <p className="text-gray-800 font-semibold text-lg mb-1">
+                  {msg.message}
                 </p>
-              ))}
+                <p className="text-gray-600 text-sm">
+                  Group ID: <span className="font-medium">{msg.group_id}</span>
+                </p>
+                <p className="text-gray-600 text-sm">
+                  Sender ID: <span className="font-medium">{msg.sender_id}</span>
+                </p>
+                <p className="text-gray-500 text-xs mt-2">
+                  {new Date(msg.created_at).toLocaleString()}
+                </p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 };
 
-export default Meetups;
+export default LastMessages;

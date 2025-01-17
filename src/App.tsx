@@ -47,7 +47,19 @@ import Change_Password from './pages/auth/changpassword.tsx';
 import Change_PasswordEmail from './pages/auth/changepasswordemail.tsx';
 import OtpChangePwdVerification from './components/Auth/OtpChangePassword.tsx';
 import User_Profile from './pages/dashboard/user_profile/index.tsx';
-import SubscriptionFormTeam from './components/DashboardComponents/SubsriptionForm.tsx';
+
+import CreateStrategyPage from './pages/dashboard/create_strategy/index.tsx';
+import StrategyPage from './pages/Strategies/index.tsx';
+import UpdateStrategyPage from './components/Dashboard/PredictivoCopier/updateStrategyPage.tsx';
+import MatchSchedulePage from './pages/dashboard/match_schedule/index.tsx';
+import MatchDetails from './components/Dashboard/MatchSchedule/MatchDetails.tsx';
+import { DashboardProvider } from './components/Chart/chartContext.tsx';
+import SubscriptionPlan from './components/Dashboard/SubscrptionPlans/Subscription.tsx';
+import CheckoutPage from './components/Stripe/CheckoutPage.tsx';
+import FollowPlayers from './components/Dashboard/Survey/Followings/PlayerFollowing.tsx';
+
+import SuccessPage from './components/Stripe/success.tsx';
+import FollowTeam from './components/Dashboard/Survey/Followings/TeamFollowing.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -88,7 +100,13 @@ function App() {
               <Route path="/auth/forget-password" element={<ForgetPassword />} />
 
               {/* Dashboard */}
-              <Route path="/dashboard" element={<ProtectedRoute><Dashboard_T /></ProtectedRoute>} />
+
+              <Route path="/dashboard" element={<ProtectedRoute>
+                <DashboardProvider>
+                <Dashboard_T />
+                </DashboardProvider>
+                </ProtectedRoute>} />
+
               <Route path="/user/profile" element={<ProtectedRoute><User_Profile /></ProtectedRoute>} />
               <Route path="/auth/change-passwordmail" element={<ProtectedRoute><Change_PasswordEmail /></ProtectedRoute>} />
               <Route path="/auth/change-password" element={<ProtectedRoute><Change_Password /></ProtectedRoute>} />
@@ -107,18 +125,49 @@ function App() {
 
               {/* Protected Routes */}
               <Route path="/user/user-group/:id" element={<ProtectedRoute><User_group /></ProtectedRoute>} />
-              <Route path="/user/subscription-form/:id" element={<ProtectedRoute><SubscriptionFormTeam /></ProtectedRoute>} />
-              <Route path="/user/settings/:id" element={<ProtectedRoute><GroupSettingsPage /></ProtectedRoute>} />
+
+              <Route path="/user/settings/:id" element=
+                {<ProtectedRoute><GroupSettingsPage /></ProtectedRoute>} />
               <Route path="/user/all-groups" element={<ProtectedRoute><ALl_Groups /></ProtectedRoute>} />
               <Route path="/user/update-group/:id" element={<ProtectedRoute><Update_Group /></ProtectedRoute>} />
               <Route path="/user/add-members/:id" element={<ProtectedRoute><Add_Members /></ProtectedRoute>} />
               <Route path="/user/role/:id" element={<ProtectedRoute><AddRoles /></ProtectedRoute>} />
               <Route path="/user/all-users/:id" element={<ProtectedRoute><AllUsersPage /></ProtectedRoute>} />
               <Route path="/user/remove-users/:id" element={<ProtectedRoute><RemoveMember /></ProtectedRoute>} />
-              <Route path="/user/general/strategy" element={<ProtectedRoute><GeneralStrategyPage /></ProtectedRoute>} />
-              <Route path="/user/preset-rules" element={<ProtectedRoute><PresetRulesPage /></ProtectedRoute>} />
-              <Route path="/user/import-rules" element={<ProtectedRoute><ImportRulesPage/></ProtectedRoute>}></Route>
+              <Route path="/user/strategy/:strategy_id" element={<ProtectedRoute><GeneralStrategyPage /></ProtectedRoute>} />
+
+              <Route path="/user/strategies" element={<ProtectedRoute><StrategyPage /></ProtectedRoute>} />
+
+              <Route path="/user/create-strategy/:strategy_id" element={<ProtectedRoute><CreateStrategyPage /></ProtectedRoute>} />
+
+              <Route path="/user/update-strategy/:id" element={<ProtectedRoute><UpdateStrategyPage /></ProtectedRoute>} />
+
+              <Route path="/user/preset/" element={<ProtectedRoute><PresetRulesPage /></ProtectedRoute>} />
+
+              <Route path="/match-schedule" element={<ProtectedRoute><MatchSchedulePage /></ProtectedRoute>} />
+
+              <Route path="/match-schedule/:id" element={<ProtectedRoute><MatchDetails /></ProtectedRoute>} />
+
+              <Route path="/user/import-rules" element={<ProtectedRoute><ImportRulesPage /></ProtectedRoute>}></Route>
               {/* Ui */}
+
+                <Route path="/user/subscribe-plan/:id" element={<ProtectedRoute><SubscriptionPlan /></ProtectedRoute>}></Route>
+
+                <Route path="/user/follow-team/:id" element={<ProtectedRoute><FollowTeam /></ProtectedRoute>}></Route>
+
+                <Route path="/user/follow-player/:id" element={<ProtectedRoute><FollowPlayers /></ProtectedRoute>}></Route>
+
+                <Route path="/user/checkout/:id" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}></Route>
+
+                <Route path="/user/payment-success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>}></Route>
+
+              {/*stripe payment*/}
+              {/* <Route path="/user/checkout" element={
+                <ProtectedRoute>
+                 <CheckoutPage />
+                </ProtectedRoute>
+              } ></Route> */}
+
               <Route path="/ui/button" element={<ButtonT />} />
               <Route path="/ui/textinput" element={<ExampleForm />} />
             </Routes>

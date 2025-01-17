@@ -3,13 +3,14 @@ import Button from '@/components/Ui/Button';
 import { FaCalendarDay } from "react-icons/fa";
 import NewsForum from "@/components/DashboardComponents/newsForum";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
-import Meetups, { ForumMeetupsData } from "@/components/DashboardComponents/meetups";
 import { useState } from "react";
+import LastMessages from "@/components/DashboardComponents/meetups";
 const Forum = () => {
   const [isMeetupsEnlarged, setIsMeetupsEnlarged] = useState(false);
 
   const handleMeetupsClick = () => {
     setIsMeetupsEnlarged(!isMeetupsEnlarged);
+
   };
   return (
     <AuthLayout>
@@ -94,7 +95,7 @@ const Forum = () => {
               <button className="font-semibold transition-transform duration-300 transform hover:scale-105 hover:bg-blue-600 active:scale-95 rounded-lg px-2 py-2 hover:text-white">
                 Last Messages <ArrowRightIcon className="inline-block mr-2 w-6" />
               </button>
-              <Meetups meetupsData={ForumMeetupsData} />
+              <LastMessages />
             </div>
 
             {/* {!isMeetupsEnlarged && (

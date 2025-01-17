@@ -1,9 +1,8 @@
 import { AuthLayout } from "../Layout/layout";
-import StackBarChart from "../Chart/stack-bar";
 import SelectMonth from "../SelectMonth";
 import PastResultChat from "../Chart/PastResultChat";
 import Card from "../Ui/Card";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import GroupCard from "../Ui/GroupCard";
 import { IoEyeOutline } from "react-icons/io5";
 import { FaRegCalendarCheck } from "react-icons/fa";
@@ -18,10 +17,8 @@ import moment from "moment-timezone";
 import { RootState } from "@/context/store/rootReducer";
 import { useSelector } from "react-redux";
 import useDashBoardManagement from "@/hooks/useDashboard";
-import PlanCard from "../DashboardComponents/planCard";
-import { toast } from "react-toastify";
-import { useNavigate, useParams } from "react-router-dom";
-
+import LiveDataChart from "../Chart/LiveBar";
+import PredictiveDataChart from "../Chart/predictiveBar"; 
 const timeZone = "Africa/Lagos";
 const getGreeting = (timeZone: string) => {
   const now = moment().tz(timeZone);
@@ -43,59 +40,58 @@ fiveDaysAhead.setDate(today.getDate() + 5);
 const Dashboard = () => {
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
-  const {id} = useParams<{id: string}>();
-  const [activeTab, setActiveTab] = useState("goals");
+  const [activeTab, setActiveTab] = useState("live");
   const [dateRange, setDateRange] = useState<[Date, Date]>([
     today,
     fiveDaysAhead,
   ]);
-  interface Plan {
-    plan: {
-      name: string;
-      amount: number;
-      en_id: string;
-    };
-    feature: {
-      feature_label: string;
-    }[];
-  }
+
   
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const { getSubsriptionPlans,subsricbeToPlan } = useDashBoardManagement();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
+
+  const {  getMatchAlert } = useDashBoardManagement();
+
+  interface MatchAlert {
+    meta_data: {
+      home_club: string;
+    };
+    live_data: {
+      home_corner_kick: number;
+    };
+  }
+
+  const [matchAlerts, setMatchAlerts] = useState<MatchAlert[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const data = await getSubsriptionPlans();
-        console.log(data);
-        setPlans(data[0]); 
+        const matchAlertsData = await getMatchAlert();
+        console.log(matchAlertsData);
+        setMatchAlerts(matchAlertsData);
       } catch (error) {
         console.log(error);
       }
     })();
   }, []);
 
-const handleSubscribeToPlan = async (planId: string) => {
-  toast.promise(
-    subsricbeToPlan(planId),
-    {
-      pending: "Subscribing to plan...",
-      success: {
-        render({ data }) {
-          setIsModalOpen(true);
-          return <div>{data as string}</div>;
-        },
-      },
-      error: {
-        render({ data }) {
-          return <div>{data as string}</div>;
-        },
-      },
-    }
-  );
-}
+  // const handleSubscribeToPlan = async (planId: string) => {
+  //   toast.promise(
+  //     subsricbeToPlan(planId),
+  //     {
+  //       pending: "Subscribing to plan...",
+  //       success: {
+  //         render({ data }) {
+  //           setIsModalOpen(true);
+  //           return <div>{data as string}</div>;
+  //         },
+  //       },
+  //       error: {
+  //         render({ data }) {
+  //           return <div>{data as string}</div>;
+  //         },
+  //       },
+  //     }
+  //   );
+  // };
 
   const handleDateChange = (dates: Date[]) => {
     if (dates.length === 2) {
@@ -108,18 +104,13 @@ const handleSubscribeToPlan = async (planId: string) => {
     setActiveTab(tab);
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "goals":
-        return <StackBarChart />;
-      case "corner":
-        return <StackBarChart />;
-      case "jobs":
-        return <StackBarChart />;
-      default:
-        return <StackBarChart />;
+  const renderContent = useMemo(() => {
+    if (activeTab === "live") {
+      return <LiveDataChart />;
+    } else if (activeTab === "predictive") {
+      return <PredictiveDataChart />;
     }
-  };
+  }, [activeTab]);
 
   const formatDateRange = (dates: [Date, Date]) => {
     const [start, end] = dates;
@@ -137,47 +128,6 @@ const handleSubscribeToPlan = async (planId: string) => {
     )} - ${end.toLocaleDateString("en-US", options)}`;
   };
 
-  const [selectedTab, setSelectedTab] = useState("monthly");
-
-  const basicPlanData = plans.find(plan => plan.plan.name === "Basic");
-  const premiumPlanData = plans.find(plan => plan.plan.name === "upper");
-  const advancedPlanData = plans.find(plan => plan.plan.name === "Advanced Plan");
-
-
-  const basicPlan = basicPlanData ? {
-    title: basicPlanData.plan.name,
-    price: `£${(basicPlanData.plan.amount).toFixed(2)}`,
-    en_key: basicPlanData.plan.en_id,
-    features: basicPlanData.feature.map(f => ({
-      name: f.feature_label,
-      isAvailable: true,
-    })),
-  } : null;
-
-  const premiumPlan = premiumPlanData ? {
-    title: premiumPlanData.plan.name,
-    price: `£${(premiumPlanData.plan.amount).toFixed(2)}`,
-    en_key: premiumPlanData.plan.en_id,
-    features: premiumPlanData.feature.map(f => ({
-      name: f.feature_label,
-      isAvailable: true,
-    })),
-  } : null;
-
-  const advancedPlan = advancedPlanData ? {
-    title: advancedPlanData.plan.name,
-    price: `£${(advancedPlanData.plan.amount).toFixed(2)}`,
-    en_key: advancedPlanData.plan.en_id,
-    features: advancedPlanData.feature.map(f => ({
-      name: f.feature_label,
-      isAvailable: true,
-    })),
-  } : null;
-
-  const availableFeatures = (plan: Plan) => plan.feature.map(f => ({
-    name: f.feature_label,
-    isAvailable: true,
-  }));
 
   return (
     <AuthLayout>
@@ -226,24 +176,24 @@ const handleSubscribeToPlan = async (planId: string) => {
                   {/* Tab headers */}
                   <div className="flex border-b border-gray-200 mb-4">
                     <button
-                      className={`py-2 px-4 text-sm font-medium ${activeTab === "goals"
+                      className={`py-2 px-4 text-sm font-medium ${activeTab === "live"
                           ? "text-blue-600 border-b-2 border-blue-600"
                           : "text-gray-600"
                         }`}
-                      onClick={() => handleTabClick("goals")}
+                      onClick={() => handleTabClick("live")}
                     >
-                      Goals Stats
+                      Live Stats
                     </button>
                     <button
-                      className={`py-2 px-4 text-sm font-medium ${activeTab === "corner"
+                      className={`py-2 px-4 text-sm font-medium ${activeTab === "predictive"
                           ? "text-blue-600 border-b-2 border-blue-600"
                           : "text-gray-600"
                         }`}
-                      onClick={() => handleTabClick("corner")}
+                      onClick={() => handleTabClick("predictive")}
                     >
-                      Corner Stats
+                      Predicitve Stats
                     </button>
-                    <button
+                    {/* <button
                       className={`py-2 px-4 text-sm font-medium ${activeTab === "jobs"
                           ? "text-blue-600 border-b-2 border-blue-600"
                           : "text-gray-600"
@@ -251,12 +201,12 @@ const handleSubscribeToPlan = async (planId: string) => {
                       onClick={() => handleTabClick("jobs")}
                     >
                       Jobs Applied
-                    </button>
+                    </button> */}
                   </div>
 
                   {/* Tab content */}
                   <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                    {renderContent()}
+                    {renderContent}
                   </div>
                 </div>
 
@@ -308,8 +258,8 @@ const handleSubscribeToPlan = async (planId: string) => {
           <div className="lg:col-span-4 col-span-12 space-y-5">
             <Card title="Corner Statistic">
               <div className="flex items-end">
-                <span className="text-7xl font-bold">0</span>
-                <span className="text-lg text-gray-500">Arsenal</span>
+                <span className="text-7xl font-bold">{matchAlerts.length > 0 ? matchAlerts[0].live_data.home_corner_kick : '0'}</span>
+                <span className="text-lg text-gray-500">{matchAlerts.length > 0 ? matchAlerts[0].meta_data.home_club : 'No team yet'}</span>
               </div>
             </Card>
             <Card title="Past Results">
@@ -324,108 +274,11 @@ const handleSubscribeToPlan = async (planId: string) => {
           </div>
         </div>
 
-        {/* payment plan */}
-        <div className="container mx-auto pt-9">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Choose your Plan
-            </h1>
-            <div className="flex justify-center my-4">
-              <button
-                className={`px-14 py-2 border rounded-l-lg ${selectedTab === "monthly"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
-                  }`}
-                onClick={() => setSelectedTab("monthly")}
-              >
-                Monthly
-              </button>
-              <button
-                className={`px-4 py-2 border rounded-r-lg ${selectedTab === "yearly"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
-                  }`}
-                onClick={() => setSelectedTab("yearly")}
-              >
-                Yearly <span className="text-green-400">(save 2.5%)</span>
-              </button>
-            </div>
-            <h2 className="text-2xl my-2">
-              <span className="text-blue-300">Best Plans For</span> Predictive
-              Sport
-            </h2>
-          </div>
-
-          {/* Monthly Tab Content */}
-          {selectedTab === "monthly" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-center">
-              {basicPlan && (
-                <PlanCard
-                  features={availableFeatures(basicPlanData!)}
-                  title={basicPlan.title}
-                  price={basicPlan.price}
-                  buttonText="Choose Plan"
-                  buttonClass="bg-blue-300"
-                  onSubscribe={() => handleSubscribeToPlan(basicPlan.en_key)}
-                />
-              )}
-              {premiumPlan && (
-                <PlanCard
-                  features={availableFeatures(premiumPlanData!)}
-                  title={premiumPlan.title}
-                  price={premiumPlan.price}
-                  buttonText="Choose Plan"
-                  buttonClass="bg-blue-300"
-                  onSubscribe={() => handleSubscribeToPlan(premiumPlan.en_key)}
-                />
-              )}
-              {advancedPlan && (
-                <PlanCard
-                  features={availableFeatures(advancedPlanData!)}
-                  title={advancedPlan.title}
-                  price={advancedPlan.price}
-                  buttonText="Choose Plan"
-                  buttonClass="bg-blue-300"
-                  onSubscribe={() => handleSubscribeToPlan(advancedPlan.en_key)}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Yearly Tab Content */}
-          {selectedTab === "yearly" && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 text-center">
-              <PlanCard
-                title={basicPlan?.title || ""}
-                price={`£${(parseInt(basicPlan?.price.slice(1) || "0") * 12).toFixed(2)}`}
-                features={availableFeatures(basicPlanData!)}
-                buttonText="Choose Plan"
-                buttonClass="bg-blue-300"
-                onSubscribe={() => handleSubscribeToPlan(basicPlan!.en_key)}
-              />
-              {/* Add other PlanCards here if needed */}
-            </div>
-          )}
-        </div>
+      
       </div>
 
-      {/* Custom Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6  w-[600px] h-[300px]">
-            <h2 className="text-xl font-bold mb-4">Complete Your Subscription</h2>
-            <p className="mb-4">Please fill out the form to complete your subscription.</p>
-            <div className="flex justify-end">
-              <button
-                onClick={() => navigate(`/user/subscription-form/${id}`)}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+     
+      
     </AuthLayout>
   );
 };

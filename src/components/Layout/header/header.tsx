@@ -198,14 +198,14 @@ export const Header = ({ showNav, setShowNav }: Props) => {
                   </Menu.Item>
                   <Menu.Item>
                     <Link
-                      to={"/settings"}
+                      to={"/user/strategies"}
                       className={
                         "flex items-center gap-2 rounded p-2 transition-colors ease-in-out duration-150 text-gray-700 hover:bg-gray-100 group"
                       }
                     >
                       <CogIcon className={"h-4 w-4 text-gray-700"} />
                       <span className={"group-hover:text-orange-500"}>
-                        Settings
+                        Strategies
                       </span>
                     </Link>
                   </Menu.Item>

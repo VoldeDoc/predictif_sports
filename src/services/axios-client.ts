@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 
-const apiURL = import.meta.env.VITE_BASE_URL;
+export const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const axiosClient = (): AxiosInstance => {
   const token = JSON.parse(localStorage.getItem("token") || "null");
@@ -15,7 +15,7 @@ const axiosClient = (): AxiosInstance => {
       };
 
   const client = axios.create({
-    baseURL: apiURL,
+    baseURL: baseUrl,
     headers,
     timeout: 60000,
     withCredentials: false,
