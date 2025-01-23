@@ -3,7 +3,6 @@ import Card from "../Ui/Card";
 import GroupCard from "../Ui/GroupCard";
 import { IoEyeOutline } from "react-icons/io5";
 import { FaRegCalendarCheck } from "react-icons/fa";
-import { BsCaretDownFill } from "react-icons/bs";
 import "flatpickr/dist/themes/airbnb.css";
 import moment from "moment-timezone";
 import { RootState } from "@/context/store/rootReducer";
@@ -52,10 +51,10 @@ const Dashboard = () => {
   const [clubFollowed, setClubFollowed] = useState<Club[]>([]);
   const [playerFollowed, setPlayerFollowed] = useState<Player[]>([]);
   const [playerFollowedCount, setPlayerFollowedCount] = useState(0);
-  const [dateRange, setDateRange] = useState<[Date, Date]>([
+  const dateRange: [Date, Date] = [
     new Date(),
     new Date(new Date().setDate(new Date().getDate() + 5)),
-  ]);
+  ];
   const [strategies, setStrategies] = useState({
     all: 0,
     active: 0,
