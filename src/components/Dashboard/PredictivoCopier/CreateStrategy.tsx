@@ -27,7 +27,7 @@ export default function CreateStrategy() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('Select an option');
     const { strategy_id } = useParams<{ strategy_id: string }>();
-    const { createStrategies,updateUserOnboarding } = useDashBoardManagement();
+    const { createStrategies } = useDashBoardManagement();
     const {
         register,
         handleSubmit,
@@ -37,6 +37,8 @@ export default function CreateStrategy() {
         resolver: yupResolver(schema),
         mode: "all",
     });
+    const [minNumber, setMinNumber] = useState(0);
+    const [maxNumber, setMaxNumber] = useState(0);
 
     useEffect(() => {
         if (strategy_id) {
@@ -59,7 +61,7 @@ export default function CreateStrategy() {
     };
 
     const onSubmit: SubmitHandler<createStrategyValues> = async (data) => {
-        await updateUserOnboarding('completed')
+        // await updateUserOnboarding('completed')
         toast.promise(
             createStrategies(data),
             {
@@ -179,25 +181,37 @@ export default function CreateStrategy() {
                         <div className="px-6 py-3">
                             <div className="px-8 py-4 border-l-4 border-red-800">
                                 <div className="mt-4">
-                                    <label className="block text-gray-700 font-semibold">Min Number</label>
+                                    <label className="block text-gray-700 font-semibold">Min Number : {minNumber}</label>
                                     <input
                                         type="range"
                                         min="0"
-                                        max="70"
-                                        className="w-full h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer"
+                                        max="20"
+                                        className="w-52 h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer"
                                         {...register("min_number")}
+                                        value={minNumber}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            setMinNumber(value);
+                                            setValue("min_number", value.toString()); 
+                                        }}
                                     />
                                     
                                     <div className="text-gray-700 font-semibold mt-2">{errors.min_number ? errors.min_number.message : null}</div>
                                 </div>
                                 <div className="mt-4">
-                                    <label className="block text-gray-700 font-semibold">Max Number</label>
+                                    <label className="block text-gray-700 font-semibold">Max Number {maxNumber}</label>
                                     <input
                                         type="range"
                                         min="0"
-                                        max="70"
-                                        className="w-full h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer"
+                                        max="20"
+                                        className="w-52 h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer"
                                         {...register("max_number")}
+                                        value={maxNumber}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value);
+                                            setMaxNumber(value);
+                                            setValue("max_number", value.toString());
+                                        }}
                                     />
                                     <div className="text-gray-700 font-semibold mt-2">{errors.max_number ? errors.max_number.message : null}</div>
                                 </div>

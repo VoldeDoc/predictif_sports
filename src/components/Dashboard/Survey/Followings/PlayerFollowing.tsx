@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import { FiChevronDown, FiX } from "react-icons/fi";
 import useDashBoardManagement from "@/hooks/useDashboard";
@@ -9,50 +7,50 @@ import { AuthLayout } from "@/components/Layout/layout";
 import useJoyride from "@/components/Ui/JoyRide";
 import { useNavigate } from "react-router-dom";
 
+export default function FollowPlayers() {
+  interface DropdownProps {
+    label: string;
+    options: { id: string; name: string; logo?: string; photo?: string }[];
+    selected: string;
+    onSelect: (id: string, name: string) => void;
+  }
 
-export default function FolloPlayers() {
-    interface DropdownProps {
-        label: string;
-        options: { id: string; name: string; logo?: string; photo?: string }[];
-        selected: string;
-        onSelect: (id: string, name: string) => void;
-      }
-      
-      const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
-        const [open, setOpen] = useState(false);
-      
-        return (
-          <div className="relative w-full">
-            <button
-              type="button"
-              className="w-full px-4 py-3 border rounded-lg flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={() => setOpen(!open)}
-            >
-              <span>{selected || label}</span>
-              <FiChevronDown className={`ml-2 transform ${open ? "rotate-180" : "rotate-0"}`} />
-            </button>
-      
-            {open && (
-              <ul className="absolute left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
-                {options.map((option, index) => (
-                  <li
-                    key={option.id || `option-${index}`}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                    onClick={() => {
-                      onSelect(option.id, option.name);
-                      setOpen(false);
-                    }}
-                  >
-                    {option.logo && <img src={option.logo} alt={option.name} className="w-6 h-6 mr-2" />}
-                    {option.photo && <img src={option.photo} alt={option.name} className="w-6 h-6 mr-2" />}
-                    <span>{option.name}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        );
-      };
+  const Dropdown = ({ label, options, selected, onSelect }: DropdownProps) => {
+    const [open, setOpen] = useState(false);
+
+    return (
+      <div className="relative w-full">
+        <button
+          type="button"
+          className="w-full px-4 py-3 border rounded-lg flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => setOpen(!open)}
+        >
+          <span>{selected || label}</span>
+          <FiChevronDown className={`ml-2 transform ${open ? "rotate-180" : "rotate-0"}`} />
+        </button>
+
+        {open && (
+          <ul className="absolute left-0 right-0 mt-2 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
+            {options.map((option, index) => (
+              <li
+                key={option.id || `option-${index}`}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                onClick={() => {
+                  onSelect(option.id, option.name);
+                  setOpen(false);
+                }}
+              >
+                {option.logo && <img src={option.logo} alt={option.name} className="w-6 h-6 mr-2" />}
+                {option.photo && <img src={option.photo} alt={option.name} className="w-6 h-6 mr-2" />}
+                <span>{option.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  };
+
   const [playerSelection, setPlayerSelection] = useState({
     country: "",
     countryId: "",
@@ -68,8 +66,9 @@ export default function FolloPlayers() {
   const [leagues, setLeagues] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
-const router = useNavigate();
-  const { getTeamCountry, getTeam, getTeamLeague, getPlayer, submitPlayer,updateUserOnboarding } = useDashBoardManagement();
+  const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
+  const router = useNavigate();
+  const { getTeamCountry, getTeam, getTeamLeague, getPlayer, submitPlayer, updateUserOnboarding, getUserDetails, getUserPlan } = useDashBoardManagement();
 
   useEffect(() => {
     (async () => {
@@ -124,14 +123,35 @@ const router = useNavigate();
     }
   }, [playerSelection.teamId]);
 
-  const addPlayerSelection = () => {
+  useEffect(() => {
+    (async () => {
+      try {
+        const subscriptionPlanResponse = await getUserPlan();
+        setSubscriptionPlan(subscriptionPlanResponse);
+        
+      } catch (error) {
+        console.error("Failed to fetch subscription plan", error);
+      }
+    })();
+  }, []);
+
+  const addPlayerSelection = async () => {
     if (!playerSelection.country || !playerSelection.league || !playerSelection.team || !playerSelection.player) {
       alert("Please complete the selection before proceeding.");
       return;
     }
 
-    if (playerSelections.length >= 5) {
-      alert("You can select up to 5 players only.");
+    const userDetail = await getUserDetails();
+    const userDetailOnboard = userDetail[0]?.onboarding_state;
+console.log(subscriptionPlan[0][0].payment_status);
+
+    if (userDetailOnboard !== 'completed' && playerSelections.length >= 1) {
+      alert("You can only select one player");
+      return;
+    }
+
+    if (userDetailOnboard === 'completed' && subscriptionPlan[0][0]?.payment_status === 'active' && playerSelections.length >= 3) {
+      alert("You can only select up to three players");
       return;
     }
 
@@ -165,7 +185,7 @@ const router = useNavigate();
             router("/predictivo-copier");
             return <div>{data as string}</div>
           },
-        }, 
+        },
         error: {
           render({ data }) {
             return <div>{data as string}</div>
@@ -173,7 +193,7 @@ const router = useNavigate();
         },
       }
     );
-    
+
   };
 
   const steps = [
@@ -289,7 +309,7 @@ const router = useNavigate();
             <button
               type="button"
               onClick={addPlayerSelection}
-              className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 mt-6 player-button" 
+              className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 mt-6 player-button"
             >
               Next
             </button>

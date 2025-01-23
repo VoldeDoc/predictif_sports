@@ -1,7 +1,6 @@
 import { AuthLayout } from "@/components/Layout/layout";
 import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
 import MatchResults from "./MatchResults";
-
 export default function MatchSchedule() {
     return (
         <AuthLayout>

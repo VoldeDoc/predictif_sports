@@ -107,3 +107,15 @@ export interface createStrategyValues {
   team_player:string;
   endDate?:string;
 }
+
+
+export interface updateStreategyValues{
+  name:string;
+  description:string;
+  strategy_id:number;
+  max_number?:string;
+  min_number?:string;
+  team_player_id:string;
+  team_player:string;
+  endDate?:string;
+}

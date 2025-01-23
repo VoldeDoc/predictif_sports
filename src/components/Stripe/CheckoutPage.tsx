@@ -16,7 +16,7 @@ const CheckoutForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { subsricbeToPlan } = useDashBoardManagement();
+  const { subsricbeToPlan, updateUserOnboarding } = useDashBoardManagement();
 
   const { title, amount, type }: {
     title: string;
@@ -68,7 +68,6 @@ const CheckoutForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(id);
 
     if (paymentMethod === "stripe") {
       if (!stripe || !elements) {
@@ -91,17 +90,19 @@ const CheckoutForm = () => {
         return;
       }
 
+      const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        },
+      });
+
+      if (stripeError) {
+        setError(stripeError.message || "An error occurred while confirming the card payment.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: cardElement,
-          },
-        });
-
-        if (error) {
-          throw new Error(error.message || "An unknown error occurred during Stripe confirmation.");
-        }
-
         const stripeConfirmResponse = await fetch(`${baseUrl}/payment/stripe-payment-confirm`, {
           method: "POST",
           headers: {
@@ -114,17 +115,25 @@ const CheckoutForm = () => {
           }),
         });
 
+        // Check the response status
+        console.log("Stripe Confirm Response Status:", stripeConfirmResponse.status);
+
         if (!stripeConfirmResponse.ok) {
-          const contentType = stripeConfirmResponse.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const responseData = await stripeConfirmResponse.json();
-            throw new Error(responseData.message || "Failed to confirm payment with Stripe.");
-          } else {
-            const responseText = await stripeConfirmResponse.text();
-            console.error("Error confirming payment with Stripe:", responseText);
-            throw new Error("Failed to confirm payment with Stripe. Server returned an unexpected response.");
-          }
+          // Log error and throw if the response is not OK
+          const errorResponse = await stripeConfirmResponse.json();
+          console.error("Error Response Data:", errorResponse);
+          throw new Error(errorResponse.message || "Failed to confirm payment with Stripe.");
         }
+
+        // Parse and log the expected JSON response
+        const confirmResponseData = await stripeConfirmResponse.json();
+        console.log("Stripe Confirm Response Data:", confirmResponseData);
+
+        if (!confirmResponseData.reference || !confirmResponseData.sub_id) {
+          throw new Error("Invalid response format: Expected 'reference' and 'sub_id'.");
+        }
+
+        console.log(`Payment confirmed. Reference: ${confirmResponseData.reference}, Subscription ID: ${confirmResponseData.sub_id}`);
 
         if (!id) {
           throw new Error("Plan ID is not defined.");
@@ -135,6 +144,12 @@ const CheckoutForm = () => {
           throw new Error("Failed to subscribe to the plan.");
         }
 
+        console.log("Subscription Data:", subscriptionData);
+
+        // Update user onboarding status
+        const onboardingResponse = await updateUserOnboarding('completed');
+        console.log("Onboarding Update Response:", onboardingResponse);
+
         navigate("/user/payment-success", {
           state: {
             title,
@@ -142,6 +157,8 @@ const CheckoutForm = () => {
             type,
             paymentIntentId: paymentIntent.id,
             subscriptionDetails: subscriptionData,
+            reference: confirmResponseData.reference,
+            sub_id: confirmResponseData.sub_id,
           },
         });
 
@@ -152,7 +169,7 @@ const CheckoutForm = () => {
       } finally {
         setLoading(false);
       }
-    } else if (paymentMethod === "flutterwave") {
+    } else if (paymentMethod === "paystack") {
       setLoading(true);
       setTimeout(() => {
         setSuccess(true);
@@ -197,12 +214,12 @@ const CheckoutForm = () => {
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="flutterwave"
-                    checked={paymentMethod === "flutterwave"}
+                    value="paystack"
+                    checked={paymentMethod === "paystack"}
                     onChange={handlePaymentMethodChange}
                     className="mr-2"
                   />
-                  Pay with Flutterwave
+                  Pay with Paystack
                 </label>
               </div>
             </div>
@@ -246,7 +263,7 @@ const CheckoutForm = () => {
                 : "bg-indigo-600 hover:bg-indigo-500"
                 }`}
             >
-              {loading ? "Processing..." : `Pay with ${paymentMethod === "stripe" ? "Stripe" : "Flutterwave"}`}
+              {loading ? "Processing..." : `Pay with ${paymentMethod === "stripe" ? "Stripe" : "Paystack"}`}
             </button>
           </form>
         )}

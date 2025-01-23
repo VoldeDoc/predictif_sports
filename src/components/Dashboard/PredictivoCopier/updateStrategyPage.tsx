@@ -27,7 +27,7 @@ export default function UpdateStrategyPage() {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('Select an option');
     const { strategy_id } = useParams<{ strategy_id: string }>();
-    const { createStrategies } = useDashBoardManagement();
+    const { updateStrategies, getStrategyById } = useDashBoardManagement();
     const {
         register,
         handleSubmit,
@@ -37,15 +37,7 @@ export default function UpdateStrategyPage() {
         resolver: yupResolver(schema),
         mode: "all",
     });
-
-    useEffect(() => {
-        if (strategy_id) {
-            setValue("strategy_id", Number(strategy_id));
-            console.log("Strategy ID set:", strategy_id);
-        } else {
-            console.error("Strategy ID is null");
-        }
-    }, [strategy_id, setValue]);
+console.log(errors);
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -53,16 +45,46 @@ export default function UpdateStrategyPage() {
 
     const handleSelect = (option: string, id: string) => {
         setSelectedOption(option);
+        setIsOpen(false);
         setValue("team_player_id", id);
         setValue("team_player", option);
-        setIsOpen(false);
     };
+
+    useEffect(() => {
+        const fetchStrategyDetails = async () => {
+            if (strategy_id) {
+                try {
+                    const strategyResponse = await getStrategyById(strategy_id);
+
+                    if (strategyResponse?.[0]?.[0]) {
+                        const strategyData = strategyResponse[0][0];
+                        
+                        setValue("strategy_id", strategyData.id);
+                        setValue("name", strategyData.name || "");
+                        setValue("description", strategyData.description || "");
+                        setValue("min_number", strategyData.min_number || "");
+                        setValue("max_number", strategyData.max_number || "");
+                        setValue("team_player", strategyData.team_player || "");
+                        setValue("team_player_id", strategyData.team_player_id || "");
+                        setValue("endDate", strategyData.endDate?.split(" ")[0] || "");
+                        setSelectedOption(strategyData.team_player || "Select an option");
+                    } else {
+                        console.error("Invalid response format or no data found");
+                    }
+                } catch (error) {
+                    console.error("Error fetching strategy details:", error);
+                }
+            }
+        };
+
+        fetchStrategyDetails();
+    }, []);
 
     const onSubmit: SubmitHandler<createStrategyValues> = async (data) => {
         toast.promise(
-            createStrategies(data),
+            updateStrategies(data),
             {
-                pending: "Creating strategy...",
+                pending: "Updating strategy...",
                 success: {
                     render({ data }) {
                         return <div>{data as string}</div>;
@@ -186,7 +208,6 @@ export default function UpdateStrategyPage() {
                                         className="w-full h-2 bg-blue-800 rounded-lg appearance-none cursor-pointer"
                                         {...register("min_number")}
                                     />
-                                    
                                     <div className="text-gray-700 font-semibold mt-2">{errors.min_number ? errors.min_number.message : null}</div>
                                 </div>
                                 <div className="mt-4">

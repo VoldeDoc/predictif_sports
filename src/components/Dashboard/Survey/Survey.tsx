@@ -36,23 +36,23 @@ export default function Survey() {
     opinion_bet: yup.string().required("Field is required"),
     legalized_bet: yup.string().required("Field is required"),
     long_involve_bet: yup.string().required("Field is required"),
-    sport_bet: yup.array().of(yup.string().required()).required("Field is required"),
-    bet_type_prefer: yup.array().of(yup.string().required()).required("Field is required"),
-    influences_bet: yup.array().of(yup.string().required()).required(" required"),
+    sport_bet: yup.array().of(yup.string().required()).min(1, "At least one option must be selected").required("Field is required"),  
+    bet_type_prefer: yup.array().of(yup.string().required()).min(1,"At least one option must be selected").required("Field is required"),
+    influences_bet: yup.array().of(yup.string().required()).min(1,"At least one option must be selected").required(" required"),
     other_bet_tools: yup.string().required(" required"),
     bet_budget_set: yup.string().required("Field is required"),
     amount_wager_bet: yup.string().required("Field is required"),
     participated_bet: yup.string().required("Field is required"),
     often_bet: yup.string().required("Field is required"),
-    platform_bet: yup.array().of(yup.string().required()).required("Field is required"),
-    motivates_bet: yup.array().of(yup.string().required()).required("Field is required"),
+    platform_bet: yup.array().of(yup.string().required()).min(1,"At least one option must be selected").required("Field is required"),
+    motivates_bet: yup.array().of(yup.string().required()).min(1,"At least one option must be selected").required("Field is required"),
     negative_consequences_bet: yup.string().required(" required"),
-    placing_strategies_bet: yup.array().of(yup.string().required()).required(" required"),
+    placing_strategies_bet: yup.array().of(yup.string().required()).min(1,"At least one option must be selected").required(" required"),
     future_plan_bet: yup.string().required(" required"),
-    changes_see_sport: yup.array().of(yup.string().required()).required(" required"),
+    changes_see_sport: yup.array().of(yup.string().required()).min(1,"At least one  option must be selected").required(" required"),
     responsible_gambling_programs: yup.string().required(" required"),
-    view_luck_skill_bet: yup.string().required(" required"),
-    improvements_sport_bet: yup.string().required(" required"),
+    view_luck_skill_bet: yup.string().required("Field is required"),
+    improvements_sport_bet: yup.string().required("Field is required"),
     comments_sport_bet: yup.string(),
   });
 
@@ -64,16 +64,29 @@ export default function Survey() {
   } = useForm<SurveyDataValues>({
     resolver: yupResolver(schema),
     mode: "all",
+    defaultValues: {
+      sport_bet: [], 
+      bet_type_prefer:[],
+      influences_bet:[],
+      platform_bet:[],
+      motivates_bet:[],
+      changes_see_sport:[],
+      placing_strategies_bet:[],
+    },
   });
 
   const handleNextClick = async () => {
-    const currentStepFields = questionnaire[currentStep].questions.map((question) => question.id.toString() as keyof SurveyDataValues);
+    const currentStepFields = questionnaire[currentStep].questions.map(
+      (question) => question.id.toString() as keyof SurveyDataValues
+    );
+  
     const isValid = await trigger(currentStepFields);
-
+  
     if (isValid) {
       setCurrentStep((prevStep) => Math.min(prevStep + 1, questionnaire.length - 1));
     }
   };
+  
 
   const onSubmitSurvey: SubmitHandler<SurveyDataValues> = async (data) => {
     toast.promise(surveyQuestions(data), {

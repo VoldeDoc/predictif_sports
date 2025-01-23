@@ -1,9 +1,7 @@
 import { Dispatch, forwardRef, SetStateAction } from "react";
 import {
-  UserIcon,
   Squares2X2Icon,
   BookOpenIcon,
-  CalendarDaysIcon,
   UsersIcon,
   CommandLineIcon,
 } from "@heroicons/react/24/solid";
@@ -24,29 +22,29 @@ const MENU_ITEMS = [
     path: "/dashboard",
   },
   {
-    name: "Predictivo Copier",
+    name: "Predictive Copier",
     icon: BookOpenIcon,
     path: "/predictivo-copier",
   },
-  {
-    name: "PreMatch Alerts",
-    icon: CalendarDaysIcon,
-    path: "/prematch-alerts",
-  },
+  // {
+  //   name: "PreMatch Alerts",
+  //   icon: CalendarDaysIcon,
+  //   path: "/prematch-alerts",
+  // },
   {
     name: "InPlay Alerts",
     icon: UsersIcon,
     path: "/match-schedule",
   },
+  // {
+  //   name: "Fixtures",
+  //   icon: UserIcon,
+  //   path: "/fixtures",
+  // },
   {
-    name: "Fixtures",
-    icon: UserIcon,
-    path: "/fixtures",
-  },
-  {
-    name: "Daily Predictivo",
+    name: "Strategies",
     icon: CommandLineIcon,
-    path: "/daily-predictivo",
+    path: "/user/strategies",
   },
   {
     name: "Forum",

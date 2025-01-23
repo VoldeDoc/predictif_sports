@@ -1,11 +1,14 @@
 import { AuthLayout } from "@/components/Layout/layout";
-import { FaCalendar } from "react-icons/fa";
+import { FaCalendar, FaFutbol, FaExclamationTriangle, FaArrowDown, FaArrowUp, FaSquareFull, FaFlag, FaBullseye, FaFistRaised } from "react-icons/fa";
 import { MdStadium } from "react-icons/md";
 import { GiWhistle } from "react-icons/gi";
 import { useEffect, useState, lazy, Suspense } from "react";
 import MatchTimeline from "./Event";
 import Tabs from "./Tool/Tab";
 import useDashBoardManagement from "@/hooks/useDashboard";
+import { useParams } from "react-router-dom";
+import Loader from "@/pages/Ui/loader"; 
+// import MatchLineUp from "./MatchLineup";
 
 const Stats = lazy(() => import("./MatchStats"));
 
@@ -14,60 +17,52 @@ export default function MatchDetails() {
         { key: 'Match Preview', label: 'Preview' },
         { key: 'Stats', label: 'Stats' },
         { key: 'Lineup', label: 'Lineup' },
-        { key: 'Events', label: 'Events' },
-        { key: 'Standing', label: 'Standing' },
-        { key: 'Head2Head', label: 'H2H' }
+        { key: 'Timeline', label: 'Timeline' },
+        { key: 'H2H', label: 'H2H' }
     ];
 
-    const events = [
-        {
-            time: "90 +5",
-            player: "Neal Maupay",
-            eventType: "yellow-card" as const,
-            team: "home" as const,
-        },
-        {
-            time: "90 +5",
-            player: "Nick Pope",
-            eventType: "yellow-card" as const,
-            team: "away" as const,
-        },
-        {
-            time: "81",
-            player: "Callum Wilson",
-            subPlayer: "Alexander Isak",
-            eventType: "goal" as const,
-            team: "away" as const,
-        },
-        {
-            time: "76",
-            player: "Lewis Hall",
-            eventType: "penalty-cancelled" as const,
-            team: "away" as const,
-        },
-        {
-            time: "74",
-            player: "Kevin Schade",
-            eventType: "red-card" as const,
-            team: "home" as const,
-        },
-    ];
-
-    const { getMatchAlert } = useDashBoardManagement();
-    const [matchdata, setMatchData] = useState<any[]>([]);
+    const [matchData, setMatchData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState('Match Preview');
+    const [expandedMatches, setExpandedMatches] = useState<number[]>([]);
+    const { getMatchDetail } = useDashBoardManagement();
+    const { id } = useParams<{ id: string }>();
 
     useEffect(() => {
         (async () => {
             try {
-                const response = await getMatchAlert();
-                setMatchData(response);
+                if (id) {
+                    const response = await getMatchDetail(id);
+                    console.log(response);
+                    setMatchData(response[0]);
+                    setError(null);
+                }
             } catch (error) {
-                console.log('error getting data', error);
+                setError('Failed to fetch match data. Please try again later.');
+            } finally {
+                setLoading(false);
             }
         })();
-    }, [getMatchAlert]);
+    }, [getMatchDetail, id]);
 
-    const [activeTab, setActiveTab] = useState('Match Preview');
+    const toggleExpand = (index: number) => {
+        setExpandedMatches((prev) =>
+            prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <Loader loading={loading} color="#123abc" size={40} />
+            </div>
+        );
+    }
+
+    if (error) {
+        return <div className="text-center text-red-500">{error}</div>;
+    }
 
     return (
         <AuthLayout>
@@ -90,20 +85,20 @@ export default function MatchDetails() {
 
                     <div className="flex justify-center items-center text-center pb-5">
                         <div className="grid grid-cols-6 space-x-6">
-                            {matchdata.length > 0 && matchdata[0].meta_data && (
+                            {matchData && matchData.meta_data && (
                                 <>
                                     {/* Team 1 Section */}
                                     <div className="col-span-2 flex flex-col items-center">
                                         <div>
                                             <img
-                                                src={matchdata[0].meta_data.home_club_logo}
-                                                alt={matchdata[0].meta_data.home_club}
+                                                src={matchData.meta_data.home_club_logo}
+                                                alt={matchData.meta_data.home_club}
                                                 className="h-16 w-16"
                                             />
                                         </div>
                                         <div className="hidden lg:block">
                                             <ul className="text-white text-center">
-                                                <li>{matchdata[0].meta_data.home_club}</li>
+                                                <li>{matchData.meta_data.home_club}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -112,23 +107,22 @@ export default function MatchDetails() {
                                     <div className="col-span-2 flex flex-col items-center space-y-1">
                                         <p className="text-white">FT</p>
                                         <p className="px-4 text-white rounded-xl bg-black-900">
-                                            {matchdata[0].live_data.home_score} - {matchdata[0].live_data.away_score}
+                                            {matchData.live_data.home_score} - {matchData.live_data.away_score}
                                         </p>
-                                        {/* <p className="text-xs text-white">(0-1)</p> */}
                                     </div>
 
                                     {/* Team 2 Section */}
                                     <div className="col-span-2 flex flex-col items-center">
                                         <div>
                                             <img
-                                                src={matchdata[0].meta_data.away_club_logo}
-                                                alt={matchdata[0].meta_data.away_club}
+                                                src={matchData.meta_data.away_club_logo}
+                                                alt={matchData.meta_data.away_club}
                                                 className="h-16 w-16"
                                             />
                                         </div>
                                         <div className="hidden lg:block">
                                             <ul className="text-white text-center">
-                                                <li>{matchdata[0].meta_data.away_club}</li>
+                                                <li>{matchData.meta_data.away_club}</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -161,54 +155,91 @@ export default function MatchDetails() {
                         activeClassName="border-b-2 border-red-500"
                     />
                 </div>
-                {activeTab === 'Events' && (
+                {activeTab === 'Match Preview' && (
+                    <div className="bg-white p-4">
+                        <h2 className="text-lg font-bold">Match Preview</h2>
+                        <p>Home Team: {matchData?.meta_data?.home_club}</p>
+                        <p>Away Team: {matchData?.meta_data?.away_club}</p>
+                        <p>Score: {matchData?.meta_data?.home_score} - {matchData?.meta_data?.away_scrore}</p>
+                    </div>
+                )}
+                {activeTab === 'Stats' && (
+                    <div className="bg-white p-4">
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <Stats liveData={matchData?.live_data} predictData={matchData?.predict_data} />
+                        </Suspense>
+                    </div>
+                )}
+                {activeTab === 'Lineup' && (
+                    <div className="bg-white p-4">
+                        <h2 className="text-lg font-bold">Lineup</h2>
+                        <h3 className="text-md font-semibold">Home Team</h3>
+                        <p>Predictive: {JSON.stringify(matchData?.matchGamePlayer?.home?.predictive)}</p>
+                        <p>Result: {JSON.stringify(matchData?.matchGamePlayer?.home?.result)}</p>
+                        <h3 className="text-md font-semibold mt-4">Away Team</h3>
+                        <p>Predictive: {JSON.stringify(matchData?.matchGamePlayer?.away?.predictive)}</p>
+                        <p>Result: {JSON.stringify(matchData?.matchGamePlayer?.away?.result)}</p>
+                        {/* <MatchLineUp players={players} defaultJerseyColor={"rgb(0,0,0)"} defaultJerseyTextColor={"#FFFF00"}/> */}
+                    </div>
+                )}
+                {activeTab === 'Timeline' && (
                     <div className="bg-white">
                         <div className="flex justify-between bg-gray-200 px-4 py-1">
                             <div className="flex items-center space-x-2">
                                 <img
-                                    src="/assets/images/landingPage/Arsenal.svg"
+                                    src={matchData?.meta_data?.home_club_logo}
                                     alt=""
                                     className="h-10 w-10"
                                 />
-                                <h1 className="font-bold text-lg">ARS</h1>
+                                <h1 className="font-bold text-lg">{matchData?.meta_data?.home_club}</h1>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <img
-                                    src="/assets/images/landingPage/Chelsea-FC-logo-480x480 1.svg"
+                                    src={matchData?.meta_data?.away_club_logo}
                                     alt=""
                                     className="h-10 w-10"
                                 />
-                                <h1 className="font-bold text-lg">CHE</h1>
+                                <h1 className="font-bold text-lg">{matchData?.meta_data?.away_club}</h1>
                             </div>
                         </div>
-                        <MatchTimeline events={events} />
+                        <MatchTimeline events={matchData?.matchGameTimeline || []} />
                     </div>
                 )}
-              {activeTab === 'Stats' && (
-    <div className="bg-white">
-        <div className="flex justify-between bg-gray-200 px-4 py-1">
-            <div className="flex items-center space-x-2">
-                <img
-                    src={matchdata[0]?.meta_data?.home_club_logo}
-                    alt=""
-                    className="h-10 w-10"
-                />
-                <h1 className="font-bold text-lg">{matchdata[0]?.meta_data?.home_club}</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-                <img
-                    src={matchdata[0]?.meta_data?.away_club_logo}
-                    alt=""
-                    className="h-10 w-10"
-                />
-                <h1 className="font-bold text-lg">{matchdata[0]?.meta_data?.away_club}</h1>
-            </div>
-        </div>
-        <Suspense fallback={<div>Loading...</div>}>
-            <Stats />
-        </Suspense>
-    </div>
-)}
+                {activeTab === 'H2H' && (
+                    <div className="bg-white p-4">
+                        <h2 className="text-lg font-bold">Head to Head</h2>
+                        {matchData.H2H?.map((match: any, index: number) => (
+                            <div key={index} className="mb-4 border-b pb-2">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <p className="font-semibold">{match.home_club} vs {match.away_club}</p>
+                                        <p className="text-gray-600">Score: {match.home_score} - {match.away_score}</p>
+                                    </div>
+                                    <button
+                                        className="text-blue-500"
+                                        onClick={() => toggleExpand(index)}
+                                    >
+                                        {expandedMatches.includes(index) ? (
+                                            <FaArrowUp />
+                                        ) : (
+                                            <FaArrowDown />
+                                        )}
+                                    </button>
+                                </div>
+                                {expandedMatches.includes(index) && (
+                                    <div className="mt-2">
+                                        <p><FaExclamationTriangle className="inline mr-1 text-red-500" /> Red Cards: {match.home_red_card} - {match.away_red_card}</p>
+                                        <p><FaSquareFull className="inline mr-1 text-yellow-500" /> Yellow Cards: {match.home_yellow_card} - {match.away_yellow_card}</p>
+                                        <p><FaFlag className="inline mr-1 text-blue-500" /> Corner Kicks: {match.home_corner_kick} - {match.away_corner_kick}</p>
+                                        <p><FaBullseye className="inline mr-1 text-green-500" /> Penalty Kicks: {match.home_penalty_kick} - {match.away_penalty_kick}</p>
+                                        <p><FaFistRaised className="inline mr-1 text-purple-500" /> Free Kicks: {match.home_free_kick} - {match.away_free_kick}</p>
+                                        <p><FaFutbol className="inline mr-1 text-gray-500" /> Throw-ins: {match.home_throwing} - {match.away_throwing}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </AuthLayout>
     );

@@ -589,6 +589,25 @@ function useDashBoardManagement() {
         }
     }
 
+    const updateStrategies = async (data: createStrategyValues) => {
+        try {
+            setLoading(true)
+            const res = await client.post('/user/strategiesUpdate', data)
+            console.log(res.data)
+            router('/user/strategies')
+            return Promise.resolve("Strategy updated successfully")
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return Promise.reject(`${errorMessage}`);
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
     const getMyStrategies = async (type: string) => {
         try {
             setLoading(true)
@@ -637,79 +656,139 @@ function useDashBoardManagement() {
         }
     }
 
-const getLastMessagesForGroups = async ()=>{
-    try {
-        setLoading(true)
-        const response = await client.get('/forum/messages/lastUser')
-        return response?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
+    const getLastMessagesForGroups = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/forum/messages/lastUser')
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
             const errorMessage = resError?.message || resError?.data || "An error occurred";
             console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getLastMessagesForGroupsById = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/forum/messages/last')
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const saveUserWidget = async (widget_state: string) => {
+        try {
+            setLoading(true);
+            const response = await client.post('/updateUserWidget', { widget_state });
+            return response?.data.data;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getUserDetails = async () => {
+        try {
+            setLoading(true)
+            const response = await client.get('/getUserDetails')
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+
+    const updateUserOnboarding = async (onboarding_state: string) => {
+        try {
+            setLoading(true);
+            const response = await client.post('/updateUserOnboarding', { onboarding_state });
+            return response?.data.data;
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStrategyById = async (strategy_id: string) => {
+        try {
+            setLoading(true)
+            const response = await client.get(`user/getStrategyById/${strategy_id}`)
+            return response?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getPlayerById = async (player_id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getPlayerById/${player_id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getTeamById = async (player_id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getClubById/${player_id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+const getMatchDetail = async (id: string) => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchDetail/${id}`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
     }
     finally {
         setLoading(false)
     }
 }
-
-const getLastMessagesForGroupsById = async ()=>{
-    try {
-        setLoading(true)
-        const response = await client.get('/forum/messages/last')
-        return response?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
-            const errorMessage = resError?.message || resError?.data || "An error occurred";
-            console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-
-const saveUserWidget = async (widget_state: string ) => {
-    try {
-        setLoading(true);
-        const response = await client.post('/updateUserWidget', { widget_state });
-        return response?.data.data;
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    } finally {
-        setLoading(false);
-    }
-};
-
-const getUserWidget = async ()=>{
-try {
-    setLoading(true)
-    const response = await client.get('/getUserDetails')
-    return response?.data.data
-} catch (error: any) {
-    const resError = error.response?.data;
-    const errorMessage = resError?.message || resError?.data || "An error occurred";
-    console.error(errorMessage);
-} finally {
-    setLoading(false);
-}
-
-}
-
-
-const updateUserOnboarding = async (onboarding_state: string ) => {
-    try {
-        setLoading(true);
-        const response = await client.post('/updateUserOnboarding', { onboarding_state });
-        return response?.data.data;
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    } finally {
-        setLoading(false);
-    }
-};
     return {
         loading,
         username,
@@ -753,8 +832,13 @@ const updateUserOnboarding = async (onboarding_state: string ) => {
         getLastMessagesForGroups,
         getLastMessagesForGroupsById,
         saveUserWidget,
-        getUserWidget,
+        getUserDetails,
         updateUserOnboarding,
+        getStrategyById,
+        updateStrategies,
+        getPlayerById,
+        getTeamById,
+        getMatchDetail,
     };
 }
 

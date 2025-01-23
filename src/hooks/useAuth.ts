@@ -49,12 +49,12 @@ const signInFunction = async (data: LoginDataValues) => {
 const signUpFunction = async (data: SignUpDataValues) => {
   try {
     setLoading(true);
-    const res = await client.post("/register", data);
-    const otp = res.data.data.otp;
-    console.log(otp);
-    dispatch(setOtpMail(data.email));
+  const signed =  await client.post("/register", data);
+  console.log(signed);
+  
+   dispatch(setOtpMail(data.email));
     router("/auth/otp-verification");
-    return Promise.resolve(`this is your otp `);
+    return Promise.resolve(`OTP sent to mail `);
   } catch (error: any) {
     const resError = error.response?.data;
     const errorMessage = resError?.message || "An error occurred";

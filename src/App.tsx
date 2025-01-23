@@ -13,7 +13,6 @@ import Dashboard_T from "@/pages/dashboard";
 import Predictivo_copier from "./pages/dashboard/predictivo_copier/Index";
 import Prematch_alerts from "./pages/dashboard/prematch_alerts";
 import Inplay_alerts from "./pages/dashboard/inplay_alerts";
-import Daily_predictivo from "./pages/dashboard/daily_predictivo";
 import FixturesT from "./pages/dashboard/fixtures";
 import Home from "./pages/home/home_page";
 import NotFound from "./pages/home/notFound/notFound";
@@ -60,6 +59,8 @@ import FollowPlayers from './components/Dashboard/Survey/Followings/PlayerFollow
 
 import SuccessPage from './components/Stripe/success.tsx';
 import FollowTeam from './components/Dashboard/Survey/Followings/TeamFollowing.tsx';
+import PlayerDetails from './components/Dashboard/PrematchAlerts/PlayerDetails.tsx';
+import TeamDetails from './components/Dashboard/PrematchAlerts/TeamDetails.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -114,7 +115,7 @@ function App() {
               <Route path="/predictivo-copier" element={<ProtectedRoute><Predictivo_copier /></ProtectedRoute>} />
               <Route path="/prematch-alerts" element={<ProtectedRoute><Prematch_alerts /></ProtectedRoute>} />
               <Route path="/inplay-alerts" element={<ProtectedRoute><Inplay_alerts /></ProtectedRoute>} />
-              <Route path="/daily-predictivo" element={<ProtectedRoute><Daily_predictivo /></ProtectedRoute>} />
+              <Route path="/user/strategies" element={<ProtectedRoute><StrategyPage/></ProtectedRoute>} />
               <Route path="/fixtures" element={<ProtectedRoute><FixturesT /></ProtectedRoute>} />
               <Route path="/forum" element={<ProtectedRoute><ForumT /></ProtectedRoute>} />
               <Route path="/forum/messages/:id" element={<ProtectedRoute><Message_Box /></ProtectedRoute>} />
@@ -140,7 +141,7 @@ function App() {
 
               <Route path="/user/create-strategy/:strategy_id" element={<ProtectedRoute><CreateStrategyPage /></ProtectedRoute>} />
 
-              <Route path="/user/update-strategy/:id" element={<ProtectedRoute><UpdateStrategyPage /></ProtectedRoute>} />
+              <Route path="/user/update-strategy/:strategy_id" element={<ProtectedRoute><UpdateStrategyPage /></ProtectedRoute>} />
 
               <Route path="/user/preset/" element={<ProtectedRoute><PresetRulesPage /></ProtectedRoute>} />
 
@@ -160,6 +161,10 @@ function App() {
                 <Route path="/user/checkout/:id" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}></Route>
 
                 <Route path="/user/payment-success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>}></Route>
+
+                <Route path="/user/player/:player_id" element={<ProtectedRoute><PlayerDetails /></ProtectedRoute>}></Route>
+
+                <Route path="/user/team/:team_id" element={<ProtectedRoute><TeamDetails /></ProtectedRoute>}></Route>
 
               {/*stripe payment*/}
               {/* <Route path="/user/checkout" element={

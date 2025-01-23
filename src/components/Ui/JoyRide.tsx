@@ -61,7 +61,7 @@ const useJoyride = (initialSteps: Step[]): {
 } => {
   const [steps] = useState<Step[]>(initialSteps);
   const [run, setRun] = useState(false);
-  const { saveUserWidget, getUserWidget } = useDashBoardManagement();
+  const { saveUserWidget, getUserDetails } = useDashBoardManagement();
   const location = useLocation();
 
   const startTour = () => setRun(true);
@@ -73,9 +73,9 @@ const useJoyride = (initialSteps: Step[]): {
   useEffect(() => {
     const initializeTour = async () => {
       try {
-        const response = await getUserWidget();
+        const response = await getUserDetails();
         const userDetails = response?.[0]; 
-        if (userDetails?.widget_state !== "seen" && location.pathname !== "/forum") {
+        if ((userDetails?.widget_state === null || userDetails?.widget_state !== "seen") && location.pathname !== "/forum") {
           startTour();
         }
       } catch (error) {

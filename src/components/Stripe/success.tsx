@@ -2,17 +2,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { FaCheckCircle } from "react-icons/fa";
-import useDashBoardManagement from "@/hooks/useDashboard";
-import { RootState } from "@/context/store/rootReducer";
-import { useSelector } from "react-redux";
 
 const SuccessPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { updateUserOnboarding } = useDashBoardManagement();
   const { title, amount, type, paymentIntentId } = location.state || {};
-  const userdata = useSelector((state: RootState) => state.auth?.user);
-  const UserId = userdata?.id;
   // Generate the current date and time
   const paymentDateTime = new Date().toLocaleString("en-NG", {
     year: "numeric",
@@ -134,8 +128,7 @@ const SuccessPage = () => {
         <button
           className="mt-6 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium transition duration-150"
           onClick={() => {
-            updateUserOnboarding("strategy");
-            navigate(`/user/follow-team/${UserId}`);
+            navigate(`/predictivo-copier`);
           }}
         >
           Click to continue 

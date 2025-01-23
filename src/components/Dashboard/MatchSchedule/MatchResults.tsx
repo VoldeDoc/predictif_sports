@@ -1,51 +1,79 @@
-const matchData = [
-    { home: "Brentford", away: "Newcastle United", homeScore: 2, awayScore: 4, status: "FT", homeLogo: "brentford.png", awayLogo: "newcastle.png" },
-    { home: "Sheffield United", away: "Tottenham Hotspur", homeScore: 0, awayScore: 3, status: "FT", homeLogo: "sheffield.png", awayLogo: "tottenham.png" },
-    { home: "Manchester City", away: "West Ham United", homeScore: 3, awayScore: 1, status: "FT", homeLogo: "mancity.png", awayLogo: "westham.png" },
-    { home: "Chelsea", away: "AFC Bournemouth", homeScore: 2, awayScore: 1, status: "FT", homeLogo: "chelsea.png", awayLogo: "bournemouth.png" },
-    { home: "Burnley", away: "Nottingham Forest", homeScore: 1, awayScore: 2, status: "FT", homeLogo: "burnley.png", awayLogo: "nottingham.png" },
-    { home: "Liverpool", away: "Wolverhampton Wanderers", homeScore: 2, awayScore: 0, status: "FT", homeLogo: "liverpool.png", awayLogo: "wolves.png" },
-    { home: "Arsenal", away: "Everton", homeScore: 2, awayScore: 1, status: "FT", homeLogo: "arsenal.png", awayLogo: "everton.png" },
-    { home: "Crystal Palace", away: "Aston Villa", homeScore: 5, awayScore: 0, status: "FT", homeLogo: "palace.png", awayLogo: "villa.png" },
-    { home: "Brighton & Hove Albion", away: "Manchester United", homeScore: 0, awayScore: 2, status: "FT", homeLogo: "brighton.png", awayLogo: "manutd.png" },
-    { home: "Luton Town", away: "Fulham", homeScore: 2, awayScore: 4, status: "FT", homeLogo: "luton.png", awayLogo: "fulham.png" },
-];
+import { useEffect, useState } from "react";
+import useDashBoardManagement from "@/hooks/useDashboard";
+import { Link } from "react-router-dom";
+import Loader from "@/pages/Ui/loader"; // Assuming you have a Loader component
 
 export default function MatchTable() {
+    const { getMatchAlert } = useDashBoardManagement();
+    const [matchData, setMatchData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await getMatchAlert();
+                if (data.length > 0 && data[0].meta_data) {
+                    setMatchData(data[0].meta_data);
+                }
+                setError(null);
+            } catch (err) {
+                setError('Failed to fetch match data. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [getMatchAlert]);
+
     return (
         <div className="min-h-screen bg-white flex justify-center items-center">
             <div className="w-full max-w-4xl p-4">
-                {matchData.map((match, index) => (
-                    <div
-                        key={index}
-                        className="grid grid-cols-10 sm:grid-cols-8 gap-4 items-center py-2 border-b border-gray-200"
-                    >
-                        {/* Match Status */}
-                        <span className="col-span-1 text-xs text-gray-600 sm:col-span-1">{match.status}</span>
-
-                        {/* Home Team */}
-                        <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-end">
-                            <img src={`/logos/${match.homeLogo}`} alt="" className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
-                            <span className="font-medium text-xs sm:text-sm text-center sm:text-right">{match.home}</span>
-                        </div>
-                        
-                        {/* Match Score */}
-                        <div className="col-span-2 sm:col-span-1 flex justify-center items-center">
-                            <span className="px-3 py-1 bg-gray-100 rounded-md font-semibold text-xs sm:text-sm">
-                                {match.homeScore} - {match.awayScore}
-                            </span>
-                        </div>
-
-                        {/* Away Team */}
-                        <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-start">
-                            <img src={`/logos/${match.awayLogo}`} alt="" className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
-                            <span className="font-medium text-xs sm:text-sm text-center sm:text-left">{match.away}</span>
-                        </div>
-
-                        {/* Details Link */}
-                        <span className="col-span-1 text-red-500 cursor-pointer text-xs sm:text-sm hidden lg:block">Details</span>
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <Loader loading={loading} color="#123abc" size={40} />
                     </div>
-                ))}
+                ) : error ? (
+                    <div className="text-center text-red-500">{error}</div>
+                ) : matchData.length > 0 ? (
+                    matchData.map((match, index) => (
+                        <div
+                            key={index}
+                            className="grid grid-cols-10 sm:grid-cols-8 gap-4 items-center py-2 border-b border-gray-200"
+                        >
+                            {/* Game Start Date and Time */}
+                            <span className="col-span-1 text-xs text-gray-600 sm:col-span-1">
+                                {match.game_start_date} {match.game_start_time}
+                            </span>
+
+                            {/* Home Team */}
+                            <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-end">
+                                <img src={match.home_club_logo} alt={match.home_club} className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
+                                <span className="font-medium text-xs sm:text-sm text-center sm:text-right">{match.home_club}</span>
+                            </div>
+                            
+                            {/* Match Score */}
+                            <div className="col-span-2 sm:col-span-1 flex flex-col items-center">
+                                <span className="px-3 py-1 bg-gray-100 rounded-md font-semibold text-xs sm:text-sm">
+                                    {match.home_score} - {match.away_scrore}
+                                </span>
+                                <span className="text-xs text-gray-500">{match.minute_played}</span>
+                            </div>
+
+                            {/* Away Team */}
+                            <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-start">
+                                <img src={match.away_club_logo} alt={match.away_club} className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
+                                <span className="font-medium text-xs sm:text-sm text-center sm:text-left">{match.away_club}</span>
+                            </div>
+
+                            {/* Details Link */}
+                            <Link to={`/match-schedule/${match.id}`} className="col-span-1 text-blue-500 cursor-pointer text-xs sm:text-sm hidden lg:block">
+                                <span className="col-span-1 text-red-500 cursor-pointer text-xs sm:text-sm hidden lg:block">Details</span>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-center text-gray-500 p-4">No match data available.</p>
+                )}
             </div>
         </div>
     );

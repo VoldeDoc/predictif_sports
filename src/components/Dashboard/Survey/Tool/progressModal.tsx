@@ -38,8 +38,8 @@ const ProgressPage: React.FC = () => {
           setProgress(0);
         } else {
             setTimeout(async () => {
-              await updateUserOnboarding('subscription');
-              router(`/user/subscribe-plan/${id}`);
+              await updateUserOnboarding('followTeam');
+              router(`/user/follow-team/${id}`);
             }, 2000);
         }
       }
