@@ -25,6 +25,7 @@ function PredictivoCopier() {
         setStrategyItem(response);
         const userDetail = await getUserDetails();
         const subscriptionPlanResponse = await getUserPlan();
+        
         setSubscriptionPlan(subscriptionPlanResponse);
 
         if (userDetail?.[0].onboarding_state) {
@@ -48,6 +49,8 @@ function PredictivoCopier() {
     return () => clearTimeout(modalTimer);
   }, []);
 
+  const isSubscriptionActive = subscriptionPlan && subscriptionPlan.length > 0 && subscriptionPlan[0].length > 0 && subscriptionPlan[0][0].payment_status === "active";
+
   return (
     <AuthLayout>
       <div className="px-4 sm:px-8 md:px-16">
@@ -56,7 +59,7 @@ function PredictivoCopier() {
             <h1 className="font-bold text-xl sm:text-2xl text-gray-700">New Prematch Strategy</h1>
           </div>
           <div className="flex items-center mb-4 sm:mb-0 sm:order-2">
-            {subscriptionPlan && subscriptionPlan[0][0].payment_status !== "active" && (
+            {!isSubscriptionActive && (
               <Link to={`/user/subscribe-plan/${id}`} className="mt-4">
                 <button className="bg-red-800 hover:bg-red-700 px-4 py-2 rounded text-white text-sm transition duration-300 ease-in-out">
                   Subscribe
@@ -199,14 +202,14 @@ function PredictivoCopier() {
         </div>
       </div>
 
-      {subscriptionPlan && subscriptionPlan[0][0].payment_status !== "active" && (
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-xl font-bold">Subscribe Now</h2>
-        <p className="mt-2">Click here to subscribe to add more strategies.</p>
-        <Link to={`/user/subscribe-plan/${id}`} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded mx-9">
-          Subscribe
-        </Link>
-      </Modal>
+      {!isSubscriptionActive && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <h2 className="text-xl font-bold">Subscribe Now</h2>
+          <p className="mt-2">Click here to subscribe to add more strategies.</p>
+          <Link to={`/user/subscribe-plan/${id}`} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded mx-9">
+            Subscribe
+          </Link>
+        </Modal>
       )}
     </AuthLayout>
   );

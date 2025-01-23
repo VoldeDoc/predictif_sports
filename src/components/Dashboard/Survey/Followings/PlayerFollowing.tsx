@@ -127,7 +127,7 @@ export default function FollowPlayers() {
     (async () => {
       try {
         const subscriptionPlanResponse = await getUserPlan();
-        setSubscriptionPlan(subscriptionPlanResponse);
+        setSubscriptionPlan(subscriptionPlanResponse || []);
         
       } catch (error) {
         console.error("Failed to fetch subscription plan", error);
@@ -143,14 +143,13 @@ export default function FollowPlayers() {
 
     const userDetail = await getUserDetails();
     const userDetailOnboard = userDetail[0]?.onboarding_state;
-console.log(subscriptionPlan[0][0].payment_status);
 
     if (userDetailOnboard !== 'completed' && playerSelections.length >= 1) {
       alert("You can only select one player");
       return;
     }
 
-    if (userDetailOnboard === 'completed' && subscriptionPlan[0][0]?.payment_status === 'active' && playerSelections.length >= 3) {
+    if (userDetailOnboard === 'completed' && subscriptionPlan?.[0]?.[0]?.payment_status === 'active' && playerSelections.length >= 3) {
       alert("You can only select up to three players");
       return;
     }
