@@ -789,6 +789,36 @@ const getMatchDetail = async (id: string) => {
         setLoading(false)
     }
 }
+
+const getUpcomingMatch = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertUpComing`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
+const getResultMatch = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchDetail/`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
     return {
         loading,
         username,
@@ -839,6 +869,8 @@ const getMatchDetail = async (id: string) => {
         getPlayerById,
         getTeamById,
         getMatchDetail,
+        getUpcomingMatch,
+        getResultMatch,
     };
 }
 

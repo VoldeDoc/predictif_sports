@@ -55,7 +55,7 @@ function UserProfile() {
         const playersFollowed = await getPlayerFollowed();
         setPlayers(playersFollowed[0] || []);
 
-        if (data[0] && data[0][0].payment_status === 'active') {
+        if (data[0] && data[0][0] && data[0][0].payment_status === 'active') {
           setSubscriptionActive(true);
         }
 
