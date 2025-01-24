@@ -66,9 +66,9 @@ export default function FollowPlayers() {
   const [leagues, setLeagues] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
+  // const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
   const router = useNavigate();
-  const { getTeamCountry, getTeam, getTeamLeague, getPlayer, submitPlayer, updateUserOnboarding, getUserDetails, getUserPlan } = useDashBoardManagement();
+  const { getTeamCountry, getTeam, getTeamLeague, getPlayer, submitPlayer, updateUserOnboarding } = useDashBoardManagement();
 
   useEffect(() => {
     (async () => {
@@ -123,17 +123,17 @@ export default function FollowPlayers() {
     }
   }, [playerSelection.teamId]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const subscriptionPlanResponse = await getUserPlan();
-        setSubscriptionPlan(subscriptionPlanResponse || []);
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const subscriptionPlanResponse = await getUserPlan();
+  //       setSubscriptionPlan(subscriptionPlanResponse || []);
         
-      } catch (error) {
-        console.error("Failed to fetch subscription plan", error);
-      }
-    })();
-  }, []);
+  //     } catch (error) {
+  //       console.error("Failed to fetch subscription plan", error);
+  //     }
+  //   })();
+  // }, []);
 
   const addPlayerSelection = async () => {
     if (!playerSelection.country || !playerSelection.league || !playerSelection.team || !playerSelection.player) {
@@ -141,18 +141,18 @@ export default function FollowPlayers() {
       return;
     }
 
-    const userDetail = await getUserDetails();
-    const userDetailOnboard = userDetail[0]?.onboarding_state;
+    // const userDetail = await getUserDetails();
+    // const userDetailOnboard = userDetail[0]?.onboarding_state;
 
-    if (userDetailOnboard !== 'completed' && playerSelections.length >= 1) {
-      alert("You can only select one player");
-      return;
-    }
+    // if (userDetailOnboard !== 'completed' && playerSelections.length >= 1) {
+    //   alert("You can only select one player");
+    //   return;
+    // }
 
-    if (userDetailOnboard === 'completed' && subscriptionPlan?.[0]?.[0]?.payment_status === 'active' && playerSelections.length >= 3) {
-      alert("You can only select up to three players");
-      return;
-    }
+    // if (userDetailOnboard === 'completed' && subscriptionPlan?.[0]?.[0]?.payment_status === 'active' && playerSelections.length >= 3) {
+    //   alert("You can only select up to three players");
+    //   return;
+    // }
 
     setPlayerSelections([...playerSelections, playerSelection]);
     setPlayerSelection({ country: "", countryId: "", league: "", leagueId: "", team: "", teamId: "", player: "", playerId: "" });

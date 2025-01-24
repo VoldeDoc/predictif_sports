@@ -189,53 +189,55 @@ export default function PlayerDetails() {
 
     return (
         <AuthLayout>
-
-      <div className="bg-gray-100 min-h-screen py-8">
-        <div className="py-5 px-5">
-                <Button
-                    text="Back"
-                    onClick={() => window.history.back()}
-                />
-            </div>
-            <div className="container mx-auto px-4">
-                <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">
-                    Player Spotlight
-                </h1>
-                <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6 md:p-8">
-                    <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
-                        <div className="flex-shrink-0">
-                            <img
-                                src={player.photo}
-                                alt={player.name}
-                                className="w-48 h-48 rounded-full object-cover border-4 border-gray-200 shadow-md"
-                            />
+            <div className="bg-gray-100 min-h-screen">
+                <div className="py-2 px-4">
+                    <Button
+                        text="Back"
+                        onClick={() => window.history.back()}
+                    />
+                </div>
+                <div className="container mx-auto px-4">
+                    <div className="bg-gradient-to-b from-blue-300 to-blue-500 relative pb-20">
+                        <div className="flex space-x-5 px-4 py-7">
+                            <div className="flex-shrink-0">
+                                <img
+                                    src={player.photo}
+                                    alt={player.name}
+                                    className="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                                />
+                            </div>
+                            <div className="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-5">
+                                <h2 className="text-3xl sm:text-5xl font-semibold text-white italic">{player.name.split(' ')[0]}</h2>
+                                <h2 className="text-3xl sm:text-5xl font-semibold text-white" style={{ fontStyle: "oblique" }}>{player.name.split(' ')[1]}</h2>
+                                <p className="text-lg text-white mb-4">
+                                    <span className="font-medium">Club:</span> {player.current_club_name}
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex-grow">
-                            <h2 className="text-3xl font-semibold text-gray-700">{player.name}</h2>
-                            <p className="text-lg text-gray-500 mb-4">
-                                <span className="font-medium">Club:</span> {player.current_club_name}
-                            </p>
-                            <div className="flex justify-center md:justify-start space-x-4 mb-4">
+                        <div className="flex flex-wrap justify-center sm:justify-start text-center space-x-2 sm:space-x-4 py-3 px-4 absolute w-full lg:pl-48 bottom-0 bg-white" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                            <div className="flex space-x-2 sm:space-x-4" style={{ display: 'flex', flexWrap: 'nowrap' }}>
                                 {tabs.map((tab) => (
                                     <button
                                         key={tab.key}
                                         onClick={() => setActiveTab(tab.key)}
                                         className={`py-2 px-4 rounded flex items-center space-x-2 ${activeTab === tab.key
-                                                ? "bg-blue-600 text-white"
-                                                : "bg-gray-200 text-gray-600"
+                                            ? "bg-blue-600 text-white"
+                                            : "bg-gray-200 text-gray-600"
                                             }`}
+                                        style={{ display: 'flex', alignItems: 'center' }}
                                     >
                                         {tab.icon}
                                         <span>{tab.label}</span>
                                     </button>
                                 ))}
                             </div>
-                            {renderTabContent()}
                         </div>
+                    </div>
+                    <div className="mt-6 px-4">
+                        {renderTabContent()}
                     </div>
                 </div>
             </div>
-        </div>
-    </AuthLayout >
-  );
+        </AuthLayout>
+    );
 }

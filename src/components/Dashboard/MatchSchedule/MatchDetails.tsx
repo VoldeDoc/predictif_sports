@@ -156,11 +156,11 @@ export default function MatchDetails() {
                     />
                 </div>
                 {activeTab === 'Match Preview' && (
-                    <div className="bg-white p-4">
+                    <div className="bg-white p-4 flex flex-col justify-center text-center">
                         <h2 className="text-lg font-bold">Match Preview</h2>
-                        <p>Home Team: {matchData?.meta_data?.home_club}</p>
-                        <p>Away Team: {matchData?.meta_data?.away_club}</p>
-                        <p>Score: {matchData?.meta_data?.home_score} - {matchData?.meta_data?.away_scrore}</p>
+                        <p className="text-2xl font-bold"> Home Team: {matchData?.meta_data?.home_club}</p>
+                        <p className="text-2xl font-bold"> Away Team: {matchData?.meta_data?.away_club}</p>
+                        <p className="text-2xl font-bold">Score: {matchData?.meta_data?.home_score} - {matchData?.meta_data?.away_scrore}</p>
                     </div>
                 )}
                 {activeTab === 'Stats' && (

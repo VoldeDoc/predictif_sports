@@ -75,8 +75,11 @@ const useJoyride = (initialSteps: Step[]): {
       try {
         const response = await getUserDetails();
         const userDetails = response?.[0]; 
-        if ((userDetails?.widget_state === null || userDetails?.widget_state !== "seen") && location.pathname !== "/forum") {
+        if (( userDetails?.widget_state !== "seen")) {
           startTour();
+        }
+        else if(userDetails?.widget_state === 'seen' && location.pathname == '/forum'){
+          stopTour()
         }
       } catch (error) {
         console.error("Error initializing Joyride:", error);

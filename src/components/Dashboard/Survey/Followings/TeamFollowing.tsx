@@ -69,7 +69,7 @@ export default function FollowTeam() {
     const router = useNavigate();
     const userdata = useSelector((state: RootState) => state.auth?.user);
     const UserId = userdata?.id;
-    const { getTeamCountry, getTeam, getTeamLeague, submmitClub, updateUserOnboarding, getUserDetails, getUserPlan } = useDashBoardManagement();
+    const { getTeamCountry, getTeam, getTeamLeague, submmitClub, updateUserOnboarding } = useDashBoardManagement();
 
     useEffect(() => {
         (async () => {
@@ -116,19 +116,19 @@ export default function FollowTeam() {
             return;
         }
 
-        const userDetail = await getUserDetails();
-        const subscriptionPlan = await getUserPlan();
-        const userDetailOnboard = userDetail[0]?.onboarding_state;
-        if (teamSelections.length >= 1 && userDetailOnboard != 'completed') {
-            alert("You can only select  1 team.");
-            return;
-        }
+    //     const userDetail = await getUserDetails();
+    //     const subscriptionPlan = await getUserPlan();
+    //     const userDetailOnboard = userDetail[0]?.onboarding_state;
+    //     if (teamSelections.length >= 1 && userDetailOnboard != 'completed') {
+    //         alert("You can only select  1 team.");
+    //         return;
+    //     }
 
         
-    if (userDetailOnboard === 'completed' && subscriptionPlan[0][0]?.payment_status === 'active' && teamSelections.length >= 3) {
-        alert("You can only select up to three teams");
-        return;
-      }
+    // if (userDetailOnboard === 'completed' && subscriptionPlan[0][0]?.payment_status === 'active' && teamSelections.length >= 3) {
+    //     alert("You can only select up to three teams");
+    //     return;
+    //   }
 
         setTeamSelections([...teamSelections, teamSelection]);
         setTeamSelection({ country: "", countryId: "", league: "", leagueId: "", team: "", teamId: "" });

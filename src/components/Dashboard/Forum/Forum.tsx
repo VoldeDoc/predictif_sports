@@ -2,9 +2,9 @@ import { AuthLayout } from "@/components/Layout/layout";
 import Button from '@/components/Ui/Button'; 
 import { FaCalendarDay } from "react-icons/fa";
 import NewsForum from "@/components/DashboardComponents/newsForum";
-import { ArrowRightIcon } from "@heroicons/react/24/solid";
+// import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
-import LastMessages from "@/components/DashboardComponents/meetups";
+// import LastMessages from "@/components/DashboardComponents/meetups";
 const Forum = () => {
   const [isMeetupsEnlarged, setIsMeetupsEnlarged] = useState(false);
 
@@ -93,9 +93,9 @@ const Forum = () => {
           <div className={`transition-transform duration-1000 transform ${isMeetupsEnlarged ? 'w-full h-screen' : 'w-full lg:w-4/12'}`}>
             <div className="bg-white rounded-lg px-4 py-4" onClick={handleMeetupsClick}>
               <button className="font-semibold transition-transform duration-300 transform hover:scale-105 hover:bg-blue-600 active:scale-95 rounded-lg px-2 py-2 hover:text-white">
-                Last Messages <ArrowRightIcon className="inline-block mr-2 w-6" />
+                {/* Last Messages <ArrowRightIcon className="inline-block mr-2 w-6" /> */}
               </button>
-              <LastMessages />
+              {/* <LastMessages /> */}
             </div>
 
             {/* {!isMeetupsEnlarged && (

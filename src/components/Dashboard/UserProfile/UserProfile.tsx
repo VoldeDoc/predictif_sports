@@ -48,14 +48,14 @@ function UserProfile() {
 
         const data = await getUserPlan();
         console.log(data[0][0]);
-        
+
         setPlans(data[0][0] || []);
         const clubsFollowed = await getClubFollowed();
         setClubs(clubsFollowed[0] || []);
         const playersFollowed = await getPlayerFollowed();
         setPlayers(playersFollowed[0] || []);
 
-        if (data[0] && data[0][0] && data[0][0].payment_status === 'active') {
+        if (data[0] && data[0][0].payment_status === 'active') {
           setSubscriptionActive(true);
         }
 
@@ -145,7 +145,12 @@ function UserProfile() {
 
               {/* Clubs Followed Section */}
               <section className="mb-10">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Clubs You Follow</h2>
+                <div className="flex justify-between">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Clubs You Follow</h2>
+                  <div>
+                    <Link to={`/user/follow-team/1}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Follow</Link>
+                  </div>
+                </div>
                 <div className="space-y-6">
                   {clubs.length > 0 ? (
                     clubs.map((club) => (
@@ -153,9 +158,10 @@ function UserProfile() {
                         <h3 className="text-lg font-bold text-gray-700">{club.club_name}</h3>
                         <div>
                           <button onClick={() => handleRemoveClub(club.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Unfollow</button>
-                          {subscriptionActive && (
+                          {/* {subscriptionActive && (
                             <Link to={`/user/follow-team/${club.club_id}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Follow</Link>
-                          )}
+                          )} */}
+
                         </div>
                       </div>
                     ))
@@ -167,7 +173,12 @@ function UserProfile() {
 
               {/* Players Followed Section */}
               <section className="mb-10">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Players You Follow</h2>
+                <div className="flex justify-between">
+                  <h2 className="text-2xl font-semibold text-gray-800 mb-6">Players You Follow</h2>
+                  <div>
+                    <Link to={`/user/follow-player/1`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Follow</Link>
+                  </div>
+                </div>
                 <div className="space-y-6">
                   {players.length > 0 ? (
                     players.map((player) => (
@@ -181,9 +192,9 @@ function UserProfile() {
                         </div>
                         <div>
                           <button onClick={() => handleRemovePlayer(player.id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Unfollow</button>
-                          {subscriptionActive && (
+                          {/* {subscriptionActive && (
                             <Link to={`/user/follow-player/${player.player_id}`} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Follow</Link>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     ))

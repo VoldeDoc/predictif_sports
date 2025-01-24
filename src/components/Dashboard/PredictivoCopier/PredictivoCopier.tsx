@@ -8,13 +8,13 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/context/store/rootReducer";
 
 function PredictivoCopier() {
-  const { getStrategyItem, getUserDetails, getUserPlan } = useDashBoardManagement();
+  const { getStrategyItem, getUserDetails } = useDashBoardManagement();
   const [strategyItem, setStrategyItem] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [onboarding, setOnboarding] = useState<string | null>(null);
+  // const [onboarding, setOnboarding] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
+  // const [subscriptionPlan, setSubscriptionPlan] = useState<any>(null);
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const id = userdata?.id;
 
@@ -23,14 +23,14 @@ function PredictivoCopier() {
       try {
         const response = await getStrategyItem();
         setStrategyItem(response);
-        const userDetail = await getUserDetails();
-        const subscriptionPlanResponse = await getUserPlan();
-        
-        setSubscriptionPlan(subscriptionPlanResponse);
+        // const userDetail = await getUserDetails();
+        // const subscriptionPlanResponse = await getUserPlan();
 
-        if (userDetail?.[0].onboarding_state) {
-          setOnboarding(userDetail[0].onboarding_state);
-        }
+        // setSubscriptionPlan(subscriptionPlanResponse);
+
+        // if (userDetail?.[0].onboarding_state) {
+        //   setOnboarding(userDetail[0].onboarding_state);
+        // }
 
         setError(null);
       } catch (error) {
@@ -49,7 +49,7 @@ function PredictivoCopier() {
     return () => clearTimeout(modalTimer);
   }, []);
 
-  const isSubscriptionActive = subscriptionPlan && subscriptionPlan.length > 0 && subscriptionPlan[0].length > 0 && subscriptionPlan[0][0].payment_status === "active";
+  // const isSubscriptionActive = subscriptionPlan && subscriptionPlan.length > 0 && subscriptionPlan[0].length > 0 && subscriptionPlan[0][0].payment_status === "active";
 
   return (
     <AuthLayout>
@@ -59,13 +59,18 @@ function PredictivoCopier() {
             <h1 className="font-bold text-xl sm:text-2xl text-gray-700">New Prematch Strategy</h1>
           </div>
           <div className="flex items-center mb-4 sm:mb-0 sm:order-2">
-            {!isSubscriptionActive && (
+            {/* {!isSubscriptionActive && (
               <Link to={`/user/subscribe-plan/${id}`} className="mt-4">
                 <button className="bg-red-800 hover:bg-red-700 px-4 py-2 rounded text-white text-sm transition duration-300 ease-in-out">
                   Subscribe
                 </button>
               </Link>
-            )}
+            )} */}
+            <Link to={`/user/subscribe-plan/${id}`} className="mt-4">
+              <button className="bg-red-800 hover:bg-red-700 px-4 py-2 rounded text-white text-sm transition duration-300 ease-in-out">
+                Subscribe
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -85,7 +90,7 @@ function PredictivoCopier() {
           ) : (
             strategyItem.map((item) => (
               <div key={item.id} className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {onboarding === "completed" ? (
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[0].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/general 1.svg" alt="" className="w-20 h-20" />
@@ -99,9 +104,15 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[0].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
+                <Link to={`/user/create-strategy/${item[0].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/general 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[0].name}</h1>
+                  </div>
+                </Link>
 
-                {onboarding === "completed" ? (
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[1].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/goals 1.svg" alt="" className="w-20 h-20" />
@@ -115,9 +126,15 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[1].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
+                <Link to={`/user/create-strategy/${item[1].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/goals 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[1].name}</h1>
+                  </div>
+                </Link>
 
-                {onboarding === "completed" ? (
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[2].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/streak 1.svg" alt="" className="w-20 h-20" />
@@ -131,9 +148,15 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[2].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
+                <Link to={`/user/create-strategy/${item[2].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/streak 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[2].name}</h1>
+                  </div>
+                </Link>
 
-                {onboarding === "completed" ? (
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[3].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/corners 1.svg" alt="" className="w-20 h-20" />
@@ -147,9 +170,16 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[3].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
 
-                {onboarding === "completed" ? (
+                <Link to={`/user/create-strategy/${item[3].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/corners 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[3].name}</h1>
+                  </div>
+                </Link>
+
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[4].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/general 1.svg" alt="" className="w-20 h-20" />
@@ -163,9 +193,16 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[4].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
 
-                {onboarding === "completed" ? (
+                <Link to={`/user/create-strategy/${item[4].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/general 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[4].name}</h1>
+                  </div>
+                </Link>
+
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[5].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/goals 1.svg" alt="" className="w-20 h-20" />
@@ -179,9 +216,15 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[5].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
 
-                {onboarding === "completed" ? (
+                <Link to={`/user/create-strategy/${item[5].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/goals 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[5].name}</h1>
+                  </div>
+                </Link>
+                {/* {onboarding === "completed" ? (
                   <Link to={`/user/create-strategy/${item[6].id}`}>
                     <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
                       <img src="assets/images/dashboard/dashboard/streak 1.svg" alt="" className="w-20 h-20" />
@@ -195,14 +238,20 @@ function PredictivoCopier() {
                       <h1 className="font-semibold">{item[6].name}</h1>
                     </button>
                   </div>
-                )}
+                )} */}
+                <Link to={`/user/create-strategy/${item[6].id}`}>
+                  <div className="bg-white py-4 px-4 rounded-md hover:bg-gray-400 flex flex-col justify-center items-center space-y-4 text-center hover:cursor-pointer">
+                    <img src="assets/images/dashboard/dashboard/streak 1.svg" alt="" className="w-20 h-20" />
+                    <h1 className="font-semibold">{item[6].name}</h1>
+                  </div>
+                </Link>
               </div>
             ))
           )}
         </div>
       </div>
 
-      {!isSubscriptionActive && (
+      {/* {!isSubscriptionActive && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <h2 className="text-xl font-bold">Subscribe Now</h2>
           <p className="mt-2">Click here to subscribe to add more strategies.</p>
@@ -210,7 +259,14 @@ function PredictivoCopier() {
             Subscribe
           </Link>
         </Modal>
-      )}
+      )} */}
+       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <h2 className="text-xl font-bold">Subscribe Now</h2>
+          <p className="mt-2">Click here to subscribe to add more strategies.</p>
+          <Link to={`/user/subscribe-plan/${id}`} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded mx-9">
+            Subscribe
+          </Link>
+        </Modal>
     </AuthLayout>
   );
 }

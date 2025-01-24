@@ -63,6 +63,13 @@ export default function MessageBox() {
     return (
         <AuthLayout>
             <div className="py-4 px-6 ">
+                <button
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md shadow-md"
+                    onClick={() => window.history.back()}
+                >
+                    Back
+                </button>
+
                 <div className="flex flex-col-reverse md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 md:space-x-24">
                     <div className="max-w-full md:max-w-xl py-6">
                         <h2 className="text-2xl md:text-4xl text-black-700 font-bold">Group Chat</h2>
