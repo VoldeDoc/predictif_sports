@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/context/store/rootReducer";
 
 function PredictivoCopier() {
-  const { getStrategyItem, getUserDetails } = useDashBoardManagement();
+  const { getStrategyItem } = useDashBoardManagement();
   const [strategyItem, setStrategyItem] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

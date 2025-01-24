@@ -38,7 +38,7 @@ function UserProfile() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [subscriptionActive, setSubscriptionActive] = useState(false);
+  // const [subscriptionActive, setSubscriptionActive] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,9 +55,9 @@ function UserProfile() {
         const playersFollowed = await getPlayerFollowed();
         setPlayers(playersFollowed[0] || []);
 
-        if (data[0] && data[0][0].payment_status === 'active') {
-          setSubscriptionActive(true);
-        }
+        // if (data[0] && data[0][0].payment_status === 'active') {
+        //   setSubscriptionActive(true);
+        // }
 
         clearTimeout(timeoutId);
         setError(null);

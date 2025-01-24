@@ -805,10 +805,11 @@ const getUpcomingMatch = async () => {
     }
 }
 
-const getResultMatch = async () => {
+
+const getTodayMatch = async () => {
     try {
         setLoading(true)
-        const res = await client.get(`/user/getMatchDetail/`)
+        const res = await client.get(`/user/getMatchAlertUpComing`)
         return res?.data.data
     } catch (error: any) {
         const resError = error.response?.data;
@@ -819,6 +820,23 @@ const getResultMatch = async () => {
         setLoading(false)
     }
 }
+
+const getResultMatch = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertResult`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
+
     return {
         loading,
         username,
@@ -871,6 +889,7 @@ const getResultMatch = async () => {
         getMatchDetail,
         getUpcomingMatch,
         getResultMatch,
+        getTodayMatch,
     };
 }
 

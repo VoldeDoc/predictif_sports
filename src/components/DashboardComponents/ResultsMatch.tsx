@@ -1,37 +1,66 @@
-// import MatchCard from "./MatchCard";
+import useDashBoardManagement from "@/hooks/useDashboard";
+import MatchCard from "./MatchCard";
+import { useEffect, useState } from "react";
+
+interface Match {
+  homeTeam: {
+    name: string;
+    logo: string;
+    score?: number;
+  };
+  awayTeam: {
+    name: string;
+    logo: string;
+    score?: number;
+  };
+  startTime: Date;
+  isLive?: boolean;
+}
 
 const ResultsMatches = () => {
-  // const matches = [
-  //   {
-  //     homeTeam: {
-  //       name: "Bayern Munich",
-  //       logo: "https://upload.wikimedia.org/wikipedia/commons/1/1b/FC_Bayern_München_logo_%282017%29.svg",
-  //     },
-  //     awayTeam: {
-  //       name: "Borussia Dortmund",
-  //       logo: "https://upload.wikimedia.org/wikipedia/commons/6/67/Borussia_Dortmund_logo.svg",
-  //     },
-  //     startTime: new Date(new Date().getTime() - 3600000), // 1 hour ago
-  //   },
-  //   {
-  //     homeTeam: {
-  //       name: "PSG",
-  //       logo: "https://upload.wikimedia.org/wikipedia/en/a/a7/Paris_Saint-Germain_F.C..svg",
-  //     },
-  //     awayTeam: {
-  //       name: "Lyon",
-  //       logo: "https://upload.wikimedia.org/wikipedia/en/c/c6/Olympique_Lyonnais.svg",
-  //     },
-  //     startTime: new Date(new Date().getTime() - 7200000), // 2 hours ago
-  //   },
-  // ];
+  const { getResultMatch } = useDashBoardManagement();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const apiData = await getResultMatch();
+        const transformedMatches: Match[] = apiData[0].map((match: any) => ({
+          homeTeam: {
+            name: match.home_club_name,
+            logo: match.home_club_logo,
+            score: match.home_score,
+          },
+          awayTeam: {
+            name: match.away_club_name,
+            logo: match.away_club_logo,
+            score: match.away_score,
+          },
+          startTime: new Date(`${match.game_start_date}T${match.game_start_time}`),
+        }));
+        setMatches(transformedMatches);
+      } catch (error) {
+        console.error("Failed to fetch matches", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMatches();
+  }, [getResultMatch]);
+
+  if (loading) {
+    return <div>Loading matches...</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      {/* {matches.map((match, index) => (
-        <MatchCard key={index} match={match} />
-      ))} */}
-      No match ended yet
+    <div className="space-y-4 overflow-y-auto h-96">
+      {matches.length > 0 ? (
+        matches.map((match, index) => <MatchCard key={index} match={match} />)
+      ) : (
+        <div>No matches have ended yet.</div>
+      )}
     </div>
   );
 };
