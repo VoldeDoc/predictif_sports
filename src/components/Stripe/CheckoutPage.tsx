@@ -6,6 +6,10 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { baseUrl } from "@/services/axios-client";
 import { LuRefreshCw } from "react-icons/lu";
 import useDashBoardManagement from "@/hooks/useDashboard";
+import PaystackCheckoutPage from "./PayStackCheckOutPage";
+import { useSelector } from "react-redux";
+import { RootState } from "@/context/store/rootReducer";
+import { toast } from "react-toastify"; // Import react-toastify
 
 const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = loadStripe(stripeKey);
@@ -30,6 +34,9 @@ const CheckoutForm = () => {
   const [paymentMethod, setPaymentMethod] = useState("stripe");
   const [token, setToken] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const userdata = useSelector((state: RootState) => state.auth?.user);
+  const Useremail = userdata?.email;
+  const Username = userdata?.username;
 
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPaymentMethod(e.target.value);
@@ -95,6 +102,7 @@ const CheckoutForm = () => {
           card: cardElement,
         },
       });
+      console.log(paymentIntent);
 
       if (stripeError) {
         setError(stripeError.message || "An error occurred while confirming the card payment.");
@@ -115,17 +123,12 @@ const CheckoutForm = () => {
           }),
         });
 
-        // Check the response status
-        console.log("Stripe Confirm Response Status:", stripeConfirmResponse.status);
-
         if (!stripeConfirmResponse.ok) {
-          // Log error and throw if the response is not OK
           const errorResponse = await stripeConfirmResponse.json();
           console.error("Error Response Data:", errorResponse);
           throw new Error(errorResponse.message || "Failed to confirm payment with Stripe.");
         }
 
-        // Parse and log the expected JSON response
         const confirmResponseData = await stripeConfirmResponse.json();
         console.log("Stripe Confirm Response Data:", confirmResponseData);
 
@@ -144,9 +147,6 @@ const CheckoutForm = () => {
           throw new Error("Failed to subscribe to the plan.");
         }
 
-        console.log("Subscription Data:", subscriptionData);
-
-        // Update user onboarding status
         const onboardingResponse = await updateUserOnboarding('completed');
         console.log("Onboarding Update Response:", onboardingResponse);
 
@@ -171,10 +171,23 @@ const CheckoutForm = () => {
       }
     } else if (paymentMethod === "paystack") {
       setLoading(true);
-      setTimeout(() => {
-        setSuccess(true);
+      const link = await PaystackCheckoutPage({
+        name: Username || "",
+        email: Useremail || "",
+        amount: amount,
+        callback_url: {
+          success: `${window.location.origin}/user/payment-success/paystack`,
+          failed: `${window.location.origin}/user/checkout/1`,
+        },
+      });
+
+      if (link) {
+        window.location.href = link;
+      } else {
+        setError("Failed to initialize Paystack payment. Please try again.");
+        toast.error("Payment failed. Please try again.");
         setLoading(false);
-      }, 2000);
+      }
     }
   };
 
@@ -224,10 +237,12 @@ const CheckoutForm = () => {
               </div>
             </div>
 
-            {!clientSecret && !error && (
+            {!clientSecret && !error && paymentMethod === "stripe" && (
               <div className="text-red-500 mb-4">
                 <LuRefreshCw className="inline-block mr-2 animate-spin" />
-                Initializing payment...</div>)}
+                Initializing payment...
+              </div>
+            )}
 
             {paymentMethod === "stripe" && clientSecret && (
               <div className="mb-4">
@@ -257,7 +272,7 @@ const CheckoutForm = () => {
 
             <button
               type="submit"
-              disabled={loading || !clientSecret}
+              disabled={loading || (paymentMethod === "stripe" && !clientSecret)}
               className={`w-full py-2 px-4 rounded-lg text-white font-semibold text-center transition duration-150 ${loading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-indigo-600 hover:bg-indigo-500"

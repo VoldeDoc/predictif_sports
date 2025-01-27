@@ -1,11 +1,36 @@
+import { useEffect, useState } from "react";
+import { FaInfoCircle, FaCalendarAlt, FaTrophy, FaUsers, FaNewspaper } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
 import { ProgressBar } from "@/components/DashboardComponents/ProgressBar";
 import { AuthLayout } from "@/components/Layout/layout";
 import Button from "@/components/Ui/Button";
 import useDashBoardManagement from "@/hooks/useDashboard";
 import Loader from "@/pages/Ui/loader";
-import { useEffect, useState } from "react";
-import { FaInfoCircle, FaCalendarAlt, FaTrophy, FaUsers, FaNewspaper } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+
+interface Match {
+    home_club_id: string;
+    away_club_id: string;
+    home_club_name: string;
+    away_club_name: string;
+    home_club_logo: string;
+    away_club_logo: string;
+    home_club_manager: string;
+    away_club_manager: string;
+    home_score: number;
+    away_score: number;
+    home_red_card: number;
+    away_red_card: number;
+    home_yellow_card: number;
+    away_yellow_card: number;
+    home_corner_kick: number;
+    away_corner_kick: number;
+    home_penalty_kick: number;
+    away_penalty_kick: number;
+    home_free_kick: number;
+    away_free_kick: number;
+    home_throwing: number;
+    away_throwing: number;
+}
 
 interface Team {
     team_id: string;
@@ -14,31 +39,22 @@ interface Team {
     manager: string;
     league_name: string;
     league_logo: string;
-    upcoming_match: string | null;
-    result: {
-        home_club_name: string;
-        away_club_name: string;
-        home_club_logo: string;
-        away_club_logo: string;
-        home_club_manager: string;
-        away_club_manager: string;
-        home_score: number;
-        away_score: number;
-        home_red_card: number;
-        away_red_card: number;
-        home_yellow_card: number;
-        away_yellow_card: number;
-        home_corner_kick: number;
-        away_corner_kick: number;
-        home_free_kick: number;
-        away_free_kick: number;
-        home_penalty_kick: number;
-        away_penalty_kick: number;
-        home_throwing: number;
-        away_throwing: number;
-    } | null;
+    upcoming_match: Match[] | null;
+    result: Match | null;
     players: { id: string; player: string; avatar: string; position: string; position_short: string }[];
     news_event: { title: string; description: string }[];
+    history: Match[] | null;
+}
+
+interface NewsEvent{
+    id:number;
+    subject_id:number;
+    heading:string,
+    sub_heading:string;
+    description:string;
+    sub_descripton:string;
+    created_at:string;
+    updated_at:string;
 }
 
 const tabs = [
@@ -47,16 +63,17 @@ const tabs = [
     { key: "result", label: "Result", icon: <FaTrophy /> },
     { key: "players", label: "Players", icon: <FaUsers /> },
     { key: "news_event", label: "News & Events", icon: <FaNewspaper /> },
+    { key: "history", label: "History", icon: <FaNewspaper /> },
 ];
 
 export default function TeamDetails() {
-    const { getTeamById } = useDashBoardManagement();
+    const { getTeamById,getNewsEventBySubject } = useDashBoardManagement();
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("bio");
+    const [news, SetNews] = useState<NewsEvent[] | null>(null);
     const { team_id } = useParams<{ team_id: string }>();
-
     useEffect(() => {
         (async () => {
             try {
@@ -64,6 +81,10 @@ export default function TeamDetails() {
                     throw new Error("Team ID is undefined");
                 }
                 const response = await getTeamById(team_id);
+                const newsResponse=  await getNewsEventBySubject(team_id);
+                if (news && news.length > 0) {
+                    console.log(news.flat());
+                }
                 const teamData = response[0];
                 const team: Team = {
                     team_id: teamData.bio.id,
@@ -72,11 +93,13 @@ export default function TeamDetails() {
                     manager: teamData.bio.club_manager,
                     league_name: teamData.bio.club_leagues_name,
                     league_logo: teamData.bio.club_leagues_logo,
-                    upcoming_match: teamData.upcoming_match,
+                    upcoming_match: teamData.coming_match,
                     result: teamData.result_match[0],
                     players: Array.isArray(teamData.players) ? teamData.players : [teamData.players],
                     news_event: teamData.news_event || [],
+                    history: teamData.result_match || [],
                 };
+                SetNews(newsResponse)
                 setTeam(team);
                 setLoading(false);
             } catch (err) {
@@ -84,14 +107,10 @@ export default function TeamDetails() {
                 setError("Failed to load team details. Please try again later.");
             }
         })();
-    }, [team_id, getTeamById]);
+    }, [team_id, getTeamById,getNewsEventBySubject]);
 
-    useEffect(() => {
-        console.log("Team data:", team);
-        console.log("Players data:", team?.players);
-    }, [team]);
-
-    const renderTabContent = () => {
+   
+const renderTabContent = () => {
         switch (activeTab) {
             case "bio":
                 return (
@@ -135,16 +154,47 @@ export default function TeamDetails() {
                 return (
                     <div className="p-6 bg-blue-50 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Upcoming Match</h2>
-                        {team?.upcoming_match ? (
-                            <div className="text-center">
-                                <p className="text-lg text-gray-700">{team.upcoming_match}</p>
-                                <p className="text-sm text-gray-500">Stay tuned for more details!</p>
-                            </div>
+                        {team?.upcoming_match && team.upcoming_match.length > 0 ? (
+                            team.upcoming_match.map((match, index) => (
+                                <div key={index} className="mb-6">
+                                    <div className="flex flex-col sm:flex-row justify-center items-center mb-6">
+                                        {/* Home Team */}
+                                        <div className="text-center w-full sm:w-1/3 mb-4 sm:mb-0">
+                                            <img
+                                                src={match.home_club_logo}
+                                                alt={match.home_club_name}
+                                                className="w-16 h-16 object-contain mx-auto"
+                                            />
+                                            <p className="text-gray-700 font-medium">{match.home_club_name}</p>
+                                        </div>
+
+                                        {/* VS */}
+                                        <div className="mx-8 w-full sm:w-1/3 text-center mb-4 sm:mb-0">
+                                            <p className="text-2xl font-bold text-gray-800">VS</p>
+                                        </div>
+
+                                        {/* Away Team */}
+                                        <div className="text-center w-full sm:w-1/3">
+                                            <img
+                                                src={match.away_club_logo}
+                                                alt={match.away_club_name}
+                                                className="w-16 h-16 object-contain mx-auto"
+                                            />
+                                            <p className="text-gray-700 font-medium">{match.away_club_name}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-lg text-gray-700">Managed by {match.home_club_manager} vs {match.away_club_manager}</p>
+                                        <p className="text-sm text-gray-500">Stay tuned for more details!</p>
+                                    </div>
+                                </div>
+                            ))
                         ) : (
                             <p className="text-gray-500">No upcoming match scheduled.</p>
                         )}
                     </div>
                 );
+
             case "result":
                 return (
                     <div className="p-6 bg-white rounded-lg shadow-md">
@@ -235,32 +285,204 @@ export default function TeamDetails() {
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">Players</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {team?.players.map((player) => (
-                                <div key={player.id} className="flex flex-col items-center text-center bg-gray-100 p-4 rounded-lg shadow">
+                                <Link to={`/user/player/${player.id}`} key={player.id}>
+                                    <div key={player.id} className="flex flex-col items-center text-center bg-gray-100 p-4 rounded-lg shadow">
                                     <img
                                         src={player.avatar || "https://example.com/default-avatar.jpg"}
                                         alt={player.player}
                                         className="w-24 h-24 object-cover rounded-full mb-4"
                                     />
                                     <h3 className="text-lg font-bold text-gray-800">{player.player}</h3>
-                                  <div className="flex space-x-5">
-                                  <p className="text-gray-500">{player.position_short}</p>
-                                  <p className="text-gray-500">{player.position}</p>
-                                  </div>
+                                    <div className="flex space-x-5">
+                                        <p className="text-gray-500">{player.position_short}</p>
+                                        <p className="text-gray-500">{player.position}</p>
+                                    </div>
                                 </div>
+                                </Link>
                             ))}
                         </div>
                     </div>
                 );
-            case "news_event":
+
+          
+                case "news_event":
+                    return (
+                        <div className="p-6 bg-white rounded-lg shadow-md">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">News & Events</h2>
+                            {news && news.length > 0 ? (
+                                news.map((newsItem, index) => (
+                                    <div key={index} className="mb-6">
+                                        <h3 className="text-xl font-bold text-gray-800">{newsItem.heading}</h3>
+                                        <p className="text-gray-600">{newsItem.description}</p>
+                                        <p className="text-gray-500 text-sm mt-2">{newsItem.sub_descripton}</p>
+                                        <p className="text-gray-400 text-xs mt-1">Updated at: {new Date(newsItem.updated_at).toLocaleDateString()}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500">No news or events available.</p>
+                            )}
+                        </div>
+                    );
+           
+
+
+            case "history":
                 return (
                     <div className="p-6 bg-white rounded-lg shadow-md">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">News & Events</h2>
-                        {/* News and Events rendering */}
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Match History</h2>
+                        {team?.history && team.history.length > 0 ? (
+                            team.history.map((match, index) => (
+                                <div key={index} className="mb-6">
+                                    <div className="flex flex-col sm:flex-row justify-center items-center mb-6">
+                                        {/* Home Team */}
+                                        <div className="text-center w-full sm:w-1/3 mb-4 sm:mb-0">
+                                            <img
+                                                src={match.home_club_logo}
+                                                alt={match.home_club_name}
+                                                className="w-16 h-16 object-contain mx-auto"
+                                            />
+                                            <p className="text-gray-700 font-medium">{match.home_club_name}</p>
+                                        </div>
+
+                                        {/* Score */}
+                                        <div className="mx-8 w-full sm:w-1/3 text-center mb-4 sm:mb-0">
+                                            <p className="text-4xl font-bold text-gray-800">
+                                                {match.home_score} - {match.away_score}
+                                            </p>
+                                            <p className="text-gray-500 text-sm">Final Score</p>
+                                        </div>
+
+                                        {/* Away Team */}
+                                        <div className="text-center w-full sm:w-1/3">
+                                            <img
+                                                src={match.away_club_logo}
+                                                alt={match.away_club_name}
+                                                className="w-16 h-16 object-contain mx-auto"
+                                            />
+                                            <p className="text-gray-700 font-medium">{match.away_club_name}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveTab(`history-${index}`)}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded shadow flex items-center"
+                                    >
+                                        <svg
+                                            className="w-4 h-4 ml-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M9 5l7 7-7 7"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500">No match history available.</p>
+                        )}
                     </div>
                 );
-            default:
-                return null;
+                default:
+                    if (activeTab.startsWith("history-")) {
+                      const index = parseInt(activeTab.split("-")[1], 10);
+                      const match = team?.history?.[index];
+                      if (match) {
+                        return (
+                          <div className="p-6 bg-white rounded-lg shadow-md">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">Match Details</h2>
+                            <div className="flex flex-col sm:flex-row justify-center items-center mb-6">
+                              {/* Home Team */}
+                              <div className="text-center w-full sm:w-1/3 mb-4 sm:mb-0">
+                                <img
+                                  src={match.home_club_logo}
+                                  alt={match.home_club_name}
+                                  className="w-16 h-16 object-contain mx-auto"
+                                />
+                                <p className="text-gray-700 font-medium">{match.home_club_name}</p>
+                              </div>
+                  
+                              {/* Score */}
+                              <div className="mx-8 w-full sm:w-1/3 text-center mb-4 sm:mb-0">
+                                <p className="text-4xl font-bold text-gray-800">
+                                  {match.home_score} - {match.away_score}
+                                </p>
+                                <p className="text-gray-500 text-sm">Final Score</p>
+                              </div>
+                  
+                              {/* Away Team */}
+                              <div className="text-center w-full sm:w-1/3">
+                                <img
+                                  src={match.away_club_logo}
+                                  alt={match.away_club_name}
+                                  className="w-16 h-16 object-contain mx-auto"
+                                />
+                                <p className="text-gray-700 font-medium">{match.away_club_name}</p>
+                              </div>
+                            </div>
+                  
+                            <div className="">
+                              <h3 className="text-lg font-bold text-gray-700 mb-2">Team Statistics</h3>
+                              <div className="flex justify-between">
+                                <div>
+                                  <strong>Home Manager:</strong> {match.home_club_manager}
+                                </div>
+                                <div>
+                                  <strong>Away Manager:</strong> {match.away_club_manager}
+                                </div>
+                              </div>
+                  
+                              <h3 className="text-lg font-bold text-gray-700 my-4">Match Statistics</h3>
+                  
+                              <div>
+                                <li className="pb-4">
+                                  <strong>Red Cards:</strong>
+                                  <ProgressBar homeValue={match.home_red_card} awayValue={match.away_red_card} />
+                                </li>
+                  
+                                <li className="pb-4">
+                                  <strong>Yellow Cards:</strong>
+                                  <ProgressBar homeValue={match.home_yellow_card} awayValue={match.away_yellow_card} />
+                                </li>
+                                <li className="pb-4">
+                                  <strong>Corner Kicks:</strong>
+                                  <ProgressBar homeValue={match.home_corner_kick} awayValue={match.away_corner_kick} />
+                                </li>
+                                <li className="pb-4">
+                                  <strong>Free Kicks:</strong>
+                                  <ProgressBar homeValue={match.home_free_kick} awayValue={match.away_free_kick} />
+                                </li>
+                                <li className="pb-4">
+                                  <strong>Penalty Kicks:</strong>
+                                  <ProgressBar homeValue={match.home_penalty_kick} awayValue={match.away_penalty_kick} />
+                                </li>
+                                <li className="pb-4">
+                                  <strong>Throw-ins:</strong>
+                                  <ProgressBar homeValue={match.home_throwing} awayValue={match.away_throwing} />
+                                </li>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setActiveTab("history")}
+                              className="bg-blue-600 text-white px-4 py-2 rounded shadow mt-4"
+                            >
+                              Back to History
+                            </button>
+                          </div>
+                        );
+                    }
+
         }
+    }
+
+
+
+
     };
 
     if (loading) {
@@ -336,8 +558,8 @@ export default function TeamDetails() {
                                         key={tab.key}
                                         onClick={() => setActiveTab(tab.key)}
                                         className={`lg:py-2 px-4 sm:px-6  text-base flex items-center justify-center space-x-2 transition ${activeTab === tab.key
-                                                ? "bg-blue-600 text-white shadow-lg"
-                                                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                                            ? "bg-blue-600 text-white shadow-lg"
+                                            : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                                             }`}
                                     >
                                         <div className="flex items-center justify-center">
@@ -349,9 +571,6 @@ export default function TeamDetails() {
                             </div>
                         </div>
                     </div>
-
-
-
 
                     {/* Tab Content */}
                     <div className="bg-white p-6 rounded-lg shadow-lg">

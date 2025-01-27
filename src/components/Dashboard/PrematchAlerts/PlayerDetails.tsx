@@ -26,33 +26,44 @@ interface Player {
     red_card: string | null;
     yellow_card: string | null;
     club_history: any[];
-    news_event: any[];
+}
+
+interface NewsEvent {
+    id: number;
+    subject_id: number;
+    heading: string;
+    sub_heading: string;
+    description: string;
+    sub_description: string;
+    created_at: string;
+    updated_at: string;
 }
 
 const tabs = [
     { key: "bio", label: "Bio", icon: <FaInfoCircle /> },
-    { key: "current club", label: "Current club", icon: <FaHistory /> },
+    { key: "current club", label: "Current Club", icon: <FaHistory /> },
     { key: "news", label: "News", icon: <FaNewspaper /> },
-    { key: "events", label: "Events", icon: <FaCalendarAlt /> },
+    { key: "history", label: "Events", icon: <FaCalendarAlt /> },
 ];
 
 export default function PlayerDetails() {
-    const { getPlayerById } = useDashBoardManagement();
+    const { getPlayerById, getNewsEventBySubject } = useDashBoardManagement();
     const [player, setPlayer] = useState<Player | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("bio");
+    const [news, setNews] = useState<NewsEvent[]>([]);
     const { player_id } = useParams<{ player_id: string }>();
 
     useEffect(() => {
-        (async () => {
+        const fetchPlayerData = async () => {
             try {
-                if (!player_id) {
-                    throw new Error("Player ID is undefined");
-                }
+                if (!player_id) throw new Error("Player ID is undefined");
+
                 const response = await getPlayerById(player_id);
                 const playerData = response[0];
-                const player: Player = {
+
+                setPlayer({
                     player_id: playerData.bio.player_id,
                     name: playerData.bio.name,
                     photo: playerData.bio.photo,
@@ -72,16 +83,33 @@ export default function PlayerDetails() {
                     red_card: playerData.current_club.red_card,
                     yellow_card: playerData.current_club.yellow_card,
                     club_history: playerData.club_history || [],
-                    news_event: playerData.news_event || [],
-                };
-                setPlayer(player);
+                });
                 setLoading(false);
             } catch (err) {
-                setLoading(false);
+                console.error(err);
                 setError("Failed to load player details. Please try again later.");
+                setLoading(false);
             }
-        })();
+        };
+
+        fetchPlayerData();
     }, [player_id, getPlayerById]);
+
+    useEffect(() => {
+        const fetchNews = async () => {
+            if (activeTab === "news" && player_id) {
+                try {
+                    const newsResponse = await getNewsEventBySubject(player_id);
+                    setNews(newsResponse || []);
+                } catch (err) {
+                    console.error("Failed to fetch news:", err);
+                    setNews([]);
+                }
+            }
+        };
+
+        fetchNews();
+    }, [activeTab, player_id, getNewsEventBySubject]);
 
     if (loading) {
         return (
@@ -152,7 +180,21 @@ export default function PlayerDetails() {
                         ))}
                     </div>
                 );
-            case "club_history":
+            case "news":
+                return news.length ? (
+                    news.map((newsItem) => (
+                        <div key={newsItem.id} className="mb-4 border p-4 rounded-md shadow-sm bg-white">
+                            <h3 className="text-lg font-semibold text-blue-600">{newsItem.heading}</h3>
+                            <h4 className="text-md font-medium text-gray-700">{newsItem.sub_heading}</h4>
+                            <p className="text-sm text-gray-600">{newsItem.sub_description}</p>
+                            <p className="text-sm text-gray-500 mt-2">{newsItem.description}</p>
+                            <p className="text-xs text-gray-400 mt-2">Published on: {new Date(newsItem.created_at).toLocaleDateString()}</p>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-sm text-gray-600">No news available.</p>
+                );
+            case "history":
                 return player.club_history.length ? (
                     player.club_history.map((history, index) => (
                         <div key={index} className="mb-4">
@@ -161,26 +203,6 @@ export default function PlayerDetails() {
                     ))
                 ) : (
                     <p className="text-sm text-gray-600">No club history available.</p>
-                );
-            case "news":
-                return player.news_event.length ? (
-                    player.news_event.map((news, index) => (
-                        <div key={index} className="mb-4">
-                            <p className="text-sm text-gray-600">{news}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-sm text-gray-600">No news available.</p>
-                );
-            case "events":
-                return player.news_event.length ? (
-                    player.news_event.map((event, index) => (
-                        <div key={index} className="mb-4">
-                            <p className="text-sm text-gray-600">{event}</p>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-sm text-gray-600">No events available.</p>
                 );
             default:
                 return null;

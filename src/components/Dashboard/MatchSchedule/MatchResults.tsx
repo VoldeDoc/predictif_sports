@@ -13,12 +13,14 @@ export default function MatchTable() {
         (async () => {
             try {
                 const data = await getMatchAlert();
-                if (data.length > 0 && data[0].meta_data) {
-                    setMatchData(data[0].meta_data);
-                }
+                const extractedData = data.flatMap((entry: any) => 
+                    entry.map((item: any) => item.meta_data).flat()
+                );
+                setMatchData(extractedData);
                 setError(null);
             } catch (err) {
-                setError('Failed to fetch match data. Please try again later.');
+                console.error(err);
+                setError("Failed to fetch match data. Please try again later.");
             } finally {
                 setLoading(false);
             }
@@ -47,32 +49,51 @@ export default function MatchTable() {
 
                             {/* Home Team */}
                             <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-end">
-                                <img src={match.home_club_logo} alt={match.home_club} className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
-                                <span className="font-medium text-xs sm:text-sm text-center sm:text-right">{match.home_club}</span>
+                                <img
+                                    src={match.home_club_logo}
+                                    alt={match.home_club}
+                                    className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2"
+                                />
+                                <span className="font-medium text-xs sm:text-sm text-center sm:text-right">
+                                    {match.home_club}
+                                </span>
                             </div>
-                            
+
                             {/* Match Score */}
                             <div className="col-span-2 sm:col-span-1 flex flex-col items-center">
                                 <span className="px-3 py-1 bg-gray-100 rounded-md font-semibold text-xs sm:text-sm">
                                     {match.home_score} - {match.away_scrore}
                                 </span>
-                                <span className="text-xs text-gray-500">{match.minute_played}</span>
+                                <span className="text-xs text-gray-500">
+                                    {match.minute_played || "Not started"}
+                                </span>
                             </div>
 
                             {/* Away Team */}
                             <div className="col-span-3 sm:col-span-2 flex flex-col sm:flex-row items-center sm:justify-start">
-                                <img src={match.away_club_logo} alt={match.away_club} className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2" />
-                                <span className="font-medium text-xs sm:text-sm text-center sm:text-left">{match.away_club}</span>
+                                <img
+                                    src={match.away_club_logo}
+                                    alt={match.away_club}
+                                    className="w-8 h-8 sm:w-6 sm:h-6 mr-2 sm:mr-2"
+                                />
+                                <span className="font-medium text-xs sm:text-sm text-center sm:text-left">
+                                    {match.away_club}
+                                </span>
                             </div>
 
                             {/* Details Link */}
-                            <Link to={`/match-schedule/${match.id}`} className="col-span-1 text-blue-500 cursor-pointer text-xs sm:text-sm hidden lg:block">
-                                <span className="col-span-1 text-red-500 cursor-pointer text-xs sm:text-sm hidden lg:block">Details</span>
+                            <Link
+                                to={`/match-schedule/${match.id}`}
+                                className="col-span-1 text-blue-500 cursor-pointer text-xs sm:text-sm hidden lg:block"
+                            >
+                                Details
                             </Link>
                         </div>
                     ))
                 ) : (
-                    <p className="text-center text-gray-500 p-4">No match data available.</p>
+                    <p className="text-center text-gray-500 p-4">
+                        No match data available.
+                    </p>
                 )}
             </div>
         </div>

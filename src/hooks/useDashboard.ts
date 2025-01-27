@@ -836,6 +836,53 @@ const getResultMatch = async () => {
     }
 }
 
+const getNewsEvent = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getNewEvent`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
+
+const getNewsEventBySubject = async (id:string)=>{
+    try{
+     setLoading(true)
+     const res = await client.get(`/user/getNewEventBySubject/${id}`)
+     return res?.data.data
+    }catch (error:any){
+     const resError =  error.response?.data;
+     const errorMessage = resError?.message || resError?.data || "An error occured";
+     console.error(errorMessage)
+    }
+    finally{
+     setLoading(false)
+    }
+ 
+ }
+
+const getNewsEventById = async (id:number)=>{
+   try{
+    setLoading(true)
+    const res = await client.get(`/user/getNewEventById/${id}`)
+    return res?.data.data
+   }catch (error:any){
+    const resError =  error.response?.data;
+    const errorMessage = resError?.message || resError?.data || "An error occured";
+    console.error(errorMessage)
+   }
+   finally{
+    setLoading(false)
+   }
+
+}
 
     return {
         loading,
@@ -875,7 +922,6 @@ const getResultMatch = async () => {
         getStrategyItem,
         createStrategies,
         getMyStrategies,
-        deleteStrategies,
         getMatchAlert,
         getLastMessagesForGroups,
         getLastMessagesForGroupsById,
@@ -890,6 +936,10 @@ const getResultMatch = async () => {
         getUpcomingMatch,
         getResultMatch,
         getTodayMatch,
+        getNewsEventBySubject,
+        getNewsEvent,
+        getNewsEventById,
+        deleteStrategies
     };
 }
 

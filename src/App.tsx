@@ -61,6 +61,7 @@ import SuccessPage from './components/Stripe/success.tsx';
 import FollowTeam from './components/Dashboard/Survey/Followings/TeamFollowing.tsx';
 import PlayerDetails from './components/Dashboard/PrematchAlerts/PlayerDetails.tsx';
 import TeamDetails from './components/Dashboard/PrematchAlerts/TeamDetails.tsx';
+import PaystackSuccessPage from './components/Stripe/paySuccessCheckoutPage.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -161,6 +162,9 @@ function App() {
                 <Route path="/user/checkout/:id" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>}></Route>
 
                 <Route path="/user/payment-success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>}></Route>
+
+                <Route path="/user/payment-success/paystack" element={<ProtectedRoute><PaystackSuccessPage /></ProtectedRoute>}></Route>
+
 
                 <Route path="/user/player/:player_id" element={<ProtectedRoute><PlayerDetails /></ProtectedRoute>}></Route>
 
