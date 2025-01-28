@@ -43,7 +43,7 @@ const tabs = [
     { key: "bio", label: "Bio", icon: <FaInfoCircle /> },
     { key: "current club", label: "Current Club", icon: <FaHistory /> },
     { key: "news", label: "News", icon: <FaNewspaper /> },
-    { key: "history", label: "Events", icon: <FaCalendarAlt /> },
+    { key: "history", label: "History", icon: <FaCalendarAlt /> },
 ];
 
 export default function PlayerDetails() {
@@ -59,10 +59,8 @@ export default function PlayerDetails() {
         const fetchPlayerData = async () => {
             try {
                 if (!player_id) throw new Error("Player ID is undefined");
-
                 const response = await getPlayerById(player_id);
                 const playerData = response[0];
-
                 setPlayer({
                     player_id: playerData.bio.player_id,
                     name: playerData.bio.name,
@@ -84,54 +82,22 @@ export default function PlayerDetails() {
                     yellow_card: playerData.current_club.yellow_card,
                     club_history: playerData.club_history || [],
                 });
-                setLoading(false);
+                const newsResponse = await getNewsEventBySubject(player_id);
+                console.log(newsResponse);
+                setNews(newsResponse[0] || []);
+                setLoading(false)
             } catch (err) {
+                setLoading(false)
                 console.error(err);
                 setError("Failed to load player details. Please try again later.");
-                setLoading(false);
             }
         };
-
         fetchPlayerData();
-    }, [player_id, getPlayerById]);
+    }, []);
 
-    useEffect(() => {
-        const fetchNews = async () => {
-            if (activeTab === "news" && player_id) {
-                try {
-                    const newsResponse = await getNewsEventBySubject(player_id);
-                    setNews(newsResponse || []);
-                } catch (err) {
-                    console.error("Failed to fetch news:", err);
-                    setNews([]);
-                }
-            }
-        };
+    
 
-        fetchNews();
-    }, [activeTab, player_id, getNewsEventBySubject]);
-
-    if (loading) {
-        return (
-            <AuthLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <Loader loading={loading} color="#123abc" size={40} />
-                    <p className="text-gray-500 text-lg ml-4">Loading player details...</p>
-                </div>
-            </AuthLayout>
-        );
-    }
-
-    if (error) {
-        return (
-            <AuthLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-red-500 text-lg">{error}</p>
-                </div>
-            </AuthLayout>
-        );
-    }
-
+ 
     if (!player) {
         return (
             <AuthLayout>
@@ -208,7 +174,6 @@ export default function PlayerDetails() {
                 return null;
         }
     };
-
     return (
         <AuthLayout>
             <div className="bg-gray-100 min-h-screen">
@@ -219,45 +184,72 @@ export default function PlayerDetails() {
                     />
                 </div>
                 <div className="container mx-auto px-4">
-                    <div className="bg-gradient-to-b from-blue-300 to-blue-500 relative pb-20">
-                        <div className="flex space-x-5 px-4 py-7">
-                            <div className="flex-shrink-0">
-                                <img
-                                    src={player.photo}
-                                    alt={player.name}
-                                    className="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-gray-200 shadow-md"
-                                />
-                            </div>
-                            <div className="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-5">
-                                <h2 className="text-3xl sm:text-5xl font-semibold text-white italic">{player.name.split(' ')[0]}</h2>
-                                <h2 className="text-3xl sm:text-5xl font-semibold text-white" style={{ fontStyle: "oblique" }}>{player.name.split(' ')[1]}</h2>
-                                <p className="text-lg text-white mb-4">
-                                    <span className="font-medium">Club:</span> {player.current_club_name}
-                                </p>
-                            </div>
+                    {loading ? (
+                        <div className="flex items-center justify-center min-h-[50vh]">
+                            <Loader loading={loading} color="#123abc" size={40} />
+                            <p className="text-gray-500 text-lg ml-4">Loading player details...</p>
                         </div>
-                        <div className="flex flex-wrap justify-center sm:justify-start text-center space-x-2 sm:space-x-4 py-3 px-4 absolute w-full lg:pl-48 bottom-0 bg-white" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                            <div className="flex space-x-2 sm:space-x-4" style={{ display: 'flex', flexWrap: 'nowrap' }}>
-                                {tabs.map((tab) => (
-                                    <button
-                                        key={tab.key}
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`py-2 px-4 rounded flex items-center space-x-2 ${activeTab === tab.key
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-gray-200 text-gray-600"
-                                            }`}
-                                        style={{ display: 'flex', alignItems: 'center' }}
+                    ) : error ? (
+                        <div className="flex items-center justify-center min-h-[50vh]">
+                            <p className="text-red-500 text-lg">{error}</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="bg-gradient-to-b from-blue-300 to-blue-500 relative pb-20">
+                                <div className="flex space-x-5 px-4 py-7">
+                                    <div className="flex-shrink-0">
+                                        <img
+                                            src={player.photo}
+                                            alt={player.name}
+                                            className="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-gray-200 shadow-md"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-5">
+                                        <h2 className="text-3xl sm:text-5xl font-semibold text-white italic">
+                                            {player.name.split(' ')[0]}
+                                        </h2>
+                                        <h2
+                                            className="text-3xl sm:text-5xl font-semibold text-white"
+                                            style={{ fontStyle: "oblique" }}
+                                        >
+                                            {player.name.split(' ')[1]}
+                                        </h2>
+                                        <p className="text-lg text-white mb-4">
+                                            <span className="font-medium">Club:</span> {player.current_club_name}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div
+                                    className="flex flex-wrap justify-center sm:justify-start text-center space-x-2 sm:space-x-4 py-3 px-4 absolute w-full lg:pl-48 bottom-0 bg-white"
+                                    style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                                >
+                                    <div
+                                        className="flex space-x-2 sm:space-x-4"
+                                        style={{ display: 'flex', flexWrap: 'nowrap' }}
                                     >
-                                        {tab.icon}
-                                        <span>{tab.label}</span>
-                                    </button>
-                                ))}
+                                        {tabs.map((tab) => (
+                                            <button
+                                                key={tab.key}
+                                                onClick={() => setActiveTab(tab.key)}
+                                                className={`py-2 px-4 rounded flex items-center space-x-2 ${
+                                                    activeTab === tab.key
+                                                        ? "bg-blue-600 text-white"
+                                                        : "bg-gray-200 text-gray-600"
+                                                }`}
+                                                style={{ display: 'flex', alignItems: 'center' }}
+                                            >
+                                                {tab.icon}
+                                                <span>{tab.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="mt-6 px-4">
-                        {renderTabContent()}
-                    </div>
+                            <div className="mt-6 px-4">
+                                {renderTabContent()}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </AuthLayout>

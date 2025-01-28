@@ -17,10 +17,9 @@ export default function MatchTable() {
                     entry.map((item: any) => item.meta_data).flat()
                 );
                 setMatchData(extractedData);
-                setError(null);
             } catch (err) {
-                console.error(err);
                 setError("Failed to fetch match data. Please try again later.");
+                setLoading(false)
             } finally {
                 setLoading(false);
             }

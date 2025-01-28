@@ -40,20 +40,12 @@ export default function Strategies() {
     const fetchStrategies = async (type: string) => {
         try {
             setLoading(true);
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-
             const data = await getMyStrategies(type);
-            clearTimeout(timeoutId);
 
             setStrategies(data.flat());
-            setError(null);
         } catch (error) {
-            if ((error as Error).name === 'AbortError') {
-                setError('Request timed out. Please check your network connection.');
-            } else {
-                setError('Error fetching strategies. Please try again later.');
-            }
+            setError('Error fetching strategies. Please try again later.');
+            setLoading(false)
         } finally {
             setLoading(false);
         }
@@ -109,11 +101,10 @@ export default function Strategies() {
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`flex items-center space-x-2 py-2 px-4 rounded ${
-                                    activeTab === tab.key
+                                className={`flex items-center space-x-2 py-2 px-4 rounded ${activeTab === tab.key
                                         ? 'bg-blue-600 text-white shadow-md'
                                         : 'bg-gray-200 text-gray-600'
-                                }`}
+                                    }`}
                             >
                                 <tab.icon className="w-5 h-5" />
                                 <span>{tab.label}</span>

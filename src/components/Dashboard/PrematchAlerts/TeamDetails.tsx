@@ -42,10 +42,9 @@ interface Team {
     upcoming_match: Match[] | null;
     result: Match | null;
     players: { id: string; player: string; avatar: string; position: string; position_short: string }[];
-    news_event: { title: string; description: string }[];
     history: Match[] | null;
 }
-
+ 
 interface NewsEvent{
     id:number;
     subject_id:number;
@@ -76,15 +75,13 @@ export default function TeamDetails() {
     const { team_id } = useParams<{ team_id: string }>();
     useEffect(() => {
         (async () => {
+            // setLoading(true)
             try {
                 if (!team_id) {
                     throw new Error("Team ID is undefined");
                 }
                 const response = await getTeamById(team_id);
                 const newsResponse=  await getNewsEventBySubject(team_id);
-                if (news && news.length > 0) {
-                    console.log(news.flat());
-                }
                 const teamData = response[0];
                 const team: Team = {
                     team_id: teamData.bio.id,
@@ -96,18 +93,17 @@ export default function TeamDetails() {
                     upcoming_match: teamData.coming_match,
                     result: teamData.result_match[0],
                     players: Array.isArray(teamData.players) ? teamData.players : [teamData.players],
-                    news_event: teamData.news_event || [],
                     history: teamData.result_match || [],
                 };
-                SetNews(newsResponse)
+                SetNews(newsResponse[0])
                 setTeam(team);
-                setLoading(false);
+                setLoading(false)
             } catch (err) {
-                setLoading(false);
+                setLoading(false)
                 setError("Failed to load team details. Please try again later.");
             }
         })();
-    }, [team_id, getTeamById,getNewsEventBySubject]);
+    }, []);
 
    
 const renderTabContent = () => {
@@ -311,11 +307,11 @@ const renderTabContent = () => {
                             <h2 className="text-2xl font-bold text-gray-800 mb-4">News & Events</h2>
                             {news && news.length > 0 ? (
                                 news.map((newsItem, index) => (
-                                    <div key={index} className="mb-6">
+                                    <div key={index} className="mb-6 border-b pb-4">
                                         <h3 className="text-xl font-bold text-gray-800">{newsItem.heading}</h3>
-                                        <p className="text-gray-600">{newsItem.description}</p>
+                                        <p className="text-gray-600 mt-2">{newsItem.description}</p>
                                         <p className="text-gray-500 text-sm mt-2">{newsItem.sub_descripton}</p>
-                                        <p className="text-gray-400 text-xs mt-1">Updated at: {new Date(newsItem.updated_at).toLocaleDateString()}</p>
+                                        <p className="text-gray-400 text-xs mt-1"> {new Date(newsItem.created_at).toLocaleDateString()}</p>
                                     </div>
                                 ))
                             ) : (
@@ -479,32 +475,29 @@ const renderTabContent = () => {
 
         }
     }
+}
 
 
 
+    
 
-    };
+    // if (loading) {
+    //     return (
+            
+    //             <div className="flex items-center justify-center min-h-screen">
+    //                 <Loader loading={loading} color="#123abc" size={40} />
+    //                 <p className="text-gray-500 text-lg ml-4">Loading team details...</p>
+    //             </div>
+    //     );
+    // }
 
-    if (loading) {
-        return (
-            <AuthLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <Loader loading={loading} color="#123abc" size={40} />
-                    <p className="text-gray-500 text-lg ml-4">Loading team details...</p>
-                </div>
-            </AuthLayout>
-        );
-    }
-
-    if (error) {
-        return (
-            <AuthLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-red-500 text-lg">{error}</p>
-                </div>
-            </AuthLayout>
-        );
-    }
+    // if (error) {
+    //     return (
+    //             <div className="flex items-center justify-center min-h-screen">
+    //                 <p className="text-red-500 text-lg">{error}</p>
+    //             </div>
+    //     );
+    // }
 
     return (
         <AuthLayout>
@@ -512,33 +505,48 @@ const renderTabContent = () => {
                 <div className="container mx-auto px-6">
                     {/* Back Button */}
                     <div className="mb-6">
-                        <Button text="Back" onClick={() => window.history.back()} className="bg-blue-600 text-white px-4 py-2 rounded shadow" />
+                        <Button
+                            text="Back"
+                            onClick={() => window.history.back()}
+                            className="bg-blue-600 text-white px-4 py-2 rounded shadow"
+                        />
                     </div>
-
+    
                     {/* Page Title */}
                     <h1 className="text-5xl font-extrabold text-center text-gray-800 mb-12">
                         Team Spotlight
                     </h1>
-
-                    {/* Team Logo and Info */}
-                    <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
-                        <div className="flex flex-col items-center">
-                            {/* Team Logo */}
-                            <img
-                                src={team?.logo}
-                                alt={team?.name}
-                                className="w-20 h-20 rounded-full object-cover border-4 border-blue-100 shadow-md mb-6"
-                            />
-                            {/* Team Name and Manager */}
-                            <h2 className="text-3xl font-bold text-gray-800 mb-2">{team?.name}</h2>
-                            <p className="text-sm text-gray-500">
-                                <span className="font-medium">Manager:</span> {team?.manager}
-                            </p>
+    
+                    {/* Loader and Error Handling */}
+                    {loading ? (
+                        <div className="flex items-center justify-center min-h-[50vh]">
+                            <Loader loading={loading} color="#123abc" size={40} />
+                            <p className="text-gray-500 text-lg ml-4">Loading team details...</p>
                         </div>
-                    </div>
-
-                    {/* Tabs Section */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg mb-8">
+                    ) : error ? (
+                        <div className="flex items-center justify-center min-h-[50vh]">
+                            <p className="text-red-500 text-lg">{error}</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Team Logo and Info */}
+                            <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+                                <div className="flex flex-col items-center">
+                                    {/* Team Logo */}
+                                    <img
+                                        src={team?.logo}
+                                        alt={team?.name}
+                                        className="w-20 h-20 rounded-full object-cover border-4 border-blue-100 shadow-md mb-6"
+                                    />
+                                    {/* Team Name and Manager */}
+                                    <h2 className="text-3xl font-bold text-gray-800 mb-2">{team?.name}</h2>
+                                    <p className="text-sm text-gray-500">
+                                        <span className="font-medium">Manager:</span> {team?.manager}
+                                    </p>
+                                </div>
+                            </div>
+        {/* Tabs Section */}
+        <div className="bg-white p-4 rounded-lg shadow-lg mb-8">
                         {/* Wrapper for scrollable container */}
                         <div
                             className="flex overflow-x-auto"
@@ -571,13 +579,16 @@ const renderTabContent = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Tab Content */}
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        {renderTabContent()}
-                    </div>
+    
+                            {/* Tab Content */}
+                            <div className="bg-white p-6 rounded-lg shadow-lg">
+                                {renderTabContent()}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </AuthLayout>
     );
+    
 }

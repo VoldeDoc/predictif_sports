@@ -43,11 +43,7 @@ function UserProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-
         const data = await getUserPlan();
-        console.log(data[0][0]);
 
         setPlans(data[0][0] || []);
         const clubsFollowed = await getClubFollowed();
@@ -59,14 +55,9 @@ function UserProfile() {
         //   setSubscriptionActive(true);
         // }
 
-        clearTimeout(timeoutId);
-        setError(null);
       } catch (error) {
-        if ((error as Error).name === 'AbortError') {
-          setError('Request timed out. Please check your network connection.');
-        } else {
-          setError('Failed to fetch data. Please try again later.');
-        }
+        setError('Request timed out. Please check your network connection.');
+        setLoading(false)
       } finally {
         setLoading(false);
       }
@@ -106,7 +97,14 @@ function UserProfile() {
   return (
     <AuthLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+       
         <div className="bg-white p-10 rounded-lg shadow-2xl max-w-3xl w-full">
+        <div>
+          <button></button>
+        <button onClick={() => window.history.back()} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          Back
+        </button>
+        </div>
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-gray-900">Welcome, {username}</h1>
             <p className="text-gray-600 mt-2">Here is your account overview</p>

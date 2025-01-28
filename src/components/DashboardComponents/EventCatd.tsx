@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import useDashBoardManagement from "@/hooks/useDashboard";
+
 interface Event {
   id: number;
   subject_id: number;
@@ -17,8 +18,7 @@ interface Event {
 }
 
 const EventCard: React.FC = () => {
-
-  const {getNewsEvent} = useDashBoardManagement()
+  const { getNewsEvent } = useDashBoardManagement();
   const [events, setEvents] = useState<Event[]>([]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -26,9 +26,11 @@ const EventCard: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await getNewsEvent()
-        const data = await response
-        setEvents(data.data);
+        const response = await getNewsEvent();
+        const EventResponse = response[0]
+        console.log(EventResponse);
+        
+        setEvents(EventResponse);
       } catch (error) {
         console.error("Failed to fetch events:", error);
       }
@@ -84,16 +86,14 @@ const EventCard: React.FC = () => {
           onMouseLeave={() => setIsPaused(false)}
         >
           {currentEvent && (
-            <Link to={''}>
-              <div className="block p-4 border-b border-gray-200">
-                <div className="items-center space-x-4 px-7 flex justify-center">
-                  <div>
-                    <h3 className="text-lg text-gray-600 font-semibold">{currentEvent.heading}</h3>
-                    <h4 className="text-md text-gray-500">{currentEvent.sub_heading}</h4>
-                    <p className="text-sm text-gray-600">{currentEvent.sub_description}</p>
-                    <p className="text-sm text-gray-500 mt-2">{currentEvent.description}</p>
-                    <p className="text-xs text-gray-400 mt-2">Published on: {new Date(currentEvent.created_at).toLocaleDateString()}</p>
-                  </div>
+            <Link to={`/user/events/${currentEvent.id}`} className="block p-4 border-b border-gray-200">
+              <div className="items-center space-x-4 px-7 flex justify-center">
+                <div>
+                  <h3 className="text-lg text-gray-600 font-semibold">{currentEvent.heading}</h3>
+                  <h4 className="text-md text-gray-500">{currentEvent.sub_heading}</h4>
+                  <p className="text-sm text-gray-600">{currentEvent.sub_description}</p>
+                  {/* <p className="text-sm text-gray-500 mt-2">{currentEvent.description}</p>
+                  <p className="text-xs text-gray-400 mt-2">Published on: {new Date(currentEvent.created_at).toLocaleDateString()}</p> */}
                 </div>
               </div>
             </Link>

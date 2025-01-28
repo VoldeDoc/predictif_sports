@@ -14,7 +14,7 @@ import PlayerCard from "../DashboardComponents/PlayerCard";
 import ResultsMatches from "../DashboardComponents/ResultsMatch";
 import TodayMatches from "../DashboardComponents/TodayMatch";
 import UpcomingMatches from "../DashboardComponents/upComingMatch";
-// import EventCard from "../DashboardComponents/EventCatd";
+import EventCard from "../DashboardComponents/EventCatd";
 
 interface Club {
   id: number;
@@ -33,18 +33,6 @@ interface Player {
   position_short: string;
 }
 
-// interface Event{
-//   id: number;
-//   subject_id: number;
-//   heading: string;
-//   sub_heading: string;
-//   sub_description: string;
-//   description: string;
-//   status: string;
-//   created_at: string;
-//   updated_at: string;
-// }
-
 const timeZone = "Africa/Lagos";
 
 const getGreeting = (timeZone: string) => {
@@ -57,13 +45,12 @@ const getGreeting = (timeZone: string) => {
 };
 
 const Dashboard = () => {
-  const { getClubFollowed, getPlayerFollowed, getMyStrategies, } = useDashBoardManagement();
+  const { getClubFollowed, getPlayerFollowed, getMyStrategies } = useDashBoardManagement();
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
   const [activeTab, setActiveTab] = useState("upcoming");
   const [clubFollowed, setClubFollowed] = useState<Club[]>([]);
   const [playerFollowed, setPlayerFollowed] = useState<Player[]>([]);
-  // const [event] = useState<Event[]>([])
   const [playerFollowedCount, setPlayerFollowedCount] = useState(0);
   const dateRange: [Date, Date] = [
     new Date(),
@@ -82,9 +69,7 @@ const Dashboard = () => {
     (async () => {
       try {
         const clubFollowedData = await getClubFollowed();
-        const flattenedClubsFollowed = clubFollowedData.flat();
-        console.log(flattenedClubsFollowed);
-        
+        const flattenedClubsFollowed = clubFollowedData.flat();        
         setClubFollowed(flattenedClubsFollowed);
       } catch (error) {
         console.error(error);
@@ -204,7 +189,7 @@ const Dashboard = () => {
                         activeTab === "upcoming"
                           ? "text-blue-600 border-b-2 border-blue-600"
                           : "text-gray-600"
-                      }`}
+                      }`} 
                       onClick={() => handleTabClick("upcoming")}
                     >
                       Upcoming
@@ -256,9 +241,9 @@ const Dashboard = () => {
           <div className="lg:col-span-4 col-span-12 space-y-5">
             <TeamCard clubFollowed={clubFollowed} />
             <PlayerCard playersFollowed={playerFollowed} />
+           <EventCard/>
           </div>
           <div className="lg:col-span-4 col-span-12 space-y-5">
-          {/* <EventCard AllEvents={event} /> */}
           </div>
         </div>
       </div>

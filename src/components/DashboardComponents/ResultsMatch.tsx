@@ -41,6 +41,7 @@ const ResultsMatches = () => {
         }));
         setMatches(transformedMatches);
       } catch (error) {
+        setLoading(false)
         console.error("Failed to fetch matches", error);
       } finally {
         setLoading(false);

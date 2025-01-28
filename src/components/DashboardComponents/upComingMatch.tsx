@@ -3,18 +3,28 @@ import { useEffect, useState } from "react";
 
 export default function UpcomingMatches() {
   const { getUpcomingMatch } = useDashBoardManagement();
+  const [loading,setLoading] = useState(true)
   const [upcomingMatch, setUpcomingMatch] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const response = await getUpcomingMatch();
-        setUpcomingMatch(response[0]); // Assumes data is an array of matches
+        setUpcomingMatch(response[0]); 
       } catch (error) {
-        console.error("Failed to fetch data", error);
+        setLoading(false)
+        console.error("Failed to fetch matches", error);
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
+  if (loading) {
+    return <div>Loading matches...</div>;
+  }
+
+  
 
   return (
     <div className="max-h-screen overflow-y-auto p-4 h-96">
@@ -67,6 +77,10 @@ export default function UpcomingMatches() {
             <div className="space-y-5">
               <h1>{match.home_score}</h1>
               <h1>{match.away_score}</h1>
+            </div>
+
+            <div className="flex flex-col">
+              predictive scores r
             </div>
           </div>
         </div>

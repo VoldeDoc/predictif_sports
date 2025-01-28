@@ -32,9 +32,9 @@ function PredictivoCopier() {
         //   setOnboarding(userDetail[0].onboarding_state);
         // }
 
-        setError(null);
       } catch (error) {
         setError('Failed to fetch strategies. Please try again later.');
+        setLoading(false)
       } finally {
         setLoading(false);
       }

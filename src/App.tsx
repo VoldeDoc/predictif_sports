@@ -62,6 +62,7 @@ import FollowTeam from './components/Dashboard/Survey/Followings/TeamFollowing.t
 import PlayerDetails from './components/Dashboard/PrematchAlerts/PlayerDetails.tsx';
 import TeamDetails from './components/Dashboard/PrematchAlerts/TeamDetails.tsx';
 import PaystackSuccessPage from './components/Stripe/paySuccessCheckoutPage.tsx';
+import EventDetails from './components/Dashboard/PrematchAlerts/EventDetails.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -169,6 +170,9 @@ function App() {
                 <Route path="/user/player/:player_id" element={<ProtectedRoute><PlayerDetails /></ProtectedRoute>}></Route>
 
                 <Route path="/user/team/:team_id" element={<ProtectedRoute><TeamDetails /></ProtectedRoute>}></Route>
+
+            
+                <Route path="/user/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>}></Route>
 
               {/*stripe payment*/}
               {/* <Route path="/user/checkout" element={
