@@ -1,6 +1,5 @@
-import useDashBoardManagement from "@/hooks/useDashboard";
+import React from "react";
 import MatchCard from "./MatchCard";
-import { useEffect, useState } from "react";
 
 interface Match {
   homeTeam: {
@@ -17,50 +16,22 @@ interface Match {
   isLive?: boolean;
 }
 
-const ResultsMatches = () => {
-  const { getResultMatch } = useDashBoardManagement();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ResultsMatchesProps {
+  matches: Match[];
+  loading: boolean;
+}
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const apiData = await getResultMatch();
-        const transformedMatches: Match[] = apiData[0].map((match: any) => ({
-          homeTeam: {
-            name: match.home_club_name,
-            logo: match.home_club_logo,
-            score: match.home_score,
-          },
-          awayTeam: {
-            name: match.away_club_name,
-            logo: match.away_club_logo,
-            score: match.away_score,
-          },
-          startTime: new Date(`${match.game_start_date}T${match.game_start_time}`),
-        }));
-        setMatches(transformedMatches);
-      } catch (error) {
-        setLoading(false)
-        console.error("Failed to fetch matches", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMatches();
-  }, [getResultMatch]);
-
+const ResultsMatches: React.FC<ResultsMatchesProps> = ({ matches, loading }) => {
   if (loading) {
     return <div>Loading matches...</div>;
   }
 
   return (
-    <div className="space-y-4 overflow-y-auto h-96">
+    <div className="space-y-4 overflow-y-auto h-96 p-2">
       {matches.length > 0 ? (
         matches.map((match, index) => <MatchCard key={index} match={match} />)
       ) : (
-        <div>No matches have ended yet.</div>
+        <div className="text-center text-gray-500">No matches have ended yet.</div>
       )}
     </div>
   );

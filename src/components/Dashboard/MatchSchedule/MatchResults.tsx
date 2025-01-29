@@ -87,6 +87,14 @@ export default function MatchTable() {
                             >
                                 Details
                             </Link>
+
+                            {/* Mobile Link */}
+                            <Link
+                                to={`/match-schedule/${match.id}`}
+                                className="col-span-10 sm:hidden block text-blue-500 text-center mt-2"
+                            >
+                                View Details
+                            </Link>
                         </div>
                     ))
                 ) : (

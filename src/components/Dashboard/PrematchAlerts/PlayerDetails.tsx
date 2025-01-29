@@ -84,7 +84,7 @@ export default function PlayerDetails() {
                 });
                 const newsResponse = await getNewsEventBySubject(player_id);
                 console.log(newsResponse);
-                setNews(newsResponse[0] || []);
+                setNews(newsResponse[0] );
                 setLoading(false)
             } catch (err) {
                 setLoading(false)
@@ -98,54 +98,59 @@ export default function PlayerDetails() {
     
 
  
-    if (!player) {
-        return (
-            <AuthLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <p className="text-gray-500 text-lg">No player details available.</p>
-                </div>
-            </AuthLayout>
-        );
-    }
 
     const renderTabContent = () => {
         switch (activeTab) {
             case "bio":
                 return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {Object.entries({
-                            Position: player.position,
-                            Earnings: player.earning,
-                            Evaluation: player.evaluation,
-                            "Date of Birth": player.dob,
-                            Height: player.height,
-                            Weight: player.weight,
-                        }).map(([key, value]) => (
-                            <p key={key} className="text-sm text-gray-600">
-                                <span className="font-semibold">{key}:</span> {value}
-                            </p>
-                        ))}
+                    <div className="p-4 bg-white shadow-md rounded-lg">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {Object.entries({
+                                Position: player?.position,
+                                Earnings: player?.earning,
+                                Evaluation: player?.evaluation,
+                                "Date of Birth": player?.dob,
+                                Height: player?.height,
+                                Weight: player?.weight,
+                            }).map(([key, value]) => (
+                                <div key={key} className="p-4 bg-gray-100 shadow-sm rounded-lg text-center">
+                                    <p className="text-lg text-gray-700">
+                                        <span className="font-semibold text-2xl">{key}</span>
+                                    </p>
+                                    <p className="text-lg text-gray-700">
+                                        <span className=" text-lg">{value}</span> 
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 );
-            case "current club":
-                return (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {Object.entries({
-                            "Current Club": player.current_club_name,
-                            Goals: player.goal || "N/A",
-                            Assists: player.assists || "N/A",
-                            "Clean Sheets": player.clean_sheets || "N/A",
-                            Appearances: player.appearance || "N/A",
-                            Substitutions: player.substitution || "N/A",
-                            "Yellow Cards": player.yellow_card || "N/A",
-                            "Red Cards": player.red_card || "N/A",
-                        }).map(([key, value]) => (
-                            <p key={key} className="text-sm text-gray-600">
-                                <span className="font-semibold">{key}:</span> {value}
-                            </p>
-                        ))}
-                    </div>
-                );
+                case "current club":
+                    return (
+                        <div className="p-4 bg-white shadow-md rounded-lg">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {Object.entries({
+                                    "Current Club": player?.current_club_name,
+                                    Goals: player?.goal || "N/A",
+                                    Assists: player?.assists || "N/A",
+                                    "Clean Sheets": player?.clean_sheets || "N/A",
+                                    Appearances: player?.appearance || "N/A",
+                                    Substitutions: player?.substitution || "N/A",
+                                    "Yellow Cards": player?.yellow_card || "N/A",
+                                    "Red Cards": player?.red_card || "N/A",
+                                }).map(([key, value]) => (
+                                    <div key={key} className="p-4 bg-gray-100 shadow-sm rounded-lg text-center">
+                                        <p className="text-lg text-gray-700">
+                                            <span className="font-semibold text-2xl">{key}</span> 
+                                        </p>
+                                        <p className="text-lg text-gray-700">
+                                            <span className=" text-lg">{value}</span> 
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
             case "news":
                 return news.length ? (
                     news.map((newsItem) => (
@@ -161,7 +166,7 @@ export default function PlayerDetails() {
                     <p className="text-sm text-gray-600">No news available.</p>
                 );
             case "history":
-                return player.club_history.length ? (
+                return player?.club_history.length ? (
                     player.club_history.map((history, index) => (
                         <div key={index} className="mb-4">
                             <p className="text-sm text-gray-600">{history}</p>
@@ -199,23 +204,23 @@ export default function PlayerDetails() {
                                 <div className="flex space-x-5 px-4 py-7">
                                     <div className="flex-shrink-0">
                                         <img
-                                            src={player.photo}
-                                            alt={player.name}
+                                            src={player?.photo}
+                                            alt={player?.name}
                                             className="w-32 h-32 sm:w-48 sm:h-48 rounded-full object-cover border-4 border-gray-200 shadow-md"
                                         />
                                     </div>
                                     <div className="flex flex-col justify-center mt-4 sm:mt-0 sm:ml-5">
                                         <h2 className="text-3xl sm:text-5xl font-semibold text-white italic">
-                                            {player.name.split(' ')[0]}
+                                            {player?.name.split(' ')[0]}
                                         </h2>
                                         <h2
                                             className="text-3xl sm:text-5xl font-semibold text-white"
                                             style={{ fontStyle: "oblique" }}
                                         >
-                                            {player.name.split(' ')[1]}
+                                            {player?.name.split(' ')[1]}
                                         </h2>
                                         <p className="text-lg text-white mb-4">
-                                            <span className="font-medium">Club:</span> {player.current_club_name}
+                                            <span className="font-medium">Club:</span> {player?.current_club_name}
                                         </p>
                                     </div>
                                 </div>

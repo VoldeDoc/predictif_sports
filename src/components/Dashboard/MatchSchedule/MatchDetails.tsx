@@ -7,7 +7,8 @@ import MatchTimeline from "./Event";
 import Tabs from "./Tool/Tab";
 import useDashBoardManagement from "@/hooks/useDashboard";
 import { useParams } from "react-router-dom";
-import Loader from "@/pages/Ui/loader"; 
+import Loader from "@/pages/Ui/loader";
+import MatchLineup from "./MatchLineup";
 // import MatchLineUp from "./MatchLineup";
 
 const Stats = lazy(() => import("./MatchStats"));
@@ -29,6 +30,37 @@ export default function MatchDetails() {
     const { getMatchDetail } = useDashBoardManagement();
     const { id } = useParams<{ id: string }>();
 
+    const homeFormation = "4-4-2";
+    const awayFormation = "4-3-3";
+  
+    const homePlayers = [
+      { name: "Goalkeeper", number: 1, position: "GK" },
+      { name: "Left Back", number: 3, position: "LB" },
+      { name: "Center Back", number: 4, position: "CB" },
+      { name: "Center Back", number: 5, position: "CB" },
+      { name: "Right Back", number: 2, position: "RB" },
+      { name: "Left Midfielder", number: 6, position: "LM" },
+      { name: "Center Midfielder", number: 8, position: "CM" },
+      { name: "Center Midfielder", number: 10, position: "CM" },
+      { name: "Right Midfielder", number: 7, position: "RM" },
+      { name: "Striker", number: 9, position: "ST" },
+      { name: "Striker", number: 11, position: "ST" },
+    ];
+  
+    const awayPlayers = [
+      { name: "Goalkeeper", number: 1, position: "GK" },
+      { name: "Left Back", number: 3, position: "LB" },
+      { name: "Center Back", number: 4, position: "CB" },
+      { name: "Center Back", number: 5, position: "CB" },
+      { name: "Right Back", number: 2, position: "RB" },
+      { name: "Left Midfielder", number: 6, position: "LM" },
+      { name: "Center Midfielder", number: 8, position: "CM" },
+      { name: "Center Midfielder", number: 10, position: "CM" },
+      { name: "Right Midfielder", number: 7, position: "RM" },
+      { name: "Striker", number: 9, position: "ST" },
+      { name: "Striker", number: 11, position: "ST" },
+    ];
+  
     useEffect(() => {
         (async () => {
             try {
@@ -178,14 +210,10 @@ export default function MatchDetails() {
                 )}
                 {activeTab === 'Lineup' && (
                     <div className="bg-white p-4">
-                        <h2 className="text-lg font-bold">Lineup</h2>
-                        <h3 className="text-md font-semibold">Home Team</h3>
-                        <p>Predictive: {JSON.stringify(matchData?.matchGamePlayer?.home?.predictive)}</p>
-                        <p>Result: {JSON.stringify(matchData?.matchGamePlayer?.home?.result)}</p>
-                        <h3 className="text-md font-semibold mt-4">Away Team</h3>
-                        <p>Predictive: {JSON.stringify(matchData?.matchGamePlayer?.away?.predictive)}</p>
-                        <p>Result: {JSON.stringify(matchData?.matchGamePlayer?.away?.result)}</p>
-                        {/* <MatchLineUp players={players} defaultJerseyColor={"rgb(0,0,0)"} defaultJerseyTextColor={"#FFFF00"}/> */}
+                        <h3 className="text-md font-semibold">Home Team Lineup</h3>
+                        <MatchLineup formation={homeFormation} players={homePlayers} />
+                        <h3 className="text-md font-semibold mt-4">Away Team Lineup</h3>
+                        <MatchLineup formation={awayFormation} players={awayPlayers} />
                     </div>
                 )}
                 {activeTab === 'Timeline' && (
@@ -208,7 +236,7 @@ export default function MatchDetails() {
                                 <h1 className="font-bold text-lg">{matchData?.meta_data?.away_club}</h1>
                             </div>
                         </div>
-                        <MatchTimeline events={matchData?.matchGameTimeline || []} />
+                        <MatchTimeline events={matchData?.events || []} />
                     </div>
                 )}
                 {activeTab === 'H2H' && (

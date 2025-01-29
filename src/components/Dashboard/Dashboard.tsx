@@ -8,13 +8,13 @@ import moment from "moment-timezone";
 import { RootState } from "@/context/store/rootReducer";
 import { useSelector } from "react-redux";
 import useDashBoardManagement from "@/hooks/useDashboard";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import TeamCard from "../DashboardComponents/TeamCard";
 import PlayerCard from "../DashboardComponents/PlayerCard";
 import ResultsMatches from "../DashboardComponents/ResultsMatch";
 import TodayMatches from "../DashboardComponents/TodayMatch";
 import UpcomingMatches from "../DashboardComponents/upComingMatch";
-import EventCard from "../DashboardComponents/EventCatd";
 
 interface Club {
   id: number;
@@ -45,17 +45,49 @@ const getGreeting = (timeZone: string) => {
 };
 
 const Dashboard = () => {
-  const { getClubFollowed, getPlayerFollowed, getMyStrategies } = useDashBoardManagement();
+  const { getClubFollowed, getPlayerFollowed, getMyStrategies, getNewsEvent, getUpcomingMatch,getResultMatch } = useDashBoardManagement();
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
   const [activeTab, setActiveTab] = useState("upcoming");
   const [clubFollowed, setClubFollowed] = useState<Club[]>([]);
   const [playerFollowed, setPlayerFollowed] = useState<Player[]>([]);
-  const [playerFollowedCount, setPlayerFollowedCount] = useState(0);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
+  const [loadingUpcoming, setLoadingUpcoming] = useState(true);
+  const [resultsMatches, setResultsMatches] = useState<Match[]>([]);
+  const [loadingResults, setLoadingResults] = useState(true);
+
   const dateRange: [Date, Date] = [
     new Date(),
     new Date(new Date().setDate(new Date().getDate() + 5)),
   ];
+  interface Event {
+    id: number;
+    subject_id: number;
+    heading: string;
+    sub_heading: string;
+    sub_description: string;
+    description: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  }
+
+  interface Match {
+    homeTeam: {
+      name: string;
+      logo: string;
+      score?: number;
+    };
+    awayTeam: {
+      name: string;
+      logo: string;
+      score?: number;
+    };
+    startTime: Date;
+    isLive?: boolean;
+  }
+  
   const [strategies, setStrategies] = useState({
     all: 0,
     active: 0,
@@ -66,10 +98,25 @@ const Dashboard = () => {
   const strategyTypes = ["all", "active", "stop", "expired"];
 
   useEffect(() => {
+    const fetchUpcomingMatches = async () => {
+      try {
+        const response = await getUpcomingMatch();
+        setUpcomingMatches(response[0]);
+      } catch (error) {
+        console.error("Failed to fetch upcoming matches", error);
+      } finally {
+        setLoadingUpcoming(false);
+      }
+    };
+
+    fetchUpcomingMatches();
+  }, []);
+
+  useEffect(() => {
     (async () => {
       try {
         const clubFollowedData = await getClubFollowed();
-        const flattenedClubsFollowed = clubFollowedData.flat();        
+        const flattenedClubsFollowed = clubFollowedData.flat();
         setClubFollowed(flattenedClubsFollowed);
       } catch (error) {
         console.error(error);
@@ -83,14 +130,13 @@ const Dashboard = () => {
         const PlayerFollowedData = await getPlayerFollowed();
         const flattenedPlayerFollowed = PlayerFollowedData.flat();
         console.log(flattenedPlayerFollowed);
-        
+
         setPlayerFollowed(flattenedPlayerFollowed);
-        setPlayerFollowedCount(flattenedPlayerFollowed.length);
       } catch (error) {
         console.error(error);
       }
     })();
-  }, [ getPlayerFollowed]);
+  }, [getPlayerFollowed]);
 
   useEffect(() => {
     const fetchStrategies = async () => {
@@ -126,17 +172,65 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await getNewsEvent();
+        const EventResponse = response[0]
+        console.log(EventResponse);
+
+        setEvents(EventResponse);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const fetchResultsMatches = async () => {
+      try {
+        const apiData = await getResultMatch();
+        const transformedMatches: Match[] = apiData[0].map((match: any) => ({
+          homeTeam: {
+            name: match.home_club_name,
+            logo: match.home_club_logo,
+            score: match.home_score,
+          },
+          awayTeam: {
+            name: match.away_club_name,
+            logo: match.away_club_logo,
+            score: match.away_score,
+          },
+          startTime: new Date(`${match.game_start_date}T${match.game_start_time}`),
+        }));
+        setResultsMatches(transformedMatches);
+      } catch (error) {
+        console.error("Failed to fetch result matches", error);
+      } finally {
+        setLoadingResults(false);
+      }
+    };
+
+    fetchResultsMatches();
+  }, []);
+
   const handleTabClick = (tab: string) => setActiveTab(tab);
 
-  const renderContent = useMemo(() => {
-    if (activeTab === "upcoming") {
-      return <UpcomingMatches />;
-    } else if (activeTab === "today") {
-      return <TodayMatches />;
-    } else if (activeTab === "results") {
-      return <ResultsMatches />;
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "upcoming":
+        return <UpcomingMatches matches={upcomingMatches} loading={loadingUpcoming} />;
+      case "today":
+        return <TodayMatches />;
+     case "results":
+      return <ResultsMatches matches={resultsMatches} loading={loadingResults} />;
+      default:
+        return null;
     }
-  }, [activeTab]);
+  };
 
   const formatDateRange = (dates: [Date, Date]) => {
     const [start, end] = dates;
@@ -183,47 +277,50 @@ const Dashboard = () => {
               <div className="flex md:flex-row flex-col items-start gap-5 w-[100%]">
                 <div className="relative md:w-[70%]">
                   <div className="flex border-b border-gray-200 mb-4">
-            
+
                     <button
-                      className={`py-2 px-4 text-sm font-medium ${
-                        activeTab === "upcoming"
-                          ? "text-blue-600 border-b-2 border-blue-600"
-                          : "text-gray-600"
-                      }`} 
+                      className={`py-2 px-4 text-sm font-medium ${activeTab === "upcoming"
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-600"
+                        }`}
                       onClick={() => handleTabClick("upcoming")}
                     >
                       Upcoming
                     </button>
                     <button
-                      className={`py-2 px-4 text-sm font-medium ${
-                        activeTab === "today"
-                          ? "text-blue-600 border-b-2 border-blue-600"
-                          : "text-gray-600"
-                      }`}
+                      className={`py-2 px-4 text-sm font-medium ${activeTab === "today"
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-600"
+                        }`}
                       onClick={() => handleTabClick("today")}
                     >
                       Today
                     </button>
                     <button
-                      className={`py-2 px-4 text-sm font-medium ${
-                        activeTab === "results"
-                          ? "text-blue-600 border-b-2 border-blue-600"
-                          : "text-gray-600"
-                      }`}
+                      className={`py-2 px-4 text-sm font-medium ${activeTab === "results"
+                        ? "text-blue-600 border-b-2 border-blue-600"
+                        : "text-gray-600"
+                        }`}
                       onClick={() => handleTabClick("results")}
                     >
                       Results
                     </button>
                   </div>
                   <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                    {renderContent}
+                    {renderContent()}
                   </div>
                 </div>
                 <div className="space-y-3 md:w-[30%] w-full mt-10">
-                  <Card title="Players Followed" headerslot={<IoEyeOutline />}>
-                    <div className="flex flex-col justify-start items-start">
-                      <div className="font-bold text-2xl">{playerFollowedCount}</div>
-                        <hr className="border-2 border-gray-300"/>
+                  <Card title="Predictive News" headerslot={<IoEyeOutline />} className="h-48 overflow-y-auto">
+                    <div className="flex flex-col justify-start items-start ">
+                      {events.map((event) => (
+                        <Link to={`/user/events/${event.id}`}>
+                          <div key={event.id} className="mb-4">
+                            <div className="font-bold text-lg">{event.heading}</div>
+                            <div className="text-xs text-gray-500">{moment(event.created_at).format('LLL')}</div>
+                            <hr className="border-2 border-gray-300 my-2" />
+                          </div></Link>
+                      ))}
                     </div>
                   </Card>
                   <Card title="Strategies" headerslot={<FaRegCalendarCheck />}>
@@ -241,7 +338,7 @@ const Dashboard = () => {
           <div className="lg:col-span-4 col-span-12 space-y-5">
             <TeamCard clubFollowed={clubFollowed} />
             <PlayerCard playersFollowed={playerFollowed} />
-           <EventCard/>
+            {/* <EventCard/> */}
           </div>
           <div className="lg:col-span-4 col-span-12 space-y-5">
           </div>
