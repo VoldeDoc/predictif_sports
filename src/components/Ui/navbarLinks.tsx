@@ -4,8 +4,8 @@ import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const links = [
   {
-    title: "Scores",
-    url: "/",
+    title: "Sports",
+    url: "/sports",
     dropdown: [
       { title: "Home 1", url: "/home" },
       { title: "Home 2", url: "/home2" },
@@ -17,7 +17,7 @@ const links = [
     { title: "The boot Room", url: "/home" },
     { title: "Strategic Analysis", url: "/home2" },
   ] },
-  { title: "Sports", url: "/sports" },
+  { title: "Scores", url: "/" },
   { title: "Forum", url: "/strategies" },
   { title: "Head2Head", url: "/head" },
   { title: "Fantasy League", url: "/fantasy" },

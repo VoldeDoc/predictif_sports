@@ -4,6 +4,7 @@ import {
   BookOpenIcon,
   UsersIcon,
   CommandLineIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/solid";
 import { NavLink } from "react-router-dom";
 import { dot, logo, medal } from "../../../../public";
@@ -36,11 +37,11 @@ const MENU_ITEMS = [
     icon: UsersIcon,
     path: "/match-schedule",
   },
-  // {
-  //   name: "Fixtures",
-  //   icon: UserIcon,
-  //   path: "/fixtures",
-  // },
+  {
+    name: "Sports",
+    icon: SparklesIcon,
+    path: "/dash-sports",
+  },
   {
     name: "Strategies",
     icon: CommandLineIcon,

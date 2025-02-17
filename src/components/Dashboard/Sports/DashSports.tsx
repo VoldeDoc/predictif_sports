@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import Tabs from '@/pages/Ui/tab';
-import SearchSection from './Tools/searchSection';
-import LeaguesList from './Tools/LeagueList';
-import Football from './Football/Football';
-import Basketball from './Basketball/Basketball';
-import NFL from './NFL/NFL';
-import Cricket from './Cricket/cricket';
-import Rugby from './Rugby/Rugby';
-import MLB from './MLB/MLB';
-import F1 from './F1/F1';
-import Tennis from './Tennis/Tennis';
+import Football from '@/components/landingPage/Sport/Football/Football';
+import Basketball from '@/components/landingPage/Sport/Basketball/Basketball';
+import NFL from '@/components/landingPage/Sport/NFL/NFL';
+import Rugby from '@/components/landingPage/Sport/Rugby/Rugby';
+import MLB from '@/components/landingPage/Sport/MLB/MLB';
+import Cricket from '@/components/landingPage/Sport/Cricket/cricket';
+import F1 from '@/components/landingPage/Sport/F1/F1';
+import Tennis from '@/components/landingPage/Sport/Tennis/Tennis';
+import SearchSection from '@/components/landingPage/Sport/Tools/searchSection';
+import LeaguesList from '@/components/landingPage/Sport/Tools/LeagueList';
 
 const regions = ["Africa", "Europe", "Australia", "North America", "South America", "Asia"];
 
@@ -42,7 +42,7 @@ const regionLeagues: { [key in typeof regions[number]]: { name: string, logo: st
     ],
 };
 
-export default function Sports() {
+export default function DashSports() {
     const [showSearch, setShowSearch] = useState(false);
     const [activeRegion, setActiveRegion] = useState<typeof regions[number]>("Africa");
 
@@ -74,7 +74,7 @@ export default function Sports() {
     };
 
     return (
-        <div className='py-28 sm:py-32 px-8 sm:px-16'>
+        <div className=' px-8 sm:px-16'>
             <div className="md:hidden mb-4 flex justify-between items-center">
                 <h1 className='text-xl font-bold'>Sports</h1>
                 <button

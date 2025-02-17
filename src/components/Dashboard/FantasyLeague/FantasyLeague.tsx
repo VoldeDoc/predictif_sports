@@ -10,7 +10,7 @@ import Squad from "./Squad";
 // import Finance from "@/components/Dashboard/FantasyLeague/Finance";
 
 export default function FantasyLeagueDash() {
-    const tabs = ["Fantasy", "Squad", "Statistic", "Calendar", "Finance","Transfer"];
+    const tabs = ["Fantasy", "Squad", "Statistic", "Calendar","Transfer"];
 
     const renderContent = (activeTab: string) => {
         switch (activeTab) {
