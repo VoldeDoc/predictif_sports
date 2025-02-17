@@ -63,6 +63,9 @@ import PlayerDetails from './components/Dashboard/PrematchAlerts/PlayerDetails.t
 import TeamDetails from './components/Dashboard/PrematchAlerts/TeamDetails.tsx';
 import PaystackSuccessPage from './components/Stripe/paySuccessCheckoutPage.tsx';
 import EventDetails from './components/Dashboard/PrematchAlerts/EventDetails.tsx';
+import Sports_page from './pages/home/sports_page/sports_page.tsx';
+import MatchInfo from './components/landingPage/Sport/MatchInfo/MatchInfo.tsx';
+import FantasyLeagueDashPage from './pages/dashboard/fantasy_league/fantasyleague_page.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -94,6 +97,10 @@ function App() {
               <Route path="/head" element={<Heading />} />
               <Route path="/fantasy" element={<Fantasy />} />
 
+              <Route path="/sports" element={<Sports_page />} />
+              {/* <Route path="/sports/match:/team1-:team2" element={<MatchInfo />} /> */}
+              <Route path="/sports/match" element={<MatchInfo />} />
+
               {/* Authentication */}
               <Route path="/auth/signin" element={<Signin />} />
               <Route path="/auth/signup" element={<Signup />} />
@@ -111,6 +118,7 @@ function App() {
                 </ProtectedRoute>} />
 
               <Route path="/user/profile" element={<ProtectedRoute><User_Profile /></ProtectedRoute>} />
+              <Route path="/fantasy-league" element={<ProtectedRoute><FantasyLeagueDashPage /></ProtectedRoute>} />
               <Route path="/auth/change-passwordmail" element={<ProtectedRoute><Change_PasswordEmail /></ProtectedRoute>} />
               <Route path="/auth/change-password" element={<ProtectedRoute><Change_Password /></ProtectedRoute>} />
               <Route path="/auth/otp-changepwd" element={<OtpChangePwdVerification />} />

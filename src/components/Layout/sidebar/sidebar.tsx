@@ -9,7 +9,7 @@ import { NavLink } from "react-router-dom";
 import { dot, logo, medal } from "../../../../public";
 import { GrAnnounce, GrClose } from "react-icons/gr";
 import Button from "@/components/Ui/Button";
-
+import FantasyLeague from "/assets/images/landingPage/football 1.png"
 type Props = {
   showNav: boolean;
   setShowNav: Dispatch<SetStateAction<boolean>>;
@@ -50,6 +50,11 @@ const MENU_ITEMS = [
     name: "Forum",
     icon: GrAnnounce,
     path: "/forum",
+  },
+  {
+    name: "Fantasy League",
+    icon: () => <img src={FantasyLeague} alt="Fantasy League" className="h-6 w-6 bg-black-500" />,
+    path: "/fantasy-league",
   },
 ];
 

@@ -17,7 +17,7 @@ const links = [
     { title: "The boot Room", url: "/home" },
     { title: "Strategic Analysis", url: "/home2" },
   ] },
-  { title: "Analysis", url: "/feat" },
+  { title: "Sports", url: "/sports" },
   { title: "Forum", url: "/strategies" },
   { title: "Head2Head", url: "/head" },
   { title: "Fantasy League", url: "/fantasy" },
