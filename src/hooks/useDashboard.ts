@@ -804,12 +804,40 @@ const getUpcomingMatch = async () => {
         setLoading(false)
     }
 }
+const getUpcomingMatchPublic = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertUpComing/public`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
 
 
 const getTodayMatch = async () => {
     try {
         setLoading(true)
-        const res = await client.get(`/user/getMatchAlertUpComing`)
+        const res = await client.get(`/user/getMatchAlertToday/`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+const getTodayMatchPublic = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertToday/public`)
         return res?.data.data
     } catch (error: any) {
         const resError = error.response?.data;
@@ -825,6 +853,20 @@ const getResultMatch = async () => {
     try {
         setLoading(true)
         const res = await client.get(`/user/getMatchAlertResult`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    }
+    finally {
+        setLoading(false)
+    }
+}
+const getResultMatchPublic = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertResult/public`)
         return res?.data.data
     } catch (error: any) {
         const resError = error.response?.data;
@@ -939,7 +981,10 @@ const getNewsEventById = async (id:number)=>{
         getNewsEventBySubject,
         getNewsEvent,
         getNewsEventById,
-        deleteStrategies
+        deleteStrategies,
+        getUpcomingMatchPublic,
+        getResultMatchPublic,
+        getTodayMatchPublic,
     };
 }
 

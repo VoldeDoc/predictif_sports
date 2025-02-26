@@ -101,7 +101,7 @@ function App() {
               <Route path="/sports" element={<Sports_page />} />
               <Route path="/dash-sports" element={<Dash_Sports />} />
               {/* <Route path="/sports/match:/team1-:team2" element={<MatchInfo />} /> */}
-              <Route path="/sports/match" element={<MatchInfo />} />
+              <Route path="/sports/match" element={<MatchInfo matchDetails={{ meta_data: { id: '', home_club: '', away_club: '', home_club_logo: '', away_club_logo: '', match_type: 'Coming Match' } }} />} />
 
               {/* Authentication */}
               <Route path="/auth/signin" element={<Signin />} />

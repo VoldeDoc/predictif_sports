@@ -5,12 +5,7 @@ import { ChevronDownIcon } from "@heroicons/react/24/solid";
 const links = [
   {
     title: "Sports",
-    url: "/sports",
-    dropdown: [
-      { title: "Home 1", url: "/home" },
-      { title: "Home 2", url: "/home2" },
-    ],
-  },
+    url: "/sports",},
   { title: "News",
      url: "/experts",
      dropdown:[
