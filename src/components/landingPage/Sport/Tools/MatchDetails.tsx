@@ -9,6 +9,7 @@ interface MatchDetailsProps {
     homelogo: string;
     awaylogo: string;
     index: number;
+    logo? :string
     homescore?: string;
     awayscore?: string;
     isUpcoming?: boolean;

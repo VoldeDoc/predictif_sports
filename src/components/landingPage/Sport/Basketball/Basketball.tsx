@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import Tabs from '@/pages/Ui/tab';
 import MatchDetails from '../Tools/MatchDetails';
 import nbaLogo from '/assets/images/landingPage/premier.svg';
-import MatchInfo from '../MatchInfo/MatchInfo';
+import BasketballMatchInfo from '../MatchInfo/BasketballMatchInfo';
 
 const Basketball: React.FC = () => {
-    const [selectedMatch, setSelectedMatch] = useState(null);
+    const [selectedMatch, setSelectedMatch] = useState<MatchDetail | null>(null);
     const tabs2: (keyof MatchDetailsType)[] = ["Latest Match", "Live Match", "Coming Match"];
 
-    const handleMatchClick = (match: any) => {
+    const handleMatchClick = (match: MatchDetail) => {
         setSelectedMatch(match);
     };
 
@@ -24,18 +24,16 @@ const Basketball: React.FC = () => {
                     <div className="mt-4">
                         {selectedMatch ? (
                             <>
-                                <MatchInfo />
+                                <BasketballMatchInfo matchDetails={selectedMatch} />
                                 <button onClick={handleBackClick} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
                                     Back to Matches
                                 </button>
                             </>
                         ) : (
-                            
                             <Tabs
-                            tabs={tabs2}
-                            renderContent={(activeTab) => RenderSecondContent(activeTab as keyof MatchDetailsType, handleMatchClick)}
-                        />
-                        
+                                tabs={tabs2}
+                                renderContent={(activeTab) => RenderSecondContent(activeTab as keyof MatchDetailsType, handleMatchClick)}
+                            />
                         )}
                     </div>
                 </div>
@@ -49,7 +47,12 @@ type MatchDetail = {
     team1: string;
     team2: string;
     score: string;
+    homelogo?: string;
+    awaylogo?: string;
     logo: string;
+    id: string;
+    game_start_date: string;
+    game_start_time: string;
 };
 
 type MatchDetailsType = {
@@ -59,13 +62,16 @@ type MatchDetailsType = {
 };
 
 const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick: (match: MatchDetail) => void) => {
-    const latestMatchDetails = [
+    const latestMatchDetails: MatchDetail[] = [
         {
             time: "4th Qtr",
             team1: "Lakers",
             team2: "Warriors",
             score: "102-99",
             logo: nbaLogo,
+            id: "1",
+            game_start_date: "2024-01-20",
+            game_start_time: "19:00",
         },
         {
             time: "4th Qtr",
@@ -73,6 +79,9 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Warriors",
             score: "102-99",
             logo: nbaLogo,
+            id: "2",
+            game_start_date: "2024-01-20",
+            game_start_time: "19:00",
         },
         {
             time: "4th Qtr",
@@ -80,16 +89,22 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Warriors",
             score: "102-99",
             logo: nbaLogo,
+            id: "3",
+            game_start_date: "2024-01-20",
+            game_start_time: "19:00",
         },
     ];
 
-    const liveMatchDetails = [
+    const liveMatchDetails: MatchDetail[] = [
         {
             time: "2nd Qtr",
             team1: "Heat",
             team2: "Celtics",
             score: "45 - 50",
             logo: nbaLogo,
+            id: "4",
+            game_start_date: "2024-01-20",
+            game_start_time: "20:00",
         },
         {
             time: "2nd Qtr",
@@ -97,6 +112,9 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Celtics",
             score: "45 - 50",
             logo: nbaLogo,
+            id: "5",
+            game_start_date: "2024-01-20",
+            game_start_time: "20:00",
         },
         {
             time: "2nd Qtr",
@@ -104,16 +122,22 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Celtics",
             score: "45 - 50",
             logo: nbaLogo,
+            id: "6",
+            game_start_date: "2024-01-20",
+            game_start_time: "20:00",
         },
     ];
 
-    const comingMatchDetails = [
+    const comingMatchDetails: MatchDetail[] = [
         {
             time: "Tomorrow",
             team1: "Bulls",
             team2: "Knicks",
             score: "-",
             logo: nbaLogo,
+            id: "7",
+            game_start_date: "2024-01-21",
+            game_start_time: "19:30",
         },
         {
             time: "Tomorrow",
@@ -121,6 +145,9 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Knicks",
             score: "-",
             logo: nbaLogo,
+            id: "8",
+            game_start_date: "2024-01-21",
+            game_start_time: "19:30",
         },
         {
             time: "Tomorrow",
@@ -128,10 +155,13 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
             team2: "Knicks",
             score: "-",
             logo: nbaLogo,
+            id: "9",
+            game_start_date: "2024-01-21",
+            game_start_time: "19:30",
         },
     ];
 
-    const matchDetails = {
+    const matchDetails: MatchDetailsType = {
         "Latest Match": latestMatchDetails,
         "Live Match": liveMatchDetails,
         "Coming Match": comingMatchDetails,
@@ -150,9 +180,13 @@ const RenderSecondContent = (activeTab: keyof MatchDetailsType, handleMatchClick
                     team1={match.team1}
                     team2={match.team2}
                     score={match.score}
-                    logo={match.logo}
+                    homelogo={match.logo}  // Use the single logo for both
+                    awaylogo={match.logo}
                     index={index}
-                    onClick={() => handleMatchClick(match)} // Pass the handleMatchClick function
+                    onClick={() => handleMatchClick(match)}
+                    id={match.id}
+                    game_start_date={match.game_start_date}
+                    game_start_time={match.game_start_time}
                 />
             ))}
         </div>
