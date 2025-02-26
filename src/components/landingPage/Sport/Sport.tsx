@@ -119,7 +119,7 @@ export default function Sports() {
     return (
         <>
             <div className="container-sm">
-                <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-10">
+                <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-20">
                   
                 </div>
             </div>
