@@ -897,7 +897,7 @@ const getNewsEvent = async () => {
 const getNewsEventBySubject = async (id:string)=>{
     try{
      setLoading(true)
-     const res = await client.get(`/user/getNewEventBySubject/${id}`)
+     const res = await client.get(`/user/getNewEventBySubject/${id}/subject`)
      return res?.data.data
     }catch (error:any){
      const resError =  error.response?.data;
