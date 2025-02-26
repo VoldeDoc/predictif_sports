@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import Tabs from '@/pages/Ui/tab';
-import Football from '@/components/landingPage/Sport/Football/Football';
+import DashBoardFootball from '@/components/landingPage/Sport/Football/DashBoardFootball';
 import Basketball from '@/components/landingPage/Sport/Basketball/Basketball';
 import NFL from '@/components/landingPage/Sport/NFL/NFL';
 import Rugby from '@/components/landingPage/Sport/Rugby/Rugby';
@@ -11,6 +11,7 @@ import F1 from '@/components/landingPage/Sport/F1/F1';
 import Tennis from '@/components/landingPage/Sport/Tennis/Tennis';
 import SearchSection from '@/components/landingPage/Sport/Tools/searchSection';
 import LeaguesList from '@/components/landingPage/Sport/Tools/LeagueList';
+
 
 const regions = ["Africa", "Europe", "Australia", "North America", "South America", "Asia"];
 
@@ -45,36 +46,79 @@ const regionLeagues: { [key in typeof regions[number]]: { name: string, logo: st
 export default function DashSports() {
     const [showSearch, setShowSearch] = useState(false);
     const [activeRegion, setActiveRegion] = useState<typeof regions[number]>("Africa");
-
+    
+    // Get initial tab from localStorage
+    const initialTab = localStorage.getItem('sportsActiveTab') || "Football";
     const tabs = ["Football", "Basketball", "NFL", "Rugby", "MLB", "Cricket", "F1", "Tennis"] as const;
     type Tab = typeof tabs[number];
-    const [activeTab, setActiveTab] = useState<Tab>("Football");
+    const [activeTab, setActiveTab] = useState<Tab>(initialTab as Tab);
+    const [mountedComponents, setMountedComponents] = useState<Set<Tab>>(new Set([initialTab as Tab]));
 
-    const renderContent = (activeTab: string) => {
-        switch (activeTab) {
-            case "Football":
-                return <Football />;
-            case "Basketball":
-                return <Basketball />;
-            case "NFL":
-                return <NFL />;
-            case "Rugby":
-                return <Rugby />;
-            case "MLB":
-                return <MLB />;
-            case "Cricket":
-                return <Cricket />;
-            case "F1":
-                return <F1 />;
-            case "Tennis":
-                return <Tennis />;
-            default:
-                return null;
-        }
+    // Initialize components object to store cached components
+    const components: Record<Tab, React.ReactNode> = {
+        Football: null,
+        Basketball: null,
+        NFL: null,
+        Rugby: null,
+        MLB: null,
+        Cricket: null,
+        F1: null,
+        Tennis: null
     };
 
+    // Cache the content of each tab
+    const cachedContent = useMemo(() => {
+        mountedComponents.forEach((tab) => {
+            switch (tab) {
+                case "Football":
+                    components[tab] = <DashBoardFootball key="football" />;
+                    break;
+                case "Basketball":
+                    components[tab] = <Basketball key="basketball" />;
+                    break;
+                case "NFL":
+                    components[tab] = <NFL key="nfl" />;
+                    break;
+                case "Rugby":
+                    components[tab] = <Rugby key="rugby" />;
+                    break;
+                case "MLB":
+                    components[tab] = <MLB key="mlb" />;
+                    break;
+                case "Cricket":
+                    components[tab] = <Cricket key="cricket" />;
+                    break;
+                case "F1":
+                    components[tab] = <F1 key="f1" />;
+                    break;
+                case "Tennis":
+                    components[tab] = <Tennis key="tennis" />;
+                    break;
+            }
+        });
+        return components;
+    }, [mountedComponents]);
+
+    const handleTabChange = useCallback((tab: string) => {
+        const newTab = tab as Tab;
+        setActiveTab(newTab);
+        localStorage.setItem('sportsActiveTab', newTab);
+        
+        // Add new tab to mounted components
+        setMountedComponents(prev => {
+            const newSet = new Set(prev);
+            newSet.add(newTab);
+            return newSet;
+        });
+    }, []);
+
+    const renderContent = useCallback((activeTab: string) => {
+        const component = cachedContent[activeTab as Tab];
+        return component;
+    }, [cachedContent, handleTabChange]);
+
     return (
-        <div className=' px-8 sm:px-16'>
+        <div className=' px-4 sm:px-8'>
             <div className="md:hidden mb-4 flex justify-between items-center">
                 <h1 className='text-xl font-bold'>Sports</h1>
                 <button
@@ -84,6 +128,7 @@ export default function DashSports() {
                     <FaSearch />
                 </button>
             </div>
+            
             {showSearch && (
                 <div className="md:hidden mb-4">
                     <SearchSection onChange={(e) => console.log(e.target.value)} />
@@ -93,11 +138,13 @@ export default function DashSports() {
 
             <Tabs 
                 tabs={tabs} 
+                defaultTab={initialTab}
                 renderContent={() => null} 
-                onTabChange={(tab) => setActiveTab(tab as Tab)} 
+                onTabChange={handleTabChange}
             />
 
             <div className="flex flex-col md:flex-row space-x-5">
+                {/* Sidebar */}
                 <div className="w-full md:w-1/4 hidden md:block"> 
                     <div className='bg-[#0C21C10D] px-4 py-4'>
                         <h1 className='pb-3'>Region</h1>
@@ -125,9 +172,16 @@ export default function DashSports() {
                     </div>
                 </div>
 
+                {/* Main Content */}
                 <div className="w-full md:w-3/4"> 
-                    {renderContent(activeTab)}
+                <div style={{ display: 'none' }}>
+                    {/* Keep mounted components in DOM but hidden */}
+                    {Array.from(mountedComponents).map(tab => (
+                        tab !== activeTab && cachedContent[tab]
+                    ))}
                 </div>
+                {renderContent(activeTab)}
+            </div>
             </div>
         </div>
     );

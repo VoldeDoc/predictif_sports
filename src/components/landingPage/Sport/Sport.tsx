@@ -45,7 +45,7 @@ const regionLeagues: { [key in typeof regions[number]]: { name: string, logo: st
 export default function Sports() {
     const [showSearch, setShowSearch] = useState(false);
     const [activeRegion, setActiveRegion] = useState<typeof regions[number]>("Africa");
-    
+
     // Get initial tab from localStorage
     const initialTab = localStorage.getItem('sportsActiveTab') || "Football";
     const tabs = ["Football", "Basketball", "NFL", "Rugby", "MLB", "Cricket", "F1", "Tennis"] as const;
@@ -102,7 +102,7 @@ export default function Sports() {
         const newTab = tab as Tab;
         setActiveTab(newTab);
         localStorage.setItem('sportsActiveTab', newTab);
-        
+
         // Add new tab to mounted components
         setMountedComponents(prev => {
             const newSet = new Set(prev);
@@ -117,71 +117,78 @@ export default function Sports() {
     }, [cachedContent, handleTabChange]);
 
     return (
-        <div className='py-28 sm:py-32 px-8 sm:px-16'>
-            <div className="md:hidden mb-4 flex justify-between items-center">
-                <h1 className='text-xl font-bold'>Sports</h1>
-                <button
-                    onClick={() => setShowSearch(!showSearch)}
-                    className="p-2 bg-blue-500 text-white rounded-full shadow-lg"
-                >
-                    <FaSearch />
-                </button>
-            </div>
-            
-            {showSearch && (
-                <div className="md:hidden mb-4">
-                    <SearchSection onChange={(e) => console.log(e.target.value)} />
-                    <LeaguesList sport={activeTab} />
+        <>
+            <div className="container-sm">
+                <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-10">
+                  
                 </div>
-            )}
+            </div>
+            <div className='py-14 sm:py-10 px-8 sm:px-16 '>
+                <div className="md:hidden mb-4 flex justify-between items-center">
+                    <h1 className='text-xl font-bold'>Sports</h1>
+                    <button
+                        onClick={() => setShowSearch(!showSearch)}
+                        className="p-2 bg-blue-500 text-white rounded-full shadow-lg"
+                    >
+                        <FaSearch />
+                    </button>
+                </div>
 
-            <Tabs 
-                tabs={tabs} 
-                defaultTab={initialTab}
-                renderContent={() => null} 
-                onTabChange={handleTabChange}
-            />
+                {showSearch && (
+                    <div className="md:hidden mb-4">
+                        <SearchSection onChange={(e) => console.log(e.target.value)} />
+                        <LeaguesList sport={activeTab} />
+                    </div>
+                )}
 
-            <div className="flex flex-col md:flex-row space-x-5">
-                {/* Sidebar */}
-                <div className="w-full md:w-1/4 hidden md:block"> 
-                    <div className='bg-[#0C21C10D] px-4 py-4'>
-                        <h1 className='pb-3'>Region</h1>
-                        {regions.map((region) => (
-                            <button 
-                                key={region} 
-                                onClick={() => setActiveRegion(region)}
-                                className={`block py-1 ${activeRegion === region ? 'font-bold' : ''}`}
-                            >
-                                {region}
-                            </button>
-                        ))}
+                <Tabs
+                    tabs={tabs}
+                    defaultTab={initialTab}
+                    renderContent={() => null}
+                    onTabChange={handleTabChange}
+                />
 
-                        <div className='mt-4'>
-                            <h2 className='pb-2 font-semibold'>Top Leagues</h2>
-                            <ul className="list-disc pl-5">
-                                {regionLeagues[activeRegion].map((league) => (
-                                    <li key={league.name} className="flex items-center space-x-2">
-                                        <img src={league.logo} alt={league.name} className="w-6 h-6 object-contain" />
-                                        <span>{league.name}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                <div className="flex flex-col md:flex-row space-x-5">
+                    {/* Sidebar */}
+                    <div className="w-full md:w-1/4 hidden md:block">
+                        <div className='bg-[#0C21C10D] px-4 py-4'>
+                            <h1 className='pb-3'>Region</h1>
+                            {regions.map((region) => (
+                                <button
+                                    key={region}
+                                    onClick={() => setActiveRegion(region)}
+                                    className={`block py-1 ${activeRegion === region ? 'font-bold' : ''}`}
+                                >
+                                    {region}
+                                </button>
+                            ))}
+
+                            <div className='mt-4'>
+                                <h2 className='pb-2 font-semibold'>Top Leagues</h2>
+                                <ul className="list-disc pl-5">
+                                    {regionLeagues[activeRegion].map((league) => (
+                                        <li key={league.name} className="flex items-center space-x-2">
+                                            <img src={league.logo} alt={league.name} className="w-6 h-6 object-contain" />
+                                            <span>{league.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Main Content */}
-                <div className="w-full md:w-3/4"> 
-                <div style={{ display: 'none' }}>
-                    {/* Keep mounted components in DOM but hidden */}
-                    {Array.from(mountedComponents).map(tab => (
-                        tab !== activeTab && cachedContent[tab]
-                    ))}
+                    {/* Main Content */}
+                    <div className="w-full md:w-3/4">
+                        <div style={{ display: 'none' }}>
+                            {/* Keep mounted components in DOM but hidden */}
+                            {Array.from(mountedComponents).map(tab => (
+                                tab !== activeTab && cachedContent[tab]
+                            ))}
+                        </div>
+                        {renderContent(activeTab)}
+                    </div>
                 </div>
-                {renderContent(activeTab)}
             </div>
-            </div>
-        </div>
+        </>
     );
 }
