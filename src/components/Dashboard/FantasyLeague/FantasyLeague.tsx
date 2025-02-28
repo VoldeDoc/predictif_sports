@@ -1,16 +1,13 @@
 import { AuthLayout } from "@/components/Layout/layout";
 import Tabs from "@/pages/Ui/tab";
 import FantasySquadMatch from "./Fantasy";
-import Calendar from "./Calendar";
 import Transfer from "./Transfer";
 import FantasyStatistic from "./Statistic";
 import Squad from "./Squad";
-// import Statistic from "@/components/Dashboard/FantasyLeague/Statistic";
-// import Calendar from "@/components/Dashboard/FantasyLeague/Calendar";
-// import Finance from "@/components/Dashboard/FantasyLeague/Finance";
+import { SquadProvider } from './context/squadContext';
 
 export default function FantasyLeagueDash() {
-    const tabs = ["Fantasy", "Squad", "Statistic", "Calendar","Transfer"];
+    const tabs = ["Fantasy", "Squad", "Statistic", "Transfer"];
 
     const renderContent = (activeTab: string) => {
         switch (activeTab) {
@@ -18,12 +15,14 @@ export default function FantasyLeagueDash() {
                 return <FantasySquadMatch />;
             case "Statistic":
                 return <FantasyStatistic />;
-            case "Calendar":
-                return <Calendar />;
             case "Squad":
-                return <Squad />;
+                return (
+                    <SquadProvider>
+                        <Squad />
+                    </SquadProvider>
+                );
             case "Transfer":
-            return <Transfer/> 
+                return <Transfer />; 
             default:
                 return null;
         }
@@ -31,8 +30,8 @@ export default function FantasyLeagueDash() {
 
     return (
         <AuthLayout>
-            <div className="px-8 sm:px-16 ">
-                    <Tabs tabs={tabs} renderContent={renderContent} />
+            <div className="px-8 sm:px-16">
+                <Tabs tabs={tabs} renderContent={renderContent} />
             </div>
         </AuthLayout>
     );

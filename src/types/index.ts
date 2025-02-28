@@ -119,3 +119,48 @@ export interface updateStreategyValues{
   team_player:string;
   endDate?:string;
 }
+
+
+export interface Player {
+  id: number;
+  name: string;
+  position: Position;
+  team: string;
+  price: number;
+  points: number;
+  selected: boolean;
+  inMatchday: boolean;
+  image?: string;
+}
+
+export enum Position {
+  GK = "Goalkeeper",
+  DEF = "Defender",
+  MID = "Midfielder",
+  FWD = "Forward"
+}
+
+export interface Formation {
+  name: string;
+  structure: {
+    GK: number;
+    DEF: number;
+    MID: number;
+    FWD: number;
+  };
+}
+
+export interface Squad {
+  players: Player[];
+  formation: Formation;
+  budget: number;
+  totalPoints: number;
+  matchdayReady: boolean;
+}
+
+export interface GameWeek {
+  id: number;
+  name: string;
+  status: 'upcoming' | 'active' | 'completed';
+}
+
