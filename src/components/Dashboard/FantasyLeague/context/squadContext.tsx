@@ -2,6 +2,31 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { formations } from '../data/formations';
 import { Formation, Player, Position, Squad } from '@/types';
 
+// Storage key for localStorage
+const SQUAD_STORAGE_KEY = 'fantasySquadData';
+
+// Get initial squad data from localStorage if available
+const getInitialSquad = (): Squad => {
+  if (typeof window !== 'undefined') {
+    const savedSquad = localStorage.getItem(SQUAD_STORAGE_KEY);
+    if (savedSquad) {
+      try {
+        return JSON.parse(savedSquad);
+      } catch (e) {
+        console.error('Error parsing stored squad data:', e);
+      }
+    }
+  }
+  
+  return {
+    players: [],
+    formation: formations[0], // Default to 4-4-2
+    budget: 100, // £100M
+    totalPoints: 0,
+    matchdayReady: false
+  };
+};
+
 interface SquadContextType {
   squad: Squad;
   addPlayer: (player: Player) => void;
@@ -19,18 +44,24 @@ interface SquadContextType {
   getSubstitutePlayers: () => Player[];
 }
 
-const initialSquad: Squad = {
-  players: [],
-  formation: formations[0], // Default to 4-4-2
-  budget: 100, // £100M
-  totalPoints: 0,
-  matchdayReady: false
-};
+// const initialSquad: Squad = {
+//   players: [],
+//   formation: formations[0], // Default to 4-4-2
+//   budget: 100, // £100M
+//   totalPoints: 0,
+//   matchdayReady: false
+// };
 
 const SquadContext = createContext<SquadContextType | undefined>(undefined);
 
 export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [squad, setSquad] = useState<Squad>(initialSquad);
+  // const [squad, setSquad] = useState<Squad>(initialSquad);
+  const [squad, setSquad] = useState<Squad>(getInitialSquad());
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SQUAD_STORAGE_KEY, JSON.stringify(squad));
+    }
+  }, [squad]);
 
   // Check if squad meets requirements whenever it changes
   useEffect(() => {

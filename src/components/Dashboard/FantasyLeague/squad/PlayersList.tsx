@@ -5,6 +5,7 @@ import { Position, Player } from '@/types';
 
 interface PlayersListProps {
   players: Player[];
+  
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({ players }) => {

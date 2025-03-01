@@ -1,95 +1,165 @@
-import React from 'react';
-import { UserCircle2 } from 'lucide-react';
-import { Position } from '@/types';
-import { useSquad } from '../context/squadContext';
+import React from "react";
+import { useSquad } from "../context/squadContext";
+import { Player, Position } from "@/types";
+
+// Updated to include goalkeeper in formation patterns
+const FORMATIONS: { [key: string]: number[] } = {
+  "4-4-2": [1, 4, 4, 2],
+  "4-3-3": [1, 4, 3, 3],
+  "3-5-2": [1, 3, 5, 2],
+  "5-3-2": [1, 5, 3, 2],
+  "4-2-3-1": [1, 4, 2, 3, 1],
+  "3-4-3": [1, 3, 4, 3]  // Add the missing 3-4-3 formation
+};
+
 const FieldView: React.FC = () => {
-  const { squad, toggleMatchdaySelection, getMatchdayPlayers } = useSquad();
-  
+  const { squad, getMatchdayPlayers, toggleMatchdaySelection } = useSquad();
   const matchdayPlayers = getMatchdayPlayers();
-  
-  const getPositionColor = (position: string) => {
-    switch(position) {
-      case 'Goalkeeper': return 'bg-yellow-500';
-      case 'Defender': return 'bg-blue-500';
-      case 'Midfielder': return 'bg-green-500';
-      case 'Forward': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
-  
-  const renderPositionRow = (position: Position) => {
-    const players = matchdayPlayers.filter(p => p.position === position);
-    const positionKey = position.split(' ')[0] as keyof typeof squad.formation.structure;
-    const limit = squad.formation.structure[positionKey];
-    
-    return (
-      <div className="flex justify-center items-center mb-8">
-        <div className={`grid grid-cols-${limit} gap-4 w-full max-w-3xl`} style={{ gridTemplateColumns: `repeat(${limit}, minmax(0, 1fr))` }}>
-          {players.map(player => (
-            <div 
-              key={player.id}
-              className={`flex flex-col items-center cursor-pointer transition-transform hover:scale-105`}
-              onClick={() => toggleMatchdaySelection(player.id)}
-            >
-              <div className={`w-16 h-16 rounded-full ${getPositionColor(player.position)} flex items-center justify-center mb-1 border-2 border-white shadow-md`}>
-                {player.image ? (
-                  <img 
-                    src={player.image} 
-                    alt={player.name} 
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <UserCircle2 className="text-white" size={32} />
-                )}
-              </div>
-              <span className="text-xs font-semibold text-center bg-white/80 rounded-full px-2 py-0.5 truncate max-w-full">
-                {player.name}
-              </span>
-            </div>
-          ))}
-          
-          {/* Empty slots */}
-          {Array.from({ length: limit - players.length }).map((_, i) => (
-            <div key={`empty-${position}-${i}`} className="flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-gray-300/50 flex items-center justify-center mb-1 border-2 border-white/30">
-                <UserCircle2 className="text-gray-400" size={32} />
-              </div>
-              <span className="text-xs text-gray-400 bg-white/50 rounded-full px-2 py-0.5">
-                Empty
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-  
+  const formationName = `${squad.formation.structure.DEF}-${squad.formation.structure.MID}-${squad.formation.structure.FWD}`;
+  // const formationPattern = FORMATIONS[formationName] || FORMATIONS["4-4-2"];
+
+  const goalkeeper = matchdayPlayers.find((p) => p.position === Position.GK);
+  const defenders = matchdayPlayers.filter((p) => p.position === Position.DEF);
+  const midfielders = matchdayPlayers.filter((p) => p.position === Position.MID);
+  const forwards = matchdayPlayers.filter((p) => p.position === Position.FWD);
+
+  const orderedPlayers = [
+    goalkeeper,
+    ...defenders,
+    ...midfielders,
+    ...forwards,
+  ].filter((player): player is Player => player !== undefined);
+
   return (
-    <div className="relative mb-8 pt-4">
-      <div className="absolute inset-0 bg-gradient-to-b from-green-600 to-green-700 rounded-lg -z-10"></div>
-      
-      {/* Field markings */}
-      <div className="absolute inset-0 flex flex-col items-center -z-10">
-        <div className="w-3/4 h-full border-2 border-white/30 rounded-lg mt-8 mb-4 mx-auto"></div>
-        <div className="absolute w-1/3 h-1/5 border-2 border-white/30 bottom-4 left-1/2 transform -translate-x-1/2"></div>
-        <div className="absolute w-40 h-40 rounded-full border-2 border-white/30 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-      </div>
-      
-      <div className="py-8 px-4">
-        {/* Formation name */}
-        <div className="text-center mb-6">
-          <span className="bg-white/80 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">
-            Formation: {squad.formation.name}
-          </span>
+    <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h2 className="text-lg font-semibold mb-3">Match Day Squad</h2>
+      <div className="relative w-full aspect-[2/3] max-w-3xl mx-auto bg-green-700 rounded-lg shadow-lg border-white border-4">
+        {/* Field markings */}
+        <div className="absolute inset-0">
+          {/* Center line */}
+          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white"></div>
+
+          {/* Center circle */}
+          <div className="absolute top-1/2 left-1/2 w-20 h-20 md:w-28 md:h-28 border-white border-2 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+
+          {/* Center dot */}
+          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+
+          {/* Penalty area - bottom */}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-1/5 border-white border-2 border-b-0"></div>
+
+          {/* Goal area - bottom */}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1/3 h-[8%] border-white border-2 border-b-0"></div>
         </div>
-        
-        {/* Players by position */}
-        {renderPositionRow(Position.FWD)}
-        {renderPositionRow(Position.MID)}
-        {renderPositionRow(Position.DEF)}
-        {renderPositionRow(Position.GK)}
+
+        <FootballFormation
+          formation={formationName}
+          players={orderedPlayers}
+          onPlayerClick={toggleMatchdaySelection}
+        />
       </div>
     </div>
+  );
+};
+
+interface FootballFormationProps {
+  formation: string;
+  players: Player[];
+  onPlayerClick: (playerId: number) => void;
+}
+
+const FootballFormation: React.FC<FootballFormationProps> = ({
+  formation,
+  players,
+  onPlayerClick
+}) => {
+  const formationPattern = FORMATIONS[formation] || FORMATIONS["4-4-2"];
+
+  const goalkeepers = players.filter(p => p.position === Position.GK);
+  const defenders = players.filter(p => p.position === Position.DEF);
+  const midfielders = players.filter(p => p.position === Position.MID);
+  const forwards = players.filter(p => p.position === Position.FWD);
+
+  // Build position groups based on formation pattern
+  const positionGroups = [
+    { players: goalkeepers, count: formationPattern[0] },
+    { players: defenders, count: formationPattern[1] },
+    { players: midfielders, count: formationPattern[2] },
+    { players: forwards, count: formationPattern[3] }
+  ];
+
+  // If there's a 5th number in the formation (like 4-2-3-1), adjust midfielders split
+  if (formationPattern.length > 4) {
+    const totalMidfielders = formationPattern[2] + formationPattern[3];
+    positionGroups[2] = { 
+      players: midfielders.slice(0, totalMidfielders), 
+      count: totalMidfielders 
+    };
+    positionGroups[3] = { 
+      players: forwards, 
+      count: formationPattern[4] 
+    };
+  }
+
+  // Ensure we're using the correct number of players per position
+  positionGroups.forEach((group) => {
+    group.players = group.players.slice(0, group.count);
+  });
+
+  return (
+    <>
+      {positionGroups.map((group, rowIndex) => {
+        const { players: positionPlayers, count } = group;
+
+        return Array(Math.min(count, positionPlayers.length))
+          .fill(null)
+          .map((_, colIndex) => {
+            const player = positionPlayers[colIndex];
+            if (!player) return null;
+
+            // Adjust positioning - goalkeeper at bottom, forwards at top
+            const yPosition = 90 - rowIndex * 20;
+
+            // Center goalkeeper, spread other players across width
+            const xPosition = rowIndex === 0
+              ? 50 // Center goalkeeper
+              : 10 + (80 / (count + 1)) * (colIndex + 1);
+
+            // Determine position color
+            let bgColor;
+            switch (player.position) {
+              case Position.GK:
+                bgColor = 'bg-yellow-500';
+                break;
+              case Position.DEF:
+                bgColor = 'bg-blue-500';
+                break;
+              case Position.MID:
+                bgColor = 'bg-green-500';
+                break;
+              case Position.FWD:
+                bgColor = 'bg-red-500';
+                break;
+              default:
+                bgColor = 'bg-gray-500';
+            }
+
+            return (
+              <div
+                key={player.id}
+                className="absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                style={{ top: `${yPosition}%`, left: `${xPosition}%` }}
+                onClick={() => onPlayerClick(player.id)}
+              >
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-white font-bold shadow-md ${bgColor}`}>
+                  {player.id % 99 + 1}
+                </div>
+                <span className="mt-1 text-xs text-white font-semibold">{player.name}</span>
+              </div>
+            );
+          });
+      })}
+    </>
   );
 };
 

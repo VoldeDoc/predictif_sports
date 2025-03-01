@@ -4,7 +4,7 @@ interface TabsProps {
     tabs: readonly string[];
     renderContent: (activeTab: string) => JSX.Element | null;
     onTabChange?: (activeTab: string) => void;
-    defaultTab?: string; // Add this prop for initial tab state
+    defaultTab?: string; 
 }
 
 export default function Tabs({ tabs, renderContent, onTabChange, defaultTab }: TabsProps) {
