@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PlayerCard from './PlayerCard';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Info } from 'lucide-react';
 import { Position, Player } from '@/types';
+import { useViewContext } from '../FantasyLeague';
 
 interface PlayersListProps {
   players: Player[];
-  
 }
 
 const PlayersList: React.FC<PlayersListProps> = ({ players }) => {
@@ -15,7 +15,47 @@ const PlayersList: React.FC<PlayersListProps> = ({ players }) => {
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const teams = Array.from(new Set(players.map(player => player.team)));
-  
+
+  // Get the tab change function from context
+  const { setActiveTab } = useViewContext();
+
+  const handleViewPlayerDetails = (playerId: number) => {
+    // Save current filters and search state to localStorage
+    localStorage.setItem('playerListFilters', JSON.stringify({
+      searchTerm,
+      positionFilter,
+      teamFilter,
+      minPrice,
+      maxPrice
+    }));
+
+    const selectedPlayer = players.find(p => p.id === playerId);
+    
+    // Store both the player ID and the full player data
+    if (selectedPlayer) {
+      localStorage.setItem('selectedPlayerForStats', playerId.toString());
+      localStorage.setItem('selectedPlayerData', JSON.stringify(selectedPlayer));
+    }
+
+    // Navigate to Statistics tab
+    setActiveTab('Statistic');
+  };
+
+  // Restore filters from localStorage
+  useEffect(() => {
+    const savedFilters = localStorage.getItem('playerListFilters');
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      setSearchTerm(filters.searchTerm);
+      setPositionFilter(filters.positionFilter);
+      setTeamFilter(filters.teamFilter);
+      setMinPrice(filters.minPrice);
+      setMaxPrice(filters.maxPrice);
+      // Clear the storage after using it
+      localStorage.removeItem('playerListFilters');
+    }
+  }, []);
+
   const filteredPlayers = players.filter(player => {
     const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPosition = positionFilter === 'All' || player.position === positionFilter;
@@ -92,7 +132,22 @@ const PlayersList: React.FC<PlayersListProps> = ({ players }) => {
       <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
         {filteredPlayers.length > 0 ? (
           filteredPlayers.map(player => (
-            <PlayerCard key={player.id} player={player} />
+            <div key={player.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex-grow">
+                  <PlayerCard player={player} />
+                </div>
+                <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                  <button
+                    onClick={() => handleViewPlayerDetails(player.id)}
+                    className="w-full sm:w-auto px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Info size={16} />
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">

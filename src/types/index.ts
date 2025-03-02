@@ -131,6 +131,39 @@ export interface Player {
   selected: boolean;
   inMatchday: boolean;
   image?: string;
+  nationality: string;
+  stats: {
+    appearances?: number,
+    cleanSheets?: number,
+    saves?: number,
+    goals?: number,
+    assists?: number,
+    goalsConceded?: number,
+    yellowCards: number,
+    redCards: number,
+    penaltySaves?: number,
+    penaltyMisses?: number,
+    foulsCommitted?: number,
+    offsides?: number,
+    shots?: number,
+    shotsOnTarget?: number,
+    passes?: number,
+    passAccuracy?: number,
+    tackles?: number,
+    tackleSuccess?: number,
+    interceptions?: number,
+    clearances?: number,
+    blocks?: number,
+    dribbles?: number,
+    dribbleSuccess?: number,
+    aerialDuelsWon?: number,
+    aerialDuelsLost?: number
+  }
+  status:{
+    isAvailable:boolean;
+    reason?: "SUSPENDED" | "INJURED" | "UNAVAILABLE";
+    expectedReturn?: string;
+  }
 }
 
 export enum Position {

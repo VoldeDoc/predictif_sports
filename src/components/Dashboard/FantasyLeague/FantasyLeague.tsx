@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { AuthLayout } from "@/components/Layout/layout";
 import Tabs from "@/pages/Ui/tab";
 import FantasySquadMatch from "./Fantasy";
@@ -8,15 +8,17 @@ import Squad from "./Squad";
 import Gameweek from "./squad/GameWeekSquad";
 import { SquadProvider } from './context/squadContext';
 
-// Create a new context to handle the view state
-import { createContext, useContext } from 'react';
-
+// Created a new context to handle the view state
 const ViewContext = createContext<{
     showGameweek: boolean;
     setShowGameweek: (show: boolean) => void;
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
 }>({
     showGameweek: false,
     setShowGameweek: () => {},
+    activeTab: 'Fantasy',
+    setActiveTab: () => {}
 });
 
 export const useViewContext = () => useContext(ViewContext);
@@ -61,7 +63,7 @@ export default function FantasyLeagueDash() {
             case "Squad":
                 return showGameweek ? <Gameweek /> : <Squad />;
             case "Transfer":
-                return <Transfer />; 
+                return <Transfer />;
             default:
                 return null;
         }
@@ -69,7 +71,12 @@ export default function FantasyLeagueDash() {
 
     return (
         <AuthLayout>
-            <ViewContext.Provider value={{ showGameweek, setShowGameweek: handleSetShowGameweek }}>
+            <ViewContext.Provider value={{ 
+                showGameweek, 
+                setShowGameweek: handleSetShowGameweek,
+                activeTab,
+                setActiveTab: handleTabChange
+            }}>
                 <SquadProvider>
                     <div className="px-8 sm:px-16">
                         <Tabs 

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { UserCircle2 } from 'lucide-react';
+import { UserCircle2, AlertCircle } from 'lucide-react';
 import { useSquad } from '../context/squadContext';
-import { Position } from '@/types';
+import { Player, Position } from '@/types';
 
 const FORMATIONS: { [key: string]: number[] } = {
   "4-4-2": [1, 4, 4, 2],
@@ -60,6 +60,32 @@ const SubstitutesList: React.FC = () => {
     toggleMatchdaySelection(playerId);
   };
   
+  const getStatusColor = (status: Player['status'] | undefined) => {
+    if (!status) return '';
+    
+    if (!status.isAvailable && status.reason) {
+      switch (status.reason) {
+        case 'SUSPENDED': return 'bg-red-50 border border-red-300';
+        case 'INJURED': return 'bg-amber-50 border border-amber-300';
+        case 'UNAVAILABLE': return 'bg-slate-50 border border-slate-300';
+        default: return 'bg-gray-50 border border-gray-300';
+      }
+    }
+    return '';
+  };
+
+  const getStatusText = (status: Player['status'] | undefined) => {
+    if (!status) return '';
+    
+    if (!status.isAvailable) {
+      const reason = status.reason || 'UNAVAILABLE';
+      const returnDate = status.expectedReturn ? 
+        new Date(status.expectedReturn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      return `${reason}${returnDate ? ` - Returns ${returnDate}` : ''}`;
+    }
+    return '';
+  };
+
   const getPositionColor = (position: string) => {
     switch(position) {
       case Position.GK: return 'bg-yellow-500 text-white';
@@ -97,12 +123,17 @@ const SubstitutesList: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {substitutes.map(player => {
               const currentCount = currentPositionCounts[player.position] || 0;
+              // const isAvailable = player.status ? player.status.isAvailable : true;
               const isDisabled = currentCount >= positionLimits[player.position];
+              const statusColor = getStatusColor(player.status);
+              const statusText = getStatusText(player.status);
 
               return (
                 <div 
                   key={player.id}
-                  className={`flex items-center p-2 bg-gray-50 rounded-lg ${
+                  className={`flex items-center p-2 rounded-lg border ${
+                    statusColor || 'bg-gray-50'
+                  } ${
                     isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
                   }`}
                   onClick={() => !isDisabled && handlePlayerSelection(player.id)}
@@ -120,10 +151,23 @@ const SubstitutesList: React.FC = () => {
                   </div>
                   <div className="flex-grow">
                     <p className="text-sm font-medium">{player.name}</p>
-                    <div className="flex items-center">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${getPositionColor(player.position)}`}>
-                        {player.position}
-                      </span>
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${getPositionColor(player.position)}`}>
+                          {player.position}
+                        </span>
+                        <span className="text-xs text-gray-600">{player.team}</span>
+                      </div>
+                      {player.status && !player.status.isAvailable && (
+                        <div className={`text-xs px-2 py-1 rounded flex items-center ${
+                          player.status.reason === 'SUSPENDED' ? 'bg-red-100 text-red-700' :
+                          player.status.reason === 'INJURED' ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                          <span className="font-medium">{statusText}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

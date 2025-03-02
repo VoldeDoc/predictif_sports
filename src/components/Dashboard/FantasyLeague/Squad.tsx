@@ -10,10 +10,7 @@ import { players } from "./data/players";
 function Squad() {
   const [activeTab, setActiveTab] = useState<"squad" | "players">("squad");
   const {  isSquadComplete } = useSquad();
-  const { setShowGameweek } = useViewContext(); // Get the context function
-  
-  console.log(isSquadComplete(), "is squad complete");
-
+  const { setShowGameweek } = useViewContext(); 
   // Function to handle proceeding to gameweek
   const handleProceedToGameweek = () => {
     // Update the parent context to show the Gameweek component
