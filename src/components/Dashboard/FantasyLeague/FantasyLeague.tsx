@@ -7,6 +7,8 @@ import FantasyStatistic from "./Statistic";
 import Squad from "./Squad";
 import Gameweek from "./squad/GameWeekSquad";
 import { SquadProvider } from './context/squadContext';
+// import { toast } from "react-toastify";
+import FantasyPoints from "./FantasyPoints";
 
 // Created a new context to handle the view state
 const ViewContext = createContext<{
@@ -46,10 +48,17 @@ export default function FantasyLeagueDash() {
         localStorage.setItem('fantasyShowGameweek', JSON.stringify(show));
     };
 
-    const tabs = ["Fantasy", "Squad", "Statistic", "Transfer"];
+    const tabs = ["Fantasy", "Squad", "Statistic", "Transfer","Points"];
 
     // Handle tab change and save to localStorage
     const handleTabChange = (tab: string) => {
+        // if (tab === "Statistic") {
+        //     // toast.error('Please view a player detail first to see statistics');
+        //     setActiveTab("Squad");
+        //     localStorage.setItem('fantasyActiveTab', "Squad");
+        //     return;
+        // }
+
         setActiveTab(tab);
         localStorage.setItem('fantasyActiveTab', tab);
     };
@@ -64,6 +73,8 @@ export default function FantasyLeagueDash() {
                 return showGameweek ? <Gameweek /> : <Squad />;
             case "Transfer":
                 return <Transfer />;
+            case "Points":
+                return <FantasyPoints />;
             default:
                 return null;
         }

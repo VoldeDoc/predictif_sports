@@ -236,22 +236,42 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       // Only matchday players earn points
       if (player.inMatchday) {
         const randomPoints = Math.floor(Math.random() * 16);
+        
+        // Use the PlayerPoints structure properly
         return {
           ...player,
-          points: player.points + randomPoints
+          points: {
+            current: (player.points?.current || 0) + randomPoints,
+            change: randomPoints,
+            breakdown: {
+              ...(player.points?.breakdown || {}),
+              minutes: randomPoints > 0 ? Math.min(3, randomPoints) : 0,
+              goals: randomPoints > 5 ? Math.floor(randomPoints / 5) : 0,
+              assists: randomPoints > 8 ? Math.floor(randomPoints / 8) : 0,
+              cleanSheet: player.position === Position.GK || player.position === Position.DEF ? (randomPoints > 10 ? 4 : 0) : 0,
+              saves: player.position === Position.GK ? Math.floor(randomPoints / 3) : 0,
+              penalties: 0,
+              bonus: randomPoints > 12 ? 3 : randomPoints > 8 ? 2 : randomPoints > 5 ? 1 : 0,
+              yellowCards: randomPoints < 3 ? 1 : 0,
+              redCards: 0,
+              ownGoals: 0
+            }
+          }
         };
       }
       return player;
-    });
-
+    }) as Player[];
+  
     // Calculate total points for the gameweek
     const gameweekPoints = updatedPlayers.reduce((total, player) => {
       if (player.inMatchday) {
-        return total + (player.points - (squad.players.find(p => p.id === player.id)?.points || 0));
+        const previousPoints = squad.players.find(p => p.id === player.id)?.points?.current || 0;
+        const newPoints = player.points?.current || 0;
+        return total + (newPoints - previousPoints);
       }
       return total;
     }, 0);
-
+  
     setSquad(prev => ({
       ...prev,
       players: updatedPlayers,

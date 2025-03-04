@@ -1,4 +1,5 @@
 import { Player, Position } from "@/types";
+
 export const players: Player[] = [
   // Goalkeepers
   {
@@ -7,7 +8,22 @@ export const players: Player[] = [
     position: Position.GK,
     team: "Liverpool",
     price: 5.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -33,7 +49,22 @@ export const players: Player[] = [
     position: Position.GK,
     team: "Man City",
     price: 5.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -59,7 +90,22 @@ export const players: Player[] = [
     position: Position.GK,
     team: "Man United",
     price: 5.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -89,7 +135,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Liverpool",
     price: 6.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -117,7 +178,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Liverpool",
     price: 7.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1508098682722-e99c643e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -145,7 +221,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Man City",
     price: 6.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1605979257913-1704eb7b6246?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -173,7 +264,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Chelsea",
     price: 5.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -203,7 +309,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Man United",
     price: 5.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -231,7 +352,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Man City",
     price: 6.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -259,7 +395,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Liverpool",
     price: 6.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -287,7 +438,22 @@ export const players: Player[] = [
     position: Position.DEF,
     team: "Man City",
     price: 5.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1508098682722-e99c643e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -317,7 +483,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Liverpool",
     price: 2.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -346,7 +527,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Man City",
     price: 2.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1508098682722-e99c643e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -375,7 +571,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Man United",
     price: 11.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1605979257913-1704eb7b6246?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -404,7 +615,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Chelsea",
     price: 7.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -433,7 +659,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Tottenham",
     price: 10.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -462,7 +703,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Arsenal",
     price: 8.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -491,7 +747,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Man City",
     price: 3.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -520,7 +791,22 @@ export const players: Player[] = [
     position: Position.MID,
     team: "Arsenal",
     price: 8.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1508098682722-e99c643e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -544,14 +830,28 @@ export const players: Player[] = [
     }
   },
   // Forwards
-  // Forwards
   {
     id: 16,
     name: "Kane",
     position: Position.FWD,
     team: "Tottenham",
     price: 5.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -578,7 +878,22 @@ export const players: Player[] = [
     position: Position.FWD,
     team: "Man City",
     price: 4.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1508098682722-e99c643e7485?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -607,7 +922,22 @@ export const players: Player[] = [
     position: Position.FWD,
     team: "Liverpool",
     price: 9.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1605979257913-1704eb7b6246?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -636,7 +966,22 @@ export const players: Player[] = [
     position: Position.FWD,
     team: "Arsenal",
     price: 8.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -663,7 +1008,22 @@ export const players: Player[] = [
     position: Position.FWD,
     team: "Man United",
     price: 9.0,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
@@ -690,7 +1050,22 @@ export const players: Player[] = [
     position: Position.FWD,
     team: "Arsenal",
     price: 7.5,
-    points: 0,
+    points: {
+      current: 0,
+      change: 0,
+      breakdown: {
+        minutes: 0,
+        goals: 0,
+        assists: 0,
+        cleanSheet: 0,
+        saves: 0,
+        penalties: 0,
+        bonus: 0,
+        yellowCards: 0,
+        redCards: 0,
+        ownGoals: 0
+      }
+    },
     selected: false,
     inMatchday: false,
     image: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",

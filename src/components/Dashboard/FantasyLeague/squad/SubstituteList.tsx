@@ -9,12 +9,12 @@ const FORMATIONS: { [key: string]: number[] } = {
   "3-5-2": [1, 3, 5, 2],
   "5-3-2": [1, 5, 3, 2],
   "4-2-3-1": [1, 4, 2, 3, 1],
-  "3-4-3": [1, 3, 4, 3]  
+  "3-4-3": [1, 3, 4, 3]
 };
 
 const SubstitutesList: React.FC = () => {
   const { squad, getSubstitutePlayers, getMatchdayPlayers, toggleMatchdaySelection } = useSquad();
-  
+
   const substitutes = getSubstitutePlayers();
   const matchdayPlayers = getMatchdayPlayers();
   const formationName = `${squad.formation.structure.DEF}-${squad.formation.structure.MID}-${squad.formation.structure.FWD}`;
@@ -59,10 +59,10 @@ const SubstitutesList: React.FC = () => {
 
     toggleMatchdaySelection(playerId);
   };
-  
+
   const getStatusColor = (status: Player['status'] | undefined) => {
     if (!status) return '';
-    
+
     if (!status.isAvailable && status.reason) {
       switch (status.reason) {
         case 'SUSPENDED': return 'bg-red-50 border border-red-300';
@@ -76,10 +76,10 @@ const SubstitutesList: React.FC = () => {
 
   const getStatusText = (status: Player['status'] | undefined) => {
     if (!status) return '';
-    
+
     if (!status.isAvailable) {
       const reason = status.reason || 'UNAVAILABLE';
-      const returnDate = status.expectedReturn ? 
+      const returnDate = status.expectedReturn ?
         new Date(status.expectedReturn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
       return `${reason}${returnDate ? ` - Returns ${returnDate}` : ''}`;
     }
@@ -87,7 +87,7 @@ const SubstitutesList: React.FC = () => {
   };
 
   const getPositionColor = (position: string) => {
-    switch(position) {
+    switch (position) {
       case Position.GK: return 'bg-yellow-500 text-white';
       case Position.DEF: return 'bg-blue-500 text-white';
       case Position.MID: return 'bg-green-500 text-white';
@@ -95,11 +95,11 @@ const SubstitutesList: React.FC = () => {
       default: return 'bg-gray-500 text-white';
     }
   };
-  
+
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold mb-3">Choose squad for matchday</h3>
-      
+
       {substitutes.length > 0 ? (
         <>
           <div className="mb-3 text-sm">
@@ -120,57 +120,50 @@ const SubstitutesList: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-2">
             {substitutes.map(player => {
               const currentCount = currentPositionCounts[player.position] || 0;
-              // const isAvailable = player.status ? player.status.isAvailable : true;
               const isDisabled = currentCount >= positionLimits[player.position];
               const statusColor = getStatusColor(player.status);
               const statusText = getStatusText(player.status);
 
               return (
-                <div 
+                <div
                   key={player.id}
-                  className={`flex items-center p-2 rounded-lg border ${
-                    statusColor || 'bg-gray-50'
-                  } ${
-                    isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
-                  }`}
+                  className={`flex flex-col lg:flex-col items-center p-4 rounded-lg border ${statusColor || 'bg-gray-50'
+                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
+                    }`}
                   onClick={() => !isDisabled && handlePlayerSelection(player.id)}
                 >
-                  <div className="w-10 h-10 rounded-full overflow-hidden mr-2">
+                  <div className="w-16 h-16 rounded-full overflow-hidden mb-2">
                     {player.image ? (
-                      <img 
-                        src={player.image} 
-                        alt={player.name} 
+                      <img
+                        src={player.image}
+                        alt={player.name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <UserCircle2 className="text-gray-400 w-full h-full" />
                     )}
                   </div>
-                  <div className="flex-grow">
+                  <div className="text-center">
                     <p className="text-sm font-medium">{player.name}</p>
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${getPositionColor(player.position)}`}>
-                          {player.position}
-                        </span>
-                        <span className="text-xs text-gray-600">{player.team}</span>
-                      </div>
-                      {player.status && !player.status.isAvailable && (
-                        <div className={`text-xs px-2 py-1 rounded flex items-center ${
-                          player.status.reason === 'SUSPENDED' ? 'bg-red-100 text-red-700' :
-                          player.status.reason === 'INJURED' ? 'bg-amber-100 text-amber-700' :
-                          'bg-slate-100 text-slate-700'
-                        }`}>
-                          <AlertCircle size={12} className="mr-1 flex-shrink-0" />
-                          <span className="font-medium">{statusText}</span>
-                        </div>
-                      )}
-                    </div>
+                      <p className={`text-xs px-2 py-0.5 rounded-full ${getPositionColor(player.position)}`}>
+                        {player.position}
+                      </p>
+                      <p className="text-xs text-gray-600">{player.team}</p>
                   </div>
+                  {player.status && !player.status.isAvailable && (
+                    <div className={`text-xs px-2 py-1 rounded flex items-center mt-2 ${player.status.reason === 'SUSPENDED' ? 'bg-red-100 text-red-700' :
+                        player.status.reason === 'INJURED' ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-700'
+                      }`}>
+                      <AlertCircle size={12} className="mr-1 flex-shrink-0" />
+                      <span className="font-medium">{statusText}</span>
+                    </div>
+                  )}
                 </div>
+
               );
             })}
           </div>

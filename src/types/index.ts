@@ -127,11 +127,12 @@ export interface Player {
   position: Position;
   team: string;
   price: number;
-  points: number;
+  points: PlayerPoints;
   selected: boolean;
   inMatchday: boolean;
   image?: string;
   nationality: string;
+  shirtNumber?: number;
   stats: {
     appearances?: number,
     cleanSheets?: number,
@@ -164,6 +165,7 @@ export interface Player {
     reason?: "SUSPENDED" | "INJURED" | "UNAVAILABLE";
     expectedReturn?: string;
   }
+  
 }
 
 export enum Position {
@@ -189,6 +191,15 @@ export interface Squad {
   budget: number;
   totalPoints: number;
   matchdayReady: boolean;
+  currentGameWeek?:number;
+  currentRank?: number | string;  // Current rank in league/competition
+  previousRank?: number | string;  // Previous rank for comparison
+  matchdayPlayers?: number[];  // IDs of players selected for matchday
+  matchdaySelectionSaved?: boolean;  // Flag to track if selection was saved
+  pointsHistory?: {
+    lastChange: number;  // Points change since last update
+    gameweekHistory?: Array<{ week: number, points: number }>;  // Historical data 
+  };
 }
 
 export interface GameWeek {
@@ -197,3 +208,9 @@ export interface GameWeek {
   status: 'upcoming' | 'active' | 'completed';
 }
 
+
+export interface PlayerPoints {
+  current: number;
+  change: number;
+  breakdown?: Record<string, number>;
+}

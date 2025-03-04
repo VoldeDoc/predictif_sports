@@ -65,7 +65,6 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
       </div>
       <div className="flex flex-col items-end">
         <span className="font-bold text-green-600">£{player.price}M</span>
-        <span className="text-sm text-gray-500">{player.points} pts</span>
       </div>
       <div className="absolute top-2 right-2">
         {isInMatchday ? (
