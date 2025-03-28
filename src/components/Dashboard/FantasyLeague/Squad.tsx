@@ -1,19 +1,46 @@
-import { useState } from "react";
+import  { useState, useEffect } from "react";
 import { Trophy, Users, ListFilter, Save } from "lucide-react";
 import { useSquad } from "./context/squadContext";
-import { useViewContext } from "./FantasyLeague"; // Import ViewContext
+import { useViewContext } from "./FantasyLeague";
 import SquadView from "./squad/SquadView";
 import PlayersList from "./squad/PlayersList";
 import SquadStats from "./squad/SquadStats";
-import { players } from "./data/players";
+import useDashBoardManagement from "@/hooks/useDashboard";
+import { Player } from "@/types";
 
 function Squad() {
   const [activeTab, setActiveTab] = useState<"squad" | "players">("squad");
-  const {  isSquadComplete } = useSquad();
-  const { setShowGameweek } = useViewContext(); 
-  // Function to handle proceeding to gameweek
+  const { isSquadComplete } = useSquad();
+  const { setShowGameweek } = useViewContext();
+  const { getPlayersByLeague } = useDashBoardManagement();
+
+  const [players, setPlayers] = useState<Player[]>([]);
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const response = await getPlayersByLeague();
+        const extractedPlayers = response[0].map((team: any) => ({
+          id: team.player?.id ,
+          name: team.player?.name ,
+          photo: team.player?.photo,
+          position: team.player?.position ,
+          team: team.name,
+          price: team.player?.evaluation
+            ? parseInt(team.player.evaluation.replace(/[^0-9]/g, ""))
+            : 0,
+        }));
+        setPlayers(extractedPlayers);
+        
+      } catch (error) {
+        console.error("Error fetching players:", error);
+      }
+    };
+
+    fetchPlayers();
+  }, []);
+
   const handleProceedToGameweek = () => {
-    // Update the parent context to show the Gameweek component
     setShowGameweek(true);
   };
 
@@ -36,8 +63,11 @@ function Squad() {
             <div className="bg-white rounded-lg shadow-md mb-4">
               <div className="flex">
                 <button
-                  className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === "squad" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500 hover:text-gray-700"
-                    }`}
+                  className={`flex-1 py-3 px-4 text-center font-medium ${
+                    activeTab === "squad"
+                      ? "text-indigo-600 border-b-2 border-indigo-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
                   onClick={() => setActiveTab("squad")}
                 >
                   <div className="flex items-center justify-center">
@@ -46,8 +76,11 @@ function Squad() {
                   </div>
                 </button>
                 <button
-                  className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === "players" ? "text-indigo-600 border-b-2 border-indigo-600" : "text-gray-500 hover:text-gray-700"
-                    }`}
+                  className={`flex-1 py-3 px-4 text-center font-medium ${
+                    activeTab === "players"
+                      ? "text-indigo-600 border-b-2 border-indigo-600"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
                   onClick={() => setActiveTab("players")}
                 >
                   <div className="flex items-center justify-center">
@@ -63,24 +96,23 @@ function Squad() {
             ) : (
               <SquadView viewMode="squad" />
             )}
-            
+
             {isSquadComplete() && (
               <div className="flex justify-center py-4">
-              <button
-                onClick={handleProceedToGameweek}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Save size={18} />
-                <span>Squad Selection Complete - Proceed to Matchweek</span>
-              </button>
+                <button
+                  onClick={handleProceedToGameweek}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Save size={18} />
+                  <span>Squad Selection Complete - Proceed to Matchweek</span>
+                </button>
               </div>
             )}
-
           </div>
 
-            <div className="w-full lg:w-1/3 order-first lg:order-last">
+          <div className="w-full lg:w-1/3 order-first lg:order-last">
             <SquadStats />
-            </div>
+          </div>
         </div>
       </main>
     </div>

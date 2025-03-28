@@ -1,45 +1,72 @@
-import { useEffect, useState } from 'react';
-import { Player, Position } from '@/types';
+import { useState } from 'react';
+import { Position } from '@/types';
+import { useViewContext } from './FantasyLeague';
 
 export default function FantasyStatistic() {
-    const [player, setPlayer] = useState<Player | null>(null);
+    const { selectedPlayer } = useViewContext();
+    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        const playerId = localStorage.getItem('selectedPlayerForStats');
-        if (playerId) {
-            // Get the players data from localStorage
-            const playersData = localStorage.getItem('players');
-            if (playersData) {
-                try {
-                    const players = JSON.parse(playersData);
-                    const selectedPlayer = players.find((p: Player) => p.id === parseInt(playerId));
-                    if (selectedPlayer) {
-                        setPlayer(selectedPlayer);
-                    } else {
-                        console.error('Selected player not found');
-                    }
-                } catch (error) {
-                    console.error('Error parsing players data:', error);
-                }
-            } else {
-                // If players data is not in localStorage, try to get it from the data file
-                import('./data/players').then(({ players }) => {
-                    const selectedPlayer = players.find((p: Player) => p.id === parseInt(playerId));
-                    if (selectedPlayer) {
-                        setPlayer(selectedPlayer);
-                        // Store the players data in localStorage for future use
-                        localStorage.setItem('players', JSON.stringify(players));
-                    }
-                }).catch(error => {
-                    console.error('Error loading players data:', error);
-                });
-            }
-        }
-    }, []);
-
-    if (!player) {
-        return <div>Loading...</div>;
+    // If no player is selected, show a message
+    if (!selectedPlayer) {
+        return (
+            <div className="text-center py-20">
+                <h3 className="text-xl font-semibold text-gray-700">No player selected</h3>
+                <p className="text-gray-500 mt-2">Please select a player from the list to view their statistics.</p>
+            </div>
+        );
     }
+
+    // Map API position format to our Position enum
+    const getPosition = (positionStr: string): Position => {
+        const positionMap: Record<string, Position> = {
+            'GK': Position.GK,
+            'Goalkeeper': Position.GK,
+            'DEF': Position.DEF,
+            'Defender': Position.DEF,
+            'MID': Position.MID,
+            'Midfielder': Position.MID,
+            'FWD': Position.FWD,
+            'Forward': Position.FWD,
+            'Striker': Position.FWD
+        };
+
+        return positionMap[positionStr] || Position.MID;
+    };
+
+    // Parse price from evaluation (e.g., "£20 million" -> 20)
+    const parsePrice = (evaluation: string): number => {
+        if (!evaluation) return 0;
+        const match = evaluation.match(/\d+/);
+        return match ? parseInt(match[0]) : 0;
+    };
+
+    // Create a player object from API data that matches our expected format
+    const player = {
+        id: selectedPlayer.id,
+        name: selectedPlayer.name,
+        image: selectedPlayer.photo,
+        position: getPosition(selectedPlayer.position_short || selectedPlayer.position),
+        team: selectedPlayer.current_club_name || '',
+        price: parsePrice(selectedPlayer.evaluation),
+        nationality: 'gb', // Default if not available
+        stats: {
+            appearances: selectedPlayer.appearance || 0,
+            goals: selectedPlayer.goal || 0,
+            assists: selectedPlayer.assists || 0,
+            cleanSheets: selectedPlayer.clean_sheets || 0,
+            redCards: selectedPlayer.red_card || 0,
+            yellowCards: selectedPlayer.yellow_card || 0,
+            saves: 0, // Default values for stats not in API
+            goalsConceded: 0,
+            penaltySaves: 0,
+            tackles: 0,
+            passes: 0,
+            dribbles: 0,
+            shots: 0,
+            shotsOnTarget: 0,
+            passAccuracy: 75 // Default value
+        }
+    };
 
     const renderStats = () => {
         switch (player.position) {
@@ -134,14 +161,22 @@ export default function FantasyStatistic() {
 
     return (
         <div>
-            <h1 className="text-3xl font-bold">Statistic</h1>
+            <h1 className="text-3xl font-bold">Player Statistics</h1>
 
-            <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+            <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6 mt-6">
                 <div className="w-full md:w-1/2">
                     <div className="px-5 py-5" style={{ background: 'linear-gradient(to bottom right, #0C21C1, #6D748B)' }}>
                         <div className="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3">
                             <div>
-                                <img src={player.image} alt={player.name} className="h-42 w-42" />
+                                <img 
+                                    src={player.image} 
+                                    alt={player.name} 
+                                    className="h-42 w-42 object-cover"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.src = '/assets/images/player-placeholder.png'; // Fallback image
+                                    }} 
+                                />
                             </div>
                             <div>
                                 <div className="text-white">
@@ -152,10 +187,6 @@ export default function FantasyStatistic() {
                                     <h1 className="font-semibold text-lg">Position:</h1>
                                     <h1 className="font-bold text-2xl">{player.position}</h1>
                                 </div>
-                                {/* <div className="text-white">
-                                    <h1 className="font-semibold text-lg">Overall Rating</h1>
-                                    <h1 className="font-bold text-2xl">{player.stats.overallRating || 'N/A'}</h1>
-                                </div> */}
                             </div>
                             <div>
                                 <div className="text-white">
@@ -164,11 +195,15 @@ export default function FantasyStatistic() {
                                         src={`https://flagcdn.com/w80/${player.nationality?.toLowerCase()}.png`}
                                         alt={player.nationality || ''}
                                         className="w-14 h-10"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = '/assets/images/flag-placeholder.png';
+                                        }}
                                     />
                                 </div>
                                 <div className="text-white">
                                     <h1 className="font-semibold text-lg">Team:</h1>
-                                    <img src={`/assets/images/teams/${player.team.toLowerCase()}.png`} className='w-14 h-14' alt={player.team} />
+                                    <h1 className="font-bold text-xl">{player.team}</h1>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +214,6 @@ export default function FantasyStatistic() {
                             </div>
                         </div>
                     </div>
-                    <div></div>
                 </div>
 
                 <div className="w-full md:w-1/2">
@@ -276,7 +310,6 @@ export default function FantasyStatistic() {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     );

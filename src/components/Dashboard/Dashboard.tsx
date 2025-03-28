@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import TeamCard from "../DashboardComponents/TeamCard";
 import PlayerCard from "../DashboardComponents/PlayerCard";
 import ResultsMatches from "../DashboardComponents/ResultsMatch";
-import TodayMatches from "../DashboardComponents/TodayMatch";
 import UpcomingMatches from "../DashboardComponents/upComingMatch";
 
 interface Club {
@@ -94,105 +93,60 @@ const Dashboard = () => {
     stop: 0,
     expired: 0,
   });
-  const [currentStrategyType, setCurrentStrategyType] = useState<keyof typeof strategies>("all");
-  const strategyTypes = ["all", "active", "stop", "expired"];
+  const [currentStrategyType] = useState<keyof typeof strategies>("all");
+  // const strategyTypes = ["all", "active", "stop", "expired"];
 
   useEffect(() => {
-    const fetchUpcomingMatches = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await getUpcomingMatch();
-        setUpcomingMatches(response[0]);
-      } catch (error) {
-        console.error("Failed to fetch upcoming matches", error);
-      } finally {
-        setLoadingUpcoming(false);
-      }
-    };
+        const [
+          clubFollowedData,
+          playerFollowedData,
+          allStrategies,
+          activeStrategies,
+          stopStrategies,
+          expiredStrategies,
+          eventsResponse,
+          upcomingMatchesResponse,
+          resultsMatchesResponse
+        ] = await Promise.all([
+          getClubFollowed(),
+          getPlayerFollowed(),
+          getMyStrategies("all"),
+          getMyStrategies("active"),
+          getMyStrategies("stop"),
+          getMyStrategies("expired"),
+          getNewsEvent(),
+          getUpcomingMatch(),
+          getResultMatch()
+        ]);
 
-    fetchUpcomingMatches();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const clubFollowedData = await getClubFollowed();
+        // Set club followed data
         const flattenedClubsFollowed = clubFollowedData.flat();
         setClubFollowed(flattenedClubsFollowed);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, [getClubFollowed]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const PlayerFollowedData = await getPlayerFollowed();
-        const flattenedPlayerFollowed = PlayerFollowedData.flat();
-        console.log(flattenedPlayerFollowed);
-
+        // Set player followed data
+        const flattenedPlayerFollowed = playerFollowedData.flat();
         setPlayerFollowed(flattenedPlayerFollowed);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, [getPlayerFollowed]);
-
-  useEffect(() => {
-    const fetchStrategies = async () => {
-      try {
-        const allStrategies = await getMyStrategies("all");
-        const activeStrategies = await getMyStrategies("active");
-        const stopStrategies = await getMyStrategies("stop");
-        const expiredStrategies = await getMyStrategies("expired");
-
+        
+        // Set strategies data
         setStrategies({
           all: allStrategies.length,
           active: activeStrategies.length,
           stop: stopStrategies.length,
           expired: expiredStrategies.length,
         });
-      } catch (error) {
-        console.error(error);
-      }
-    };
 
-    fetchStrategies();
-  }, [getMyStrategies]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStrategyType((prevType: keyof typeof strategies) => {
-        const currentIndex = strategyTypes.indexOf(prevType);
-        const nextIndex = (currentIndex + 1) % strategyTypes.length;
-        return strategyTypes[nextIndex] as keyof typeof strategies;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await getNewsEvent();
-        const EventResponse = response[0]
-        console.log(EventResponse);
-
+        // Set news events
+        const EventResponse = eventsResponse[0];
         setEvents(EventResponse);
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-      }
-    };
 
-    fetchEvents();
-  }, []);
+        // Set upcoming matches
+        setUpcomingMatches(upcomingMatchesResponse[0]);
+        setLoadingUpcoming(false);
 
-  useEffect(() => {
-    const fetchResultsMatches = async () => {
-      try {
-        const apiData = await getResultMatch();
-        const transformedMatches: Match[] = apiData[0].map((match: any) => ({
+        // Set results matches
+        const transformedMatches: Match[] = resultsMatchesResponse[0].map((match: any) => ({
           homeTeam: {
             name: match.home_club_name,
             logo: match.home_club_logo,
@@ -206,15 +160,28 @@ const Dashboard = () => {
           startTime: new Date(`${match.game_start_date}T${match.game_start_time}`),
         }));
         setResultsMatches(transformedMatches);
+        setLoadingResults(false);
       } catch (error) {
-        console.error("Failed to fetch result matches", error);
-      } finally {
+        console.error("Error fetching dashboard data:", error);
+        setLoadingUpcoming(false);
         setLoadingResults(false);
       }
     };
 
-    fetchResultsMatches();
+    fetchDashboardData();
   }, []);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentStrategyType((prevType: keyof typeof strategies) => {
+  //       const currentIndex = strategyTypes.indexOf(prevType);
+  //       const nextIndex = (currentIndex + 1) % strategyTypes.length;
+  //       return strategyTypes[nextIndex] as keyof typeof strategies;
+  //     });
+  //   }, 5000);
+
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const handleTabClick = (tab: string) => setActiveTab(tab);
 
@@ -223,8 +190,6 @@ const Dashboard = () => {
     switch (activeTab) {
       case "upcoming":
         return <UpcomingMatches matches={upcomingMatches} loading={loadingUpcoming} />;
-      case "today":
-        return <TodayMatches />;
      case "results":
       return <ResultsMatches matches={resultsMatches} loading={loadingResults} />;
       default:
@@ -287,15 +252,7 @@ const Dashboard = () => {
                     >
                       Upcoming
                     </button>
-                    <button
-                      className={`py-2 px-4 text-sm font-medium ${activeTab === "today"
-                        ? "text-blue-600 border-b-2 border-blue-600"
-                        : "text-gray-600"
-                        }`}
-                      onClick={() => handleTabClick("today")}
-                    >
-                      Today
-                    </button>
+                   
                     <button
                       className={`py-2 px-4 text-sm font-medium ${activeTab === "results"
                         ? "text-blue-600 border-b-2 border-blue-600"

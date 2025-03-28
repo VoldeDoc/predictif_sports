@@ -1,5 +1,4 @@
 import { AuthLayout } from "@/components/Layout/layout";
-import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
 import MatchResults from "./MatchResults";
 export default function MatchSchedule() {
     return (
@@ -15,7 +14,7 @@ export default function MatchSchedule() {
                             <h1 className="text-2xl sm:text-3xl font-semibold text-white">Premier League</h1>
                         </div>
                     </div>
-                    <div className="bg-gray-300 py-3 px-4 sm:px-8 flex justify-between items-center">
+                    {/* <div className="bg-gray-300 py-3 px-4 sm:px-8 flex justify-between items-center">
                         <div>
                             <p className="text-black-800">19 May, 24 Sunday</p>
                         </div>
@@ -27,7 +26,7 @@ export default function MatchSchedule() {
                                 <FaCaretRight />
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="bg-white">
                         <MatchResults/>
                     </div>

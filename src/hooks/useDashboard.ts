@@ -926,6 +926,90 @@ const getNewsEventById = async (id:number)=>{
 
 }
 
+const getRegion = async ()=>{
+    try {
+        setLoading(true)
+        const res = await client.get('/user/getRegion')
+        return res?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+        
+    }
+}
+
+const getCountryRegion = async (id:string)=>{
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getRegionByCountry/${id}`)
+        return res?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+        
+    }
+}
+
+const getCountryRegionLeague = async ({ id, sport }: { id: string, sport: string })=>{
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getLeague/${id}/${sport}`)
+        return res?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+        
+    }
+}
+
+const getPlayersByLeague = async() =>{
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getClubPlayerLeague/eyJpdiI6IjR4Y1k5YW1JUGdzU3ZIS0tGYnVmdlE9PSIsInZhbHVlIjoia3lpaHNENTFlbC9HV3Q5dkNjUnRFQT09IiwibWFjIjoiYjYzMDUxOGY5Y2JhMjc2ZTY4OTk2NzQ1ZGQxMDAzZDI3YjkzOWVlYWM3YWE0NTE1NWViN2VjZTRkYWRmZDY5YyIsInRhZyI6IiJ9`)
+        return res?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+        
+    }
+}
+
+const getFantasyPlayerById = async(id: string) => {
+    try {
+        setLoading(true);
+        const res = await client.get(`/user/fantasy/getSquadbyId/${id}`);
+        console.log(res?.data?.data);
+        
+        return {data: res?.data?.data, status: res?.status}; 
+    } catch (error: any) {
+        console.log(error);
+        
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+        return {data: [], status: 404};
+    } finally {
+        setLoading(false);
+    }
+}
+
+const getFantasyPlayerAccount = async()=>{
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/fantasy/getuser`)
+        return res?.data.data
+    } catch (error:any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+        
+    }
+}
+
     return {
         loading,
         username,
@@ -985,6 +1069,12 @@ const getNewsEventById = async (id:number)=>{
         getUpcomingMatchPublic,
         getResultMatchPublic,
         getTodayMatchPublic,
+        getRegion,
+        getCountryRegion,
+        getCountryRegionLeague,
+        getPlayersByLeague,
+        getFantasyPlayerAccount,
+        getFantasyPlayerById
     };
 }
 

@@ -43,15 +43,17 @@ function UserProfile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getUserPlan();
+        const [planData, clubsFollowed, playersFollowed] = await Promise.all([
+          getUserPlan(),
+          getClubFollowed(),
+          getPlayerFollowed()
+        ]);
 
-        setPlans(data[0][0] || []);
-        const clubsFollowed = await getClubFollowed();
+        setPlans(planData[0][0] || []);
         setClubs(clubsFollowed[0] || []);
-        const playersFollowed = await getPlayerFollowed();
         setPlayers(playersFollowed[0] || []);
 
-        // if (data[0] && data[0][0].payment_status === 'active') {
+        // if (planData[0] && planData[0][0].payment_status === 'active') {
         //   setSubscriptionActive(true);
         // }
 

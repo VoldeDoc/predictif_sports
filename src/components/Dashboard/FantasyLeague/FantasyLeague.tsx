@@ -16,11 +16,15 @@ const ViewContext = createContext<{
     setShowGameweek: (show: boolean) => void;
     activeTab: string;
     setActiveTab: (tab: string) => void;
+    selectedPlayer: any;  // Add selected player to context
+    setSelectedPlayer: (player: any) => void;  // Add setter for selected player
 }>({
     showGameweek: false,
     setShowGameweek: () => {},
     activeTab: 'Fantasy',
-    setActiveTab: () => {}
+    setActiveTab: () => {},
+    selectedPlayer: null,  // Default to null
+    setSelectedPlayer: () => {}  // Empty function placeholder
 });
 
 export const useViewContext = () => useContext(ViewContext);
@@ -37,6 +41,9 @@ export default function FantasyLeagueDash() {
         return savedTab || "Fantasy"; // Default to Fantasy tab
     });
 
+    // Add state for selected player
+    const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
+    console.log("Selected Player:", selectedPlayer);
     // Save showGameweek state to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('fantasyShowGameweek', JSON.stringify(showGameweek));
@@ -52,13 +59,7 @@ export default function FantasyLeagueDash() {
 
     // Handle tab change and save to localStorage
     const handleTabChange = (tab: string) => {
-        // if (tab === "Statistic") {
-        //     // toast.error('Please view a player detail first to see statistics');
-        //     setActiveTab("Squad");
-        //     localStorage.setItem('fantasyActiveTab', "Squad");
-        //     return;
-        // }
-
+        // Allow navigation to Statistics tab now that we have context
         setActiveTab(tab);
         localStorage.setItem('fantasyActiveTab', tab);
     };
@@ -86,7 +87,9 @@ export default function FantasyLeagueDash() {
                 showGameweek, 
                 setShowGameweek: handleSetShowGameweek,
                 activeTab,
-                setActiveTab: handleTabChange
+                setActiveTab: handleTabChange,
+                selectedPlayer,
+                setSelectedPlayer
             }}>
                 <SquadProvider>
                     <div className="px-8 sm:px-16">
