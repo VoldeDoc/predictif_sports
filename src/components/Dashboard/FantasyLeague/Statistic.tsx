@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Position } from '@/types';
 import { useViewContext } from './FantasyLeague';
 
