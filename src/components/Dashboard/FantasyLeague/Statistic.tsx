@@ -4,7 +4,7 @@ import { useViewContext } from './FantasyLeague';
 
 export default function FantasyStatistic() {
     const { selectedPlayer } = useViewContext();
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
 
     // If no player is selected, show a message
     if (!selectedPlayer) {
