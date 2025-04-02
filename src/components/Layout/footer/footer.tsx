@@ -112,10 +112,10 @@ export default function Footer() {
             <div>
               <ul className="space-x-4 flex lg:pr-16">
                 <li className="hover:text-slate-900 font-semibold">
-                  <a href="#">Terms of Service</a>
+                  <a href="/terms-of-conditions">Terms of Service</a>
                 </li>
                 <li className="hover:text-slate-900 font-semibold">
-                  <a href="#">Privacy Policy</a>
+                  <a href="/privacy">Privacy Policy</a>
                 </li>
                 <li className="hover:text-slate-900 font-semibold">
                   <a href="#">Cookies</a>

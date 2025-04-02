@@ -67,6 +67,8 @@ import Sports_page from './pages/home/sports_page/sports_page.tsx';
 import MatchInfo from './components/landingPage/Sport/MatchInfo/MatchInfo.tsx';
 import FantasyLeagueDashPage from './pages/dashboard/fantasy_league/fantasyleague_page.tsx';
 import Dash_Sports from './pages/dashboard/dash_sports/dash_sports.tsx';
+import Privacy from './components/landingPage/Privacy/privacy.tsx';
+import Terms from './components/landingPage/TermsConditions.tsx/Terms.tsx';
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -97,6 +99,8 @@ function App() {
               <Route path="/experts" element={<Expert />} />
               <Route path="/head" element={<Heading />} />
               <Route path="/fantasy" element={<Fantasy />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms-of-conditions" element={<Terms />} />
 
               <Route path="/sports" element={<Sports_page />} />
               <Route path="/dash-sports" element={<Dash_Sports />} />
