@@ -188,12 +188,7 @@ function App() {
             
                 <Route path="/user/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>}></Route>
 
-              {/*stripe payment*/}
-              {/* <Route path="/user/checkout" element={
-                <ProtectedRoute>
-                 <CheckoutPage />
-                </ProtectedRoute>
-              } ></Route> */}
+            
 
               <Route path="/ui/button" element={<ButtonT />} />
               <Route path="/ui/textinput" element={<ExampleForm />} />

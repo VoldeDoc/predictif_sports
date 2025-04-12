@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCircle2, AlertCircle, Check } from 'lucide-react';
+import { UserCircle2, AlertCircle, Check, XCircle } from 'lucide-react';
 import { useSquad } from '../context/squadContext';
 import { Position } from '@/types';
 
@@ -11,7 +11,8 @@ const SquadView: React.FC<SquadViewProps> = () => {
   const { 
     squad, 
     getPositionCount, 
-    isSquadComplete
+    isSquadComplete,
+    removePlayer
   } = useSquad();
 
   const renderPositionGroup = (position: Position) => {
@@ -35,6 +36,13 @@ const SquadView: React.FC<SquadViewProps> = () => {
         default: return 'bg-gray-500';
       }
     };
+
+    const handleRemovePlayer = (playerId: string | number, e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (window.confirm('Remove this player from your squad?')) {
+        removePlayer(playerId);
+      }
+    };
     
     return (
       <div className="mb-6">
@@ -49,15 +57,25 @@ const SquadView: React.FC<SquadViewProps> = () => {
             return (
               <div 
                 key={index} 
-                className={`flex flex-col items-center justify-center p-2 rounded-lg ${
+                className={`relative flex flex-col items-center justify-center p-2 rounded-lg ${
                   player ? getPositionColor(position) : 'bg-gray-200'
-                } text-white h-24`}
+                } text-white h-24 ${player ? 'cursor-pointer hover:opacity-90' : ''}`}
               >
+                {player && (
+                  <div 
+                    className="absolute top-1 right-1 bg-white rounded-full hover:bg-red-100"
+                    onClick={(e) => handleRemovePlayer(player.id, e)}
+                    title="Remove player"
+                  >
+                    <XCircle size={18} className="text-red-500" />
+                  </div>
+                )}
+                
                 {player ? (
                   <>
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mb-1 overflow-hidden">
-                      {player.image ? (
-                        <img src={player.image} alt={player.name} className="w-full h-full object-cover" />
+                      {player.photo ? (
+                        <img src={player.photo} alt={player.name} className="w-full h-full object-cover" />
                       ) : (
                         <UserCircle2 className="text-gray-400" size={24} />
                       )}

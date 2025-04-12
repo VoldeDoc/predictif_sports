@@ -1,9 +1,16 @@
 import { Position } from '@/types';
 import { useViewContext } from './FantasyLeague';
+import { useEffect } from 'react';
 
 export default function FantasyStatistic() {
     const { selectedPlayer } = useViewContext();
-    // const [isLoading, setIsLoading] = useState(false);
+    
+    // Log full player data for debugging
+    useEffect(() => {
+        if (selectedPlayer) {
+            console.log("Selected player data:", selectedPlayer);
+        }
+    }, [selectedPlayer]);
 
     // If no player is selected, show a message
     if (!selectedPlayer) {
@@ -14,6 +21,14 @@ export default function FantasyStatistic() {
             </div>
         );
     }
+
+    // Extract bio data - first check if bio is an object or directly in the player object
+    const bioData = typeof selectedPlayer.bio === 'object' && selectedPlayer.bio !== null 
+        ? selectedPlayer.bio 
+        : selectedPlayer;
+
+    // Extract current club data
+    const clubData = selectedPlayer.current_club || {};
 
     // Map API position format to our Position enum
     const getPosition = (positionStr: string): Position => {
@@ -41,21 +56,21 @@ export default function FantasyStatistic() {
 
     // Create a player object from API data that matches our expected format
     const player = {
-        id: selectedPlayer.id,
-        name: selectedPlayer.name,
-        image: selectedPlayer.photo,
-        position: getPosition(selectedPlayer.position_short || selectedPlayer.position),
-        team: selectedPlayer.current_club_name || '',
-        price: parsePrice(selectedPlayer.evaluation),
-        nationality: 'gb', // Default if not available
+        id: selectedPlayer.id || selectedPlayer.player_id || bioData.player_id || '',
+        name: selectedPlayer.name || bioData.name || 'Unknown Player',
+        image: selectedPlayer.photo || bioData.photo || '',
+        position: getPosition(selectedPlayer.position_short || bioData.position_short || selectedPlayer.position || bioData.position),
+        team: selectedPlayer.current_club_name || clubData.current_club_name || '',
+        price: parsePrice(selectedPlayer.evaluation || bioData.evaluation),
+        nationality: selectedPlayer.nationality || bioData.nationality || 'gb',        
         stats: {
-            appearances: selectedPlayer.appearance || 0,
-            goals: selectedPlayer.goal || 0,
-            assists: selectedPlayer.assists || 0,
-            cleanSheets: selectedPlayer.clean_sheets || 0,
-            redCards: selectedPlayer.red_card || 0,
-            yellowCards: selectedPlayer.yellow_card || 0,
-            saves: 0, // Default values for stats not in API
+            appearances: selectedPlayer.appearance || clubData.appearance || 0,
+            goals: selectedPlayer.goal || clubData.goal || 0,
+            assists: selectedPlayer.assists || clubData.assists || 0,
+            cleanSheets: selectedPlayer.clean_sheets || clubData.clean_sheets || 0,
+            redCards: selectedPlayer.red_card || clubData.red_card || 0,
+            yellowCards: selectedPlayer.yellow_card || clubData.yellow_card || 0,
+            saves: 0,
             goalsConceded: 0,
             penaltySaves: 0,
             tackles: 0,
@@ -66,6 +81,43 @@ export default function FantasyStatistic() {
             passAccuracy: 75 // Default value
         }
     };
+
+    // Extract personal details, checking both main object and bio object
+    const dob = bioData.dob || selectedPlayer.dob || "Not available";
+    const height = bioData.height || selectedPlayer.height || "Not available";
+    const weight = bioData.weight || selectedPlayer.weight || "Not available";
+    const earning = bioData.earning || selectedPlayer.earning || "Not available";
+    
+    // For bio content, construct from available data if no actual bio text is available
+    let bioContent = '';
+    try {
+        // Check if there's a direct bio string
+        if (typeof selectedPlayer.bio === 'string') {
+            bioContent = selectedPlayer.bio;
+        } else {
+            // Create a biography from available data
+            bioContent = `${player.name} is a professional footballer who plays as a ${bioData.position || player.position} for ${player.team}. `;
+            
+            if (dob !== "Not available") {
+                bioContent += `Born on ${dob}, `;
+            }
+            
+            if (height !== "Not available" || weight !== "Not available") {
+                bioContent += `with a physical profile of ${height} tall and weighing ${weight}. `;
+            }
+            
+            if (earning !== "Not available") {
+                bioContent += `Currently earning ${earning}. `;
+            }
+            
+            if (player.price > 0) {
+                bioContent += `Current market value is estimated at £${player.price}m.`;
+            }
+        }
+    } catch (error) {
+        console.error("Error processing bio content:", error);
+        bioContent = '';
+    }
 
     const renderStats = () => {
         switch (player.position) {
@@ -188,7 +240,7 @@ export default function FantasyStatistic() {
                                 </div>
                             </div>
                             <div>
-                                <div className="text-white">
+                                {/* <div className="text-white">
                                     <h1 className="font-semibold text-lg">Nationality:</h1>
                                     <img
                                         src={`https://flagcdn.com/w80/${player.nationality?.toLowerCase()}.png`}
@@ -199,7 +251,7 @@ export default function FantasyStatistic() {
                                             target.src = '/assets/images/flag-placeholder.png';
                                         }}
                                     />
-                                </div>
+                                </div> */}
                                 <div className="text-white">
                                     <h1 className="font-semibold text-lg">Team:</h1>
                                     <h1 className="font-bold text-xl">{player.team}</h1>
@@ -310,6 +362,8 @@ export default function FantasyStatistic() {
                     </div>
                 </div>
             </div>
+
+         
         </div>
     );
 }

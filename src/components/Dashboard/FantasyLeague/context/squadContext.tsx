@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { formations } from '../data/formations';
 import { Formation, Player, Position, Squad } from '@/types';
 import useDashBoardManagement from '@/hooks/useDashboard';
+import { toast } from 'react-toastify';
 
 // Storage key for localStorage
 const SQUAD_STORAGE_KEY = 'fantasySquadData';
@@ -9,8 +10,37 @@ const SQUAD_STORAGE_KEY = 'fantasySquadData';
 // Default budget
 const DEFAULT_BUDGET = 100;
 
-// Get initial squad data
+// Normalize player data to ensure consistent format
+const normalizePlayer = (player: Player): Player => {
+  return {
+    ...player,
+    id: String(player.id),
+    price: typeof player.price === 'string' ? parseFloat(player.price) : player.price,
+    selected: player.selected || false,
+    inMatchday: player.inMatchday || false,
+  };
+};
+
 const getInitialSquad = (): Squad => {
+  if (typeof window !== 'undefined') {
+    try {
+      const storedSquad = localStorage.getItem(SQUAD_STORAGE_KEY);
+      if (storedSquad) {
+        const parsedSquad = JSON.parse(storedSquad);
+        
+        // Ensure all player IDs are normalized as strings
+        if (parsedSquad.players && Array.isArray(parsedSquad.players)) {
+          parsedSquad.players = parsedSquad.players.map(normalizePlayer);
+          
+        }
+        
+        return parsedSquad;
+      }
+    } catch (error) {
+      console.error('Error parsing stored squad:', error);
+    }
+  }
+  
   return {
     players: [],
     formation: formations[0], // Default to 4-4-2
@@ -24,18 +54,20 @@ interface SquadContextType {
   squad: Squad;
   isLoading: boolean;
   addPlayer: (player: Player) => void;
-  removePlayer: (playerId: number) => void;
+  removePlayer: (playerId: number | string) => void;
   changeFormation: (formation: Formation) => void;
   canAddPlayer: (player: Player) => boolean;
   getPositionCount: (position: Position) => number;
   getPositionLimit: (position: Position) => number;
   getRemainingBudget: () => number;
   simulateGameweek: () => void;
-  toggleMatchdaySelection: (playerId: number) => void;
+  toggleMatchdaySelection: (playerId: number | string) => void;
   isSquadComplete: () => boolean;
   isMatchdayReady: () => boolean;
   getMatchdayPlayers: () => Player[];
   getSubstitutePlayers: () => Player[];
+  resetSquad: () => void;
+  syncSquadWithAPIPlayers: (apiPlayers: Player[]) => void; 
 }
 
 const SquadContext = createContext<SquadContextType | undefined>(undefined);
@@ -52,14 +84,13 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const fetchFantasyPlayerAccount = async () => {
       setIsLoading(true);
       try {
-        console.log('Fetching fantasy player account...');
         const response = await getFantasyPlayerAccount();
         
-        if (response) {
+        if (response && response[0]) {
+          const budget = response[0].budget || DEFAULT_BUDGET;
+          
           setSquad((prev) => {
-            const storedSquad = localStorage.getItem(SQUAD_STORAGE_KEY);
-            const existingSquad = storedSquad ? JSON.parse(storedSquad) : prev;
-            return { ...existingSquad, budget: response[0].budget };
+            return { ...prev, budget };
           });
         }
       } catch (error) {
@@ -71,12 +102,7 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     fetchFantasyPlayerAccount();
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(SQUAD_STORAGE_KEY, JSON.stringify(squad));
-    }
-  }, [squad]);
-
+  
   useEffect(() => {
     const matchdayPlayers = squad.players.filter((p) => p.inMatchday);
     const isValid = isSquadComplete() && matchdayPlayers.length === 11;
@@ -139,7 +165,19 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const canAddPlayer = (player: Player): boolean => {
-    if (squad.players.some((p) => p.id === player.id)) {
+    // Enhanced debugging to trace ID comparison issues
+    const normalizedPlayerId = String(player.id);
+    
+    const existingPlayerById = squad.players.find(p => String(p.id) === normalizedPlayerId);
+    
+    // 2. Check by name as a fallback (in case IDs are different but it's the same player)
+    const existingPlayerByName = squad.players.find(p => 
+      p.name === player.name && 
+      p.position === player.position &&
+      p.team === player.team
+    );
+    
+    if (existingPlayerById || existingPlayerByName) {
       return false;
     }
 
@@ -160,54 +198,73 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       [Position.FWD]: 3,
     };
 
-    return currentCount < maxLimits[player.position];
+    const canAdd = currentCount < maxLimits[player.position];
+ 
+    return canAdd;
   };
 
   const addPlayer = (player: Player) => {
     if (canAddPlayer(player)) {
-      setSquad((prev) => ({
-        ...prev,
-        players: [...prev.players, { ...player, selected: true, inMatchday: false }],
-      }));
+      
+      // Normalize the player data to ensure consistent format
+      const normalizedPlayer = normalizePlayer(player);
+      
+      setSquad((prev) => {
+        const newSquad = {
+          ...prev,
+          players: [...prev.players, { ...normalizedPlayer, selected: true, inMatchday: false }],
+        };
+        return newSquad;
+      });
     }
   };
 
-  const removePlayer = (playerId: number) => {
-    setSquad((prev) => ({
-      ...prev,
-      players: prev.players.filter((player) => player.id !== playerId),
-    }));
+  const removePlayer = (playerId: number | string) => {
+    const normalizedId = String(playerId);
+    
+    setSquad((prev) => {
+      // Find the player to remove with more detailed logging
+      const playerToRemove = prev.players.find(p => String(p.id) === normalizedId);
+      
+      if (playerToRemove) {
+      } else {
+        console.warn('Player not found with ID:', normalizedId);
+      }
+      
+      // Use strict string comparison to ensure IDs match correctly
+      return {
+        ...prev,
+        players: prev.players.filter((player) => String(player.id) !== normalizedId),
+      };
+    });
   };
 
-  const toggleMatchdaySelection = (playerId: number) => {
-    if (!isSquadComplete()) return;
-
+  const toggleMatchdaySelection = (playerId: number | string) => {
+    if (!isSquadComplete()) {
+      toast.error("Complete your squad before selecting matchday players");
+      return;
+    }
+  
+    // Convert to string for consistent comparison
+    const normalizedId = String(playerId);
+    
+    
+  
     setSquad((prev) => {
+      // Map through players and toggle the matchday status for the selected player
       const updatedPlayers = prev.players.map((player) => {
-        if (player.id === playerId) {
-          if (!player.inMatchday) {
-            const positionPlayers = prev.players.filter(
-              (p) => p.position === player.position && p.inMatchday
-            );
-
-            const positionKey = player.position.split(' ')[0] as keyof typeof prev.formation.structure;
-            const limit = prev.formation.structure[positionKey];
-
-            if (positionPlayers.length >= limit) {
-              return player;
-            }
-
-            const matchdayCount = prev.players.filter((p) => p.inMatchday).length;
-            if (matchdayCount >= 11) {
-              return player;
-            }
-          }
-
-          return { ...player, inMatchday: !player.inMatchday };
+        // Use string comparison for IDs to avoid type issues
+        if (String(player.id) === normalizedId) {
+          return {
+            ...player,
+            inMatchday: !player.inMatchday, // Toggle the matchday status
+          };
         }
         return player;
       });
-
+  
+     
+  
       return {
         ...prev,
         players: updatedPlayers,
@@ -227,7 +284,9 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const simulateGameweek = () => {
-    if (!isMatchdayReady()) return;
+    if (!isMatchdayReady()) {
+      return;
+    }
 
     const updatedPlayers = squad.players.map((player) => {
       if (player.inMatchday) {
@@ -264,7 +323,7 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const gameweekPoints = updatedPlayers.reduce((total, player) => {
       if (player.inMatchday) {
-        const previousPoints = squad.players.find((p) => p.id === player.id)?.points?.current || 0;
+        const previousPoints = squad.players.find((p) => String(p.id) === String(player.id))?.points?.current || 0;
         const newPoints = player.points?.current || 0;
         return total + (newPoints - previousPoints);
       }
@@ -276,6 +335,94 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       players: updatedPlayers,
       totalPoints: prev.totalPoints + gameweekPoints,
     }));
+  };
+
+  // Add a reset function for debugging
+  const resetSquad = () => {
+    localStorage.removeItem(SQUAD_STORAGE_KEY);
+    setSquad({
+      players: [],
+      formation: formations[0],
+      budget: DEFAULT_BUDGET,
+      totalPoints: 0,
+      matchdayReady: false,
+    });
+  };
+
+  const syncSquadWithAPIPlayers = (apiPlayers: any[]) => {
+    // console.log("syncSquadWithAPIPlayers called with", apiPlayers.length, "players");
+    
+    // // Log the exact structure of the first player to debug
+    // if (apiPlayers.length > 0) {
+    //   console.log("First player raw structure:", JSON.stringify(apiPlayers[0], null, 2));
+    // }
+    
+    // Map position_short to Position enum values
+    const positionMap: Record<string, Position> = {
+      'GK': Position.GK,
+      'DF': Position.DEF,
+      'MF': Position.MID,
+      'FW': Position.FWD,
+      'Goalkeeper': Position.GK,
+      'Defender': Position.DEF,
+      'Midfielder': Position.MID, 
+      'Forward': Position.FWD,
+      'Striker': Position.FWD,
+    };
+    
+    // Transform API players to match expected format
+    const validPlayers = apiPlayers.map(player => {
+      // Get the correct position from either position_short or position
+      const mappedPosition = 
+        (player.position_short && positionMap[player.position_short]) || 
+        (player.position && positionMap[player.position]) || 
+        Position.FWD;  // Default position
+      
+      if (Array.isArray(player)) {
+        player = player[0]; 
+      }
+      
+      // Create the player object with proper data extraction and fallbacks
+      return {
+        id: player.player_id || player.id || String(Math.random()),
+        name: player.name || "Unknown Player",
+        position: mappedPosition,
+        team: player.current_club_name || player.team || "Unknown Team",
+        price: Number(player.transfer_in_value) || Number(player.evaluation) || 5.0,
+        photo: player.photo || "",
+        selected: true,
+        inMatchday: false,
+        
+        // Add these required properties to match the Player type
+        points: {
+          current: 0,
+          change: 0
+        },
+        nationality: player.nationality || "Unknown",
+        stats: {
+          appearances: Number(player.appearance) || 0,
+          goals: Number(player.goal) || 0,
+          assists: Number(player.assists) || 0,
+          cleanSheets: Number(player.clean_sheets) || 0,
+          yellowCards: Number(player.yellow_card) || 0,
+          redCards: Number(player.red_card) || 0
+        },
+        
+        status: {
+          isAvailable: true,
+          reason: undefined,
+          expectedReturn: undefined
+        }
+      };
+    });
+    
+    
+    // Update the squad state with these players
+    setSquad(prev => ({
+      ...prev,
+      players: validPlayers as Player[],
+    }));
+    
   };
 
   return (
@@ -296,6 +443,8 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         isMatchdayReady,
         getMatchdayPlayers,
         getSubstitutePlayers,
+        resetSquad,
+        syncSquadWithAPIPlayers, 
       }}
     >
       {children}

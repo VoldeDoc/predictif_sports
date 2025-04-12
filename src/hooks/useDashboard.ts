@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axiosClient from "@/services/axios-client";
-import { addMembersValues, AssignMemberRoleValues, createGroupValues, createStrategyValues, deleteMessageValues, editMessageValues, sendMessageValues, SurveyDataValues } from "@/types";
+import { addMembersValues, AssignMemberRoleValues, createGroupValues, createStrategyValues, deleteMessageValues, editMessageValues, FormationValues, MatchDay, sendMessageValues, setSquadPlayers, SubstitutionValues, SurveyDataValues } from "@/types";
 import { useState } from "react";
 import { RootState } from "@/context/store/rootReducer";
 import { toast } from "react-toastify";
@@ -775,240 +775,370 @@ function useDashBoardManagement() {
         }
     }
 
-const getMatchDetail = async (id: string) => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchDetail/${id}`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
+    const getMatchDetail = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchDetail/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-    finally {
-        setLoading(false)
-    }
-}
 
-const getUpcomingMatch = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertUpComing`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
+    const getUpcomingMatch = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-    finally {
-        setLoading(false)
+    const getUpcomingMatchPublic = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing/public`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-}
-const getUpcomingMatchPublic = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertUpComing/public`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-
-
-const getTodayMatch = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertToday/`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-const getTodayMatchPublic = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertToday/public`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-
-const getResultMatch = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertResult`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-const getResultMatchPublic = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getMatchAlertResult/public`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
-
-const getNewsEvent = async () => {
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getNewEvent`)
-        return res?.data.data
-    } catch (error: any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occurred";
-        console.error(errorMessage);
-    }
-    finally {
-        setLoading(false)
-    }
-}
 
 
-const getNewsEventBySubject = async (id:string)=>{
-    try{
-     setLoading(true)
-     const res = await client.get(`/user/getNewEventBySubject/${id}/subject`)
-     return res?.data.data
-    }catch (error:any){
-     const resError =  error.response?.data;
-     const errorMessage = resError?.message || resError?.data || "An error occured";
-     console.error(errorMessage)
+    const getTodayMatch = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertToday/`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-    finally{
-     setLoading(false)
+    const getTodayMatchPublic = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertToday/public`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
- 
- }
 
-const getNewsEventById = async (id:number)=>{
-   try{
-    setLoading(true)
-    const res = await client.get(`/user/getNewEventById/${id}`)
-    return res?.data.data
-   }catch (error:any){
-    const resError =  error.response?.data;
-    const errorMessage = resError?.message || resError?.data || "An error occured";
-    console.error(errorMessage)
-   }
-   finally{
-    setLoading(false)
-   }
-
-}
-
-const getRegion = async ()=>{
-    try {
-        setLoading(true)
-        const res = await client.get('/user/getRegion')
-        return res?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occured"
-        console.error(errorMessage);
-        
+    const getResultMatch = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertResult`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-}
-
-const getCountryRegion = async (id:string)=>{
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getRegionByCountry/${id}`)
-        return res?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occured"
-        console.error(errorMessage);
-        
+    const getResultMatchPublic = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertResult/public`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-}
 
-const getCountryRegionLeague = async ({ id, sport }: { id: string, sport: string })=>{
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getLeague/${id}/${sport}`)
-        return res?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occured"
-        console.error(errorMessage);
-        
+    const getNewsEvent = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getNewEvent`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+        }
+        finally {
+            setLoading(false)
+        }
     }
-}
 
-const getPlayersByLeague = async() =>{
-    try {
-        setLoading(true)
-        const res = await client.get(`/user/getClubPlayerLeague/eyJpdiI6IjR4Y1k5YW1JUGdzU3ZIS0tGYnVmdlE9PSIsInZhbHVlIjoia3lpaHNENTFlbC9HV3Q5dkNjUnRFQT09IiwibWFjIjoiYjYzMDUxOGY5Y2JhMjc2ZTY4OTk2NzQ1ZGQxMDAzZDI3YjkzOWVlYWM3YWE0NTE1NWViN2VjZTRkYWRmZDY5YyIsInRhZyI6IiJ9`)
-        return res?.data.data
-    } catch (error:any) {
-        const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occured"
-        console.error(errorMessage);
-        
+
+    const getNewsEventBySubject = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getNewEventBySubject/${id}/subject`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured";
+            console.error(errorMessage)
+        }
+        finally {
+            setLoading(false)
+        }
+
     }
-}
 
-const getFantasyPlayerById = async(id: string) => {
+    const getNewsEventById = async (id: number) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getNewEventById/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured";
+            console.error(errorMessage)
+        }
+        finally {
+            setLoading(false)
+        }
+
+    }
+
+    const getRegion = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get('/user/getRegion')
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getCountryRegion = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getRegionByCountry/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getCountryRegionLeague = async ({ id, sport }: { id: string, sport: string }) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getLeague/${id}/${sport}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getPlayersByLeague = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getClubPlayerLeague/eyJpdiI6IjR4Y1k5YW1JUGdzU3ZIS0tGYnVmdlE9PSIsInZhbHVlIjoia3lpaHNENTFlbC9HV3Q5dkNjUnRFQT09IiwibWFjIjoiYjYzMDUxOGY5Y2JhMjc2ZTY4OTk2NzQ1ZGQxMDAzZDI3YjkzOWVlYWM3YWE0NTE1NWViN2VjZTRkYWRmZDY5YyIsInRhZyI6IiJ9`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getFantasyPlayerById = async (id: string) => {
+        try {
+            setLoading(true);
+            const res = await client.get(`/user/fantasy/getSquadbyId/${id}`);
+            console.log(res?.data?.data);
+
+            return { data: res?.data?.data, status: res?.status };
+        } catch (error: any) {
+            console.log(error);
+
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return { data: [], status: 404 };
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getFantasyPlayerAccount = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/fantasy/getuser`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const TransferPlayerIn = async (id: string) => {
+        try {
+            setLoading(true);
+            const res = await client.get(`/user/fantasy/transferPlayerIn/${id}`);
+            console.log(res?.data?.data);
+
+            return { data: res?.data?.data, status: res?.status };
+        } catch (error: any) {
+            console.log(error);
+
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occurred";
+            console.error(errorMessage);
+            return { data: [], status: 404 };
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getFantasySquadPlayers = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/fantasy/getSquad`)
+            return res?.data.data
+        }
+        catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const createMatchDay = async (data: MatchDay) => {
+        try {
+            setLoading(true)
+            const res = await client.post(`/user/fantasy/matchDay`, data)
+            const result = res.data.data;
+            console.log(result);
+            return Promise.resolve("Group created successfully!");
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+    const getMatchDay = async () => {
+        try {
+            setLoading(true)
+            const res = await client.get('/user/fantasy/getMatchDay')
+            return res?.data?.data
+        }
+        catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+        finally {
+            setLoading(false)
+        }
+    }
+
+const setSquad = async (data: setSquadPlayers) => {
     try {
         setLoading(true);
-        const res = await client.get(`/user/fantasy/getSquadbyId/${id}`);
-        console.log(res?.data?.data);
-        
-        return {data: res?.data?.data, status: res?.status}; 
+        const res = await client.post('/user/fantasy/setSquad', data);
+        return res?.data?.data;
     } catch (error: any) {
-        console.log(error);
-        
         const resError = error.response?.data;
         const errorMessage = resError?.message || resError?.data || "An error occurred";
         console.error(errorMessage);
-        return {data: [], status: 404};
     } finally {
         setLoading(false);
     }
 }
 
-const getFantasyPlayerAccount = async()=>{
+const getMatchDaySquad = async (id: string) => {
     try {
-        setLoading(true)
-        const res = await client.get(`/user/fantasy/getuser`)
-        return res?.data.data
-    } catch (error:any) {
+        setLoading(true);
+        const res = await client.get(`/user/fantasy/getMatchDaySquad${id}`);
+        return res?.data?.data;
+    } catch (error: any) {
         const resError = error.response?.data;
-        const errorMessage = resError?.message || resError?.data || "An error occured"
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
         console.error(errorMessage);
-        
+    } finally {
+        setLoading(false);
     }
 }
+
+const setFormation  = async (data:FormationValues) =>{
+    try {
+        setLoading(true);
+        const res = await client.post('/user/fantasy/matchDayUpdate', data);
+        return res?.data?.data;
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    } finally {
+        setLoading(false);
+} 
+    }
+
+
+   
+const substitute  = async (data:SubstitutionValues) =>{
+    try {
+        setLoading(true);
+        const res = await client.post('/user/fantasy/matchDaySquad', data);
+        return res?.data?.data;
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occurred";
+        console.error(errorMessage);
+    } finally {
+        setLoading(false);
+} 
+    }
+
 
     return {
         loading,
@@ -1074,7 +1204,15 @@ const getFantasyPlayerAccount = async()=>{
         getCountryRegionLeague,
         getPlayersByLeague,
         getFantasyPlayerAccount,
-        getFantasyPlayerById
+        getFantasyPlayerById,
+        TransferPlayerIn,
+        getFantasySquadPlayers,
+        createMatchDay,
+        getMatchDay,
+        setSquad,
+        getMatchDaySquad,
+        setFormation,
+        substitute
     };
 }
 

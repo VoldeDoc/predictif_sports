@@ -10,7 +10,6 @@ import PaystackCheckoutPage from "./PayStackCheckOutPage";
 import { useSelector } from "react-redux";
 import { RootState } from "@/context/store/rootReducer";
 import { toast } from "react-toastify"; // Import react-toastify
-
 const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
 const stripePromise = loadStripe(stripeKey);
 
@@ -20,6 +19,8 @@ const CheckoutForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  console.log(id);
+  
   const { subsricbeToPlan, updateUserOnboarding } = useDashBoardManagement();
 
   const { title, amount, type }: {
@@ -121,6 +122,7 @@ const CheckoutForm = () => {
             reference: paymentIntent.id,
             subscription_id: id,
           }),
+          
         });
 
         if (!stripeConfirmResponse.ok) {

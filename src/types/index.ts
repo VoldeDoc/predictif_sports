@@ -122,8 +122,9 @@ export interface updateStreategyValues{
 
 
 export interface Player {
-  id: number;
+  id: number | string;
   name: string;
+  photo?: string;
   position: Position;
   team: string;
   price: number;
@@ -169,10 +170,10 @@ export interface Player {
 }
 
 export enum Position {
-  GK = "Goalkeeper",
-  DEF = "Defender",
-  MID = "Midfielder",
-  FWD = "Forward"
+  GK = "GK",
+  DEF = "DEF",
+  MID = "MID",
+  FWD = "FWD"
 }
 
 export interface Formation {
@@ -192,13 +193,13 @@ export interface Squad {
   totalPoints: number;
   matchdayReady: boolean;
   currentGameWeek?:number;
-  currentRank?: number | string;  // Current rank in league/competition
-  previousRank?: number | string;  // Previous rank for comparison
-  matchdayPlayers?: number[];  // IDs of players selected for matchday
-  matchdaySelectionSaved?: boolean;  // Flag to track if selection was saved
+  currentRank?: number | string;  
+  previousRank?: number | string; 
+  matchdayPlayers?: number[];   
+  matchdaySelectionSaved?: boolean; 
   pointsHistory?: {
-    lastChange: number;  // Points change since last update
-    gameweekHistory?: Array<{ week: number, points: number }>;  // Historical data 
+    lastChange: number;
+    gameweekHistory?: Array<{ week: number, points: number }>; 
   };
 }
 
@@ -213,4 +214,27 @@ export interface PlayerPoints {
   current: number;
   change: number;
   breakdown?: Record<string, number>;
+}
+
+export interface MatchDay {
+  game_week: string;
+  game_date: string;
+  seasons_id: string;
+  formation: string;
+}
+
+export interface setSquadPlayers {
+  game_id: string;
+  player_squad_id: string;
+}
+
+export interface FormationValues{
+  id:string;
+  formation:string;
+}
+export interface SubstitutionValues{
+  game_id:string;
+  player_squad_id_out:string;
+  player_squad_id:string;
+  player_squad_position:string;
 }

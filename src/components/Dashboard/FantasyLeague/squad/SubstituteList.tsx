@@ -3,6 +3,7 @@ import { UserCircle2, AlertCircle } from 'lucide-react';
 import { useSquad } from '../context/squadContext';
 import { Player, Position } from '@/types';
 
+
 const FORMATIONS: { [key: string]: number[] } = {
   "4-4-2": [1, 4, 4, 2],
   "4-3-3": [1, 4, 3, 3],
@@ -14,6 +15,8 @@ const FORMATIONS: { [key: string]: number[] } = {
 
 const SubstitutesList: React.FC = () => {
   const { squad, getSubstitutePlayers, getMatchdayPlayers, toggleMatchdaySelection } = useSquad();
+
+  // Log the passed in squad players for debugging if needed
 
   const substitutes = getSubstitutePlayers();
   const matchdayPlayers = getMatchdayPlayers();
@@ -46,19 +49,26 @@ const SubstitutesList: React.FC = () => {
     }, {} as Record<Position, number>);
   }, [matchdayPlayers]);
 
-  const handlePlayerSelection = (playerId: number) => {
-    const player = substitutes.find(p => p.id === playerId);
-    if (!player) return;
+ // Update the handlePlayerSelection function to accept string IDs
+const handlePlayerSelection = (playerId: string | number) => {
+  // Find player using string comparison to avoid type issues
+  const player = substitutes.find(p => String(p.id) === String(playerId));
+  if (!player) {
+    console.error("Player not found with ID:", playerId);
+    return;
+  }
 
-    // Check if adding this player would exceed position limit
-    const currentCount = currentPositionCounts[player.position] || 0;
-    if (currentCount >= positionLimits[player.position]) {
-      alert(`Formation ${formationName} only allows ${positionLimits[player.position]} ${player.position}s`);
-      return;
-    }
 
-    toggleMatchdaySelection(playerId);
-  };
+  // Check if adding this player would exceed position limit
+  const currentCount = currentPositionCounts[player.position] || 0;
+  if (currentCount >= positionLimits[player.position]) {
+    alert(`Formation ${formationName} only allows ${positionLimits[player.position]} ${player.position}s`);
+    return;
+  }
+
+  // Call toggleMatchdaySelection with the player's original ID (don't convert to number)
+  toggleMatchdaySelection(player.id);
+};
 
   const getStatusColor = (status: Player['status'] | undefined) => {
     if (!status) return '';
@@ -133,12 +143,12 @@ const SubstitutesList: React.FC = () => {
                   className={`flex flex-col lg:flex-col items-center p-4 rounded-lg border ${statusColor || 'bg-gray-50'
                     } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
                     }`}
-                  onClick={() => !isDisabled && handlePlayerSelection(player.id)}
+                  onClick={() => !isDisabled && handlePlayerSelection((player.id))}
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden mb-2">
-                    {player.image ? (
+                    {player.photo ? (
                       <img
-                        src={player.image}
+                        src={player.photo}
                         alt={player.name}
                         className="w-full h-full object-cover"
                       />
@@ -163,7 +173,6 @@ const SubstitutesList: React.FC = () => {
                     </div>
                   )}
                 </div>
-
               );
             })}
           </div>

@@ -10,16 +10,16 @@ interface PlayerCardProps {
 const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
   const { addPlayer, removePlayer, canAddPlayer, squad, toggleMatchdaySelection, isSquadComplete } = useSquad();
   
-  const isSelected = squad.players.some((p: Player) => p.id === player.id);
-  const isInMatchday = squad.players.some((p: Player) => p.id === player.id && p.inMatchday);
+  const isSelected = squad.players.some((p: Player) => String(p.id) === String(player.id));
+const isInMatchday = squad.players.some((p: Player) => String(p.id) === String(player.id) && p.inMatchday);
   
   const handleClick = () => {
     if (isSelected) {
       // If squad is complete, toggle matchday selection
       if (isSquadComplete()) {
-        toggleMatchdaySelection(player.id);
+        toggleMatchdaySelection(String(player.id));
       } else {
-        removePlayer(player.id);
+        removePlayer(String(player.id));
       }
     } else if (canAddPlayer(player)) {
       addPlayer(player);
@@ -49,7 +49,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
     >
       <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden mr-3">
         <img 
-          src={player.image || `https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80`} 
+          src={player.photo || `https://images.unsplash.com/photo-1511886929837-354d1a99fc32?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80`} 
           alt={player.name} 
           className="w-full h-full object-cover"
         />
