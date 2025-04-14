@@ -2,6 +2,7 @@ import React from 'react';
 import { useSquad } from '../context/squadContext';
 import { formations } from '../data/formations';
 const FormationSelector: React.FC = () => {
+  
   const { changeFormation, squad } = useSquad();
   
   return (

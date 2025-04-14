@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 const SQUAD_STORAGE_KEY = 'fantasySquadData';
 
 // Default budget
-const DEFAULT_BUDGET = 100;
+const DEFAULT_BUDGET = 10000;
 
 // Normalize player data to ensure consistent format
 const normalizePlayer = (player: Player): Player => {
@@ -44,7 +44,7 @@ const getInitialSquad = (): Squad => {
   return {
     players: [],
     formation: formations[0], // Default to 4-4-2
-    budget: DEFAULT_BUDGET, // Use default budget initially
+    budget: 1000, // Use default budget initially
     totalPoints: 0,
     matchdayReady: false,
   };
@@ -66,7 +66,6 @@ interface SquadContextType {
   isMatchdayReady: () => boolean;
   getMatchdayPlayers: () => Player[];
   getSubstitutePlayers: () => Player[];
-  resetSquad: () => void;
   syncSquadWithAPIPlayers: (apiPlayers: Player[]) => void; 
 }
 
@@ -85,6 +84,7 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setIsLoading(true);
       try {
         const response = await getFantasyPlayerAccount();
+        console.log(response);
         
         if (response && response[0]) {
           const budget = response[0].budget || DEFAULT_BUDGET;
@@ -163,62 +163,82 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const getSubstitutePlayers = (): Player[] => {
     return squad.players.filter((p) => !p.inMatchday);
   };
+const canAddPlayer = (player: Player): boolean => {
+  const normalizedPlayerId = String(player.id);
 
-  const canAddPlayer = (player: Player): boolean => {
-    // Enhanced debugging to trace ID comparison issues
-    const normalizedPlayerId = String(player.id);
-    
-    const existingPlayerById = squad.players.find(p => String(p.id) === normalizedPlayerId);
-    
-    // 2. Check by name as a fallback (in case IDs are different but it's the same player)
-    const existingPlayerByName = squad.players.find(p => 
-      p.name === player.name && 
-      p.position === player.position &&
-      p.team === player.team
-    );
-    
-    if (existingPlayerById || existingPlayerByName) {
-      return false;
-    }
+  const existingPlayerById = squad.players.find(p => String(p.id) === normalizedPlayerId);
+  const existingPlayerByName = squad.players.find(p =>
+    p.name === player.name &&
+    p.position === player.position &&
+    p.team === player.team
+  );
 
-    if (squad.players.length >= 15) {
-      return false;
-    }
+  if (existingPlayerById || existingPlayerByName) {
+    return false; // Player already exists in the squad
+  }
 
-    if (getRemainingBudget() < player.price) {
-      return false;
-    }
+  if (squad.players.length >= 15) {
+    return false; // Squad is full
+  }
 
-    const currentCount = getPositionCount(player.position);
+  if (getRemainingBudget() < player.price) {
+    return false; // Not enough budget
+  }
 
-    const maxLimits = {
-      [Position.GK]: 2,
-      [Position.DEF]: 5,
-      [Position.MID]: 5,
-      [Position.FWD]: 3,
+  // Map player.position to the Position enum
+  const positionMap: Record<string, Position> = {
+    Goalkeeper: Position.GK,
+    Defender: Position.DEF,
+    Midfielder: Position.MID,
+    Forward: Position.FWD,
+  };
+
+  const mappedPosition = positionMap[player.position];
+  if (!mappedPosition) {
+    console.error(`Invalid position: ${player.position}`);
+    return false;
+  }
+
+  const currentCount = getPositionCount(mappedPosition);
+  const maxLimits = {
+    [Position.GK]: 2,
+    [Position.DEF]: 5,
+    [Position.MID]: 5,
+    [Position.FWD]: 3,
+  };
+
+
+  return currentCount < maxLimits[mappedPosition];
+};
+
+const addPlayer = (player: Player) => {
+  if (canAddPlayer(player)) {
+    // Map the player's position to the Position enum
+    const positionMap: Record<string, Position> = {
+      Goalkeeper: Position.GK,
+      Defender: Position.DEF,
+      Midfielder: Position.MID,
+      Forward: Position.FWD,
+      
     };
 
-    const canAdd = currentCount < maxLimits[player.position];
- 
-    return canAdd;
-  };
-
-  const addPlayer = (player: Player) => {
-    if (canAddPlayer(player)) {
-      
-      // Normalize the player data to ensure consistent format
-      const normalizedPlayer = normalizePlayer(player);
-      
-      setSquad((prev) => {
-        const newSquad = {
-          ...prev,
-          players: [...prev.players, { ...normalizedPlayer, selected: true, inMatchday: false }],
-        };
-        return newSquad;
-      });
+    const mappedPosition = positionMap[player.position];
+    if (!mappedPosition) {
+      console.error(`Invalid position: ${player.position}`);
+      return;
     }
-  };
 
+    const normalizedPlayer = normalizePlayer({ ...player, position: mappedPosition });
+
+    setSquad((prev) => {
+      const newSquad = {
+        ...prev,
+        players: [...prev.players, { ...normalizedPlayer, selected: true, inMatchday: false }],
+      };
+      return newSquad;
+    });
+  }
+};
   const removePlayer = (playerId: number | string) => {
     const normalizedId = String(playerId);
     
@@ -337,25 +357,10 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }));
   };
 
-  // Add a reset function for debugging
-  const resetSquad = () => {
-    localStorage.removeItem(SQUAD_STORAGE_KEY);
-    setSquad({
-      players: [],
-      formation: formations[0],
-      budget: DEFAULT_BUDGET,
-      totalPoints: 0,
-      matchdayReady: false,
-    });
-  };
+  
 
   const syncSquadWithAPIPlayers = (apiPlayers: any[]) => {
-    // console.log("syncSquadWithAPIPlayers called with", apiPlayers.length, "players");
-    
-    // // Log the exact structure of the first player to debug
-    // if (apiPlayers.length > 0) {
-    //   console.log("First player raw structure:", JSON.stringify(apiPlayers[0], null, 2));
-    // }
+ 
     
     // Map position_short to Position enum values
     const positionMap: Record<string, Position> = {
@@ -443,7 +448,6 @@ export const SquadProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         isMatchdayReady,
         getMatchdayPlayers,
         getSubstitutePlayers,
-        resetSquad,
         syncSquadWithAPIPlayers, 
       }}
     >

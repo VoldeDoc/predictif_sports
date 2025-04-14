@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle, RefreshCw } from 'lucide-react';
+import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 import { Player, Position } from '@/types';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
@@ -233,15 +233,15 @@ const FantasyPoints: React.FC = () => {
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
           <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Could Not Load Points</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Matchweek has not arrived yet</h2>
           <p className="text-gray-600 mb-4">{fetchError}</p>
-          <p className="text-gray-600 mb-4">Make sure you have created a matchday and saved your squad selection.</p>
-          <button
+          {/* <button
             onClick={() => window.location.reload()}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md flex items-center justify-center mx-auto"
           >
             <RefreshCw size={16} className="mr-2" />
             Refresh
-          </button>
+          </button> */}
         </div>
       </div>
     );

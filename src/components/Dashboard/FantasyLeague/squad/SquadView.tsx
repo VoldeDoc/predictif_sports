@@ -15,28 +15,34 @@ const SquadView: React.FC<SquadViewProps> = () => {
     removePlayer
   } = useSquad();
 
+ 
+   
   const renderPositionGroup = (position: Position) => {
     const positionLimits = {
       [Position.GK]: 2,
       [Position.DEF]: 5,
       [Position.MID]: 5,
-      [Position.FWD]: 3
+      [Position.FWD]: 3,
     };
     
-    const players = squad.players.filter(player => player.position === position);
-    const limit = positionLimits[position];
+    
+const players = squad.players.filter(player => player.position === position);    const limit = positionLimits[position];
     const count = getPositionCount(position);
     
-    const getPositionColor = (pos: string) => {
-      switch(pos) {
-        case 'Goalkeeper': return 'bg-yellow-500';
-        case 'Defender': return 'bg-blue-500';
-        case 'Midfielder': return 'bg-green-500';
-        case 'Forward': return 'bg-red-500';
-        default: return 'bg-gray-500';
+    const getPositionColor = (pos: Position) => {
+      switch (pos) {
+        case Position.GK:
+          return 'bg-yellow-500';
+        case Position.DEF:
+          return 'bg-blue-500';
+        case Position.MID:
+          return 'bg-green-500';
+        case Position.FWD:
+          return 'bg-red-500';
+        default:
+          return 'bg-gray-500';
       }
     };
-
     const handleRemovePlayer = (playerId: string | number, e: React.MouseEvent) => {
       e.stopPropagation();
       if (window.confirm('Remove this player from your squad?')) {

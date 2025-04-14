@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useSquad } from './context/squadContext';
 import { Position, Player } from '@/types';
 import { toast } from 'react-toastify';
-import { Search, Filter, RefreshCw, ArrowRight, UserMinus } from 'lucide-react';
+import { Search, Filter, RefreshCw, ArrowRight } from 'lucide-react';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
-// Define substitution type
+// Define substitution type - also used for transfers since API structure is the same
 interface SubstitutionValues {
     game_id: string;
     player_squad_id_out: string;
@@ -14,17 +14,16 @@ interface SubstitutionValues {
 }
 
 export default function Transfer() {
-    const {   getRemainingBudget, syncSquadWithAPIPlayers } = useSquad();
-    const { getPlayer, getTeam, getFantasySquadPlayers, getMatchDay,substitute } = useDashBoardManagement();
+    const { getRemainingBudget, syncSquadWithAPIPlayers } = useSquad();
+    const { getPlayer, getTeam, getFantasySquadPlayers, getMatchDay, substitute } = useDashBoardManagement();
 
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
     const [selectedSquadPlayer, setSelectedSquadPlayer] = useState<Player | null>(null);
     const [filterPosition, setFilterPosition] = useState<Position | 'ALL'>('ALL');
     const [searchTerm, setSearchTerm] = useState('');
     const [squadSearchTerm, setSquadSearchTerm] = useState('');
-    const [isSubstituting, setIsSubstituting] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [matchDayId, setMatchDayId] = useState<string | null>(null);
+    const [matchDayData, setMatchDayData] = useState<any>(null);
 
     // State for API data
     const [isLoading, setIsLoading] = useState(true);
@@ -34,38 +33,45 @@ export default function Transfer() {
     const [mySquadPlayers, setMySquadPlayers] = useState<Player[]>([]);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    // State to track expanded clubs
+    const remainingBudget = getRemainingBudget?.() ;
 
-    const remainingBudget = getRemainingBudget();
-
-    // Fetch current match day
     useEffect(() => {
-        const fetchMatchDay = async () => {
+        const fetchMatchdayData = async () => {
             try {
-                const matchDayResponse = await getMatchDay();
-                if (matchDayResponse && matchDayResponse[0]) {
-                    const matchday = matchDayResponse[0];
-                    setMatchDayId(matchday.id || null);
-                    console.log("Match day fetched:", matchday);
-                }
+                const matchdayData = await getMatchDay();
+                console.log(matchdayData);
+                    setMatchDayData(matchdayData[0]);
+                    
             } catch (error) {
-                console.error("Error fetching match day:", error);
+                console.error("Error fetching matchday data:", error);
+                toast.error("Failed to load matchday data. Transfers may not work correctly.");
             }
         };
-        fetchMatchDay();
+    
+        fetchMatchdayData();
     }, []);
 
-    // Fetch current squad from API
+    // Fetch current squad from API with better error handling
     useEffect(() => {
         const fetchMySquad = async () => {
             try {
+                setIsLoading(true);
                 const squadData = await getFantasySquadPlayers();
+                
+                if (!squadData) {
+                    throw new Error("Failed to fetch squad data from API");
+                }
+                
                 console.log("Raw squad data:", squadData);
 
-                // Directly use the playersData array
-                const playersData = Array.isArray(squadData[0]) ? squadData[0] : squadData;
+                // Safely access the players array
+                const playersData = Array.isArray(squadData[0]) 
+                    ? squadData[0] 
+                    : Array.isArray(squadData) 
+                        ? squadData 
+                        : [];
 
-                if (playersData && Array.isArray(playersData) && playersData.length > 0) {
+                if (playersData && playersData.length > 0) {
                     console.log("Processed players data:", playersData.length, "players");
 
                     // Transform API response to match your Player type
@@ -109,7 +115,7 @@ export default function Transfer() {
                                 goalsConceded: player.goals_conceded || 0
                             },
                             selected: false,
-                            inMatchday: false,
+                            inMatchday: player.in_matchday === true,
                             nationality: player.nationality || "Unknown"
                         };
                     });
@@ -122,11 +128,15 @@ export default function Transfer() {
                     }
                 } else {
                     console.warn("No squad players found in API response");
-                    setFetchError("No players found in your squad");
+                    // Set empty array rather than error if no players found
+                    setMySquadPlayers([]);
+                    setFetchError("No players found in your squad. Please build your squad first.");
                 }
             } catch (error) {
                 console.error("Error fetching squad players:", error);
-                setFetchError("Failed to load your squad players");
+                setFetchError("Failed to load your squad players. Please try refreshing the page.");
+                // Set empty array to avoid undefined errors
+                setMySquadPlayers([]);
             } finally {
                 setIsLoading(false);
             }
@@ -135,22 +145,36 @@ export default function Transfer() {
         fetchMySquad();
     }, []);
 
-    // Fetch clubs on component mount
+    // Fetch clubs with better error handling
     useEffect(() => {
         const fetchClubs = async () => {
             try {
                 setIsLoading(true);
                 const teamsResponse = await getTeam("eyJpdiI6IndmQ1R5VEdmM2Ewd1A3MHkwMjA3Y3c9PSIsInZhbHVlIjoiMjJDNnJDVzFtVy9WNnVwU0xFSW5sZz09IiwibWFjIjoiNzQ0Yzk2NGEwYmZiMjMyNzM0ZmJhMDNiZThhMzUzYmRlMGQzNjNhNzc3MDFjZjRiZTY3YTNhM2I2OTk5Y2YzZSIsInRhZyI6IiJ9S");
-                console.log("Clubs fetched:", teamsResponse[0]);
+                
+                if (!teamsResponse) {
+                    throw new Error("Failed to fetch clubs from API");
+                }
 
-                if (teamsResponse && teamsResponse[0] && teamsResponse[0].length > 0) {
-                    setClubs(teamsResponse[0] || []);
+                console.log("Clubs fetched:", teamsResponse);
+
+                // Safely access the clubs array
+                const clubsData = Array.isArray(teamsResponse[0]) 
+                    ? teamsResponse[0] 
+                    : Array.isArray(teamsResponse) 
+                        ? teamsResponse 
+                        : [];
+
+                if (clubsData && clubsData.length > 0) {
+                    setClubs(clubsData);
                 } else {
                     setFetchError("No clubs available in the transfer market.");
+                    setClubs([]);
                 }
             } catch (error) {
                 console.error("Error fetching clubs:", error);
                 setFetchError("Failed to load available clubs. Please try again.");
+                setClubs([]);
             } finally {
                 setIsLoading(false);
             }
@@ -173,7 +197,7 @@ export default function Transfer() {
         }
     });
 
-    // Fetch players when a club is selected
+    // Fetch players when a club is selected with better error handling
     const handleClubSelect = async (clubId: string) => {
         if (!clubId) {
             setSelectedClub(null);
@@ -187,11 +211,23 @@ export default function Transfer() {
 
         try {
             const playersResponse = await getPlayer(clubId);
+            
+            if (!playersResponse) {
+                throw new Error("Failed to fetch players from API");
+            }
+
             console.log("Players fetched:", playersResponse);
 
-            if (playersResponse && playersResponse[0] && playersResponse[0].length > 0) {
+            // Safely access the players array
+            const playersData = Array.isArray(playersResponse[0]) 
+                ? playersResponse[0] 
+                : Array.isArray(playersResponse) 
+                    ? playersResponse 
+                    : [];
+
+            if (playersData && playersData.length > 0) {
                 // Transform API response to match your Player type
-                const transformedPlayers = playersResponse[0].map((player: any) => {
+                const transformedPlayers = playersData.map((player: any) => {
                     // Extract price from "£20 million" format if available
                     let price = 5.0; // Default price
                     if (player.evaluation) {
@@ -223,20 +259,28 @@ export default function Transfer() {
                         stats: {
                             goals: player.goal || 0,
                             assists: player.assists || 0,
-                            cleanSheets: player.clean_sheets || 0
-                        }
+                            cleanSheets: player.clean_sheets || 0,
+                            yellowCards: player.yellow_cards || 0,
+                            redCards: player.red_cards || 0,
+                            appearances: player.appearances || 0,
+                            saves: player.saves || 0,
+                            goalsConceded: player.goals_conceded || 0
+                        },
+                        selected: false,
+                        inMatchday: false,
+                        nationality: player.nationality || "Unknown"
                     };
                 });
 
                 setAvailablePlayers(transformedPlayers);
-
-               
             } else {
                 setFetchError("No players available for this club.");
+                setAvailablePlayers([]);
             }
         } catch (error) {
             console.error("Error fetching players:", error);
             setFetchError("Failed to load club players. Please try again.");
+            setAvailablePlayers([]);
         } finally {
             setIsLoading(false);
         }
@@ -260,8 +304,6 @@ export default function Transfer() {
         setSelectedSquadPlayer(player);
     };
 
-  
-
     const handleTransfer = async () => {
         if (!selectedPlayer || !selectedSquadPlayer) {
             toast.error("Please select both players for transfer");
@@ -276,67 +318,101 @@ export default function Transfer() {
         const transferCost = selectedPlayer.price - selectedSquadPlayer.price;
     
         if (transferCost > remainingBudget) {
-            toast.error(`Not enough budget for this transfer. Need ${transferCost.toFixed(1)}M more.`);
+            toast.error(`Not enough budget for this transfer. Need £${transferCost.toFixed(1)}M more.`);
             return;
         }
     
-        if (!matchDayId) {
-            toast.error("Match day information not available");
+        if (!matchDayData) {
+            toast.error("Match day information not available. Please try again later.");
             return;
         }
     
         try {
             setLoading(true);
             
-            // Prepare the substitution data - use the same structure for transfers
+            // Convert position to the format expected by the API
+            let positionForAPI = "";
+            switch(selectedPlayer.position) {
+                case Position.GK:
+                    positionForAPI = "GK";
+                    break;
+                case Position.DEF:
+                    positionForAPI = "DEF";
+                    break;
+                case Position.MID:
+                    positionForAPI = "MID";
+                    break;
+                case Position.FWD:
+                    positionForAPI = "FWD";
+                    break;
+                default:
+                    positionForAPI = String(selectedPlayer.position);
+            }
+            
+            // Use the substitution API for transfer (same data structure)
             const substitutionData: SubstitutionValues = {
-                game_id: matchDayId,
-                player_squad_id_out: selectedSquadPlayer.id.toString(),
-                player_squad_id: selectedPlayer.id.toString(),
-                player_squad_position: selectedPlayer.position.toString()
+                game_id: matchDayData.id,
+                player_squad_id_out: String(selectedSquadPlayer.id),
+                player_squad_id: String(selectedPlayer.id),
+                player_squad_position: positionForAPI
             };
     
-            const result = await substitute(substitutionData);
-            console.log(result)
+            console.log("Sending transfer data:", substitutionData);
             
-            // Fetch updated squad from API
-            const squadData = await getFantasySquadPlayers();
-            const playersData = Array.isArray(squadData[0]) ? squadData[0] : squadData;
-    
-            if (playersData && Array.isArray(playersData)) {
-                // Transform API response to match your Player type
-              
+            const result = await substitute(substitutionData);
+            
+            // if (!result) {
+            //     throw new Error("No response received from server");
+            // }
+
+            if (!result) {
+                toast.success("Player transferred successfully");
             }
-    
+            
+            console.log("Transfer result:", result);
+            
             toast.success(`Successfully transferred in ${selectedPlayer.name}`);
-    
+            
             // Reset selections
             setSelectedPlayer(null);
             setSelectedSquadPlayer(null);
+            
+            // Optionally refresh the page to show updated squad
+            window.location.reload();
         } catch (error: any) {
             console.error("Transfer failed:", error);
-            const errorMessage = error.response?.data?.message || error.message || "Failed to complete transfer. Please try again.";
+            const errorMessage = error.response?.data?.message || error.message || "Failed to complete transfer. Please try again later.";
             toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
-   
-
-  
-
-    // Toggle between transfer and substitution mode
-    const toggleSubstitutionMode = () => {
-        setIsSubstituting(!isSubstituting);
-        // Reset selections when switching modes
-        setSelectedPlayer(null);
-        setSelectedSquadPlayer(null);
-    };
-
-    // Debug logs to help troubleshoot
-    console.log("MySquadPlayers state:", mySquadPlayers);
-    console.log("Filtered squad players:", filteredSquadPlayers);
+    // Show detailed error message when API fails
+    if (fetchError && mySquadPlayers.length === 0) {
+        return (
+            <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
+                <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">Unable to Access Transfer Market</h2>
+                <p className="text-gray-500 mb-4">{fetchError}</p>
+                
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                        Retry
+                    </button>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     // Show loading state
     if (isLoading) {
@@ -351,57 +427,16 @@ export default function Transfer() {
         );
     }
 
-    // Show error state if fetching failed
-    if (fetchError && mySquadPlayers.length === 0) {
-        return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
-                    <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h2 className="text-xl font-semibold text-gray-700 mb-2">Something went wrong</h2>
-                    <p className="text-gray-500 mb-4">{fetchError}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                        Refresh Page
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <>
             <div className='flex flex-col gap-4'>
-                {/* Mode Selector */}
-                <div className="flex justify-end mb-2">
-                    <div className="bg-white rounded-lg shadow p-1 inline-flex">
-                        <button
-                            className={`px-4 py-2 rounded-md font-medium ${!isSubstituting ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-                            onClick={() => !isSubstituting || toggleSubstitutionMode()}
-                        >
-                            Transfer
-                        </button>
-                        <button
-                            className={`px-4 py-2 rounded-md font-medium ${isSubstituting ? 'bg-blue-600 text-white' : 'text-gray-700'}`}
-                            onClick={() => isSubstituting || toggleSubstitutionMode()}
-                        >
-                            Substitution
-                        </button>
-                    </div>
-                </div>
-
-                {/* Transfer/Substitution Box */}
+                {/* Transfer Box */}
                 <div className="bg-gradient-to-r from-indigo-600 to-blue-700 text-white rounded-lg shadow-lg p-5 mb-4">
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-bold">
-                            {isSubstituting ? 'Player Substitution' : 'Transfer Market'}
-                        </h2>
-                        {!isSubstituting && (
-                            <div className="bg-white text-blue-800 px-4 py-2 rounded-lg font-bold">
-                                Budget: £{remainingBudget.toFixed(1)}M
-                            </div>
-                        )}
+                        <h2 className="text-xl font-bold">Transfer Market</h2>
+                        <div className="bg-white text-blue-800 px-4 py-2 rounded-lg font-bold">
+                            Budget: £{remainingBudget.toFixed(1)}M
+                        </div>
                     </div>
 
                     <div className="mt-4 bg-white/10 p-4 rounded-lg">
@@ -426,7 +461,7 @@ export default function Transfer() {
                             </div>
 
                             <div className="bg-blue-800 rounded-full p-2">
-                                {isSubstituting ? <UserMinus className="h-5 w-5" /> : <RefreshCw className="h-5 w-5" />}
+                                <RefreshCw className="h-5 w-5" />
                             </div>
 
                             <div className="w-full md:w-1/2 flex flex-col">
@@ -443,7 +478,7 @@ export default function Transfer() {
                                     </div>
                                 ) : (
                                     <div className="bg-white/5 border border-dashed border-white/30 rounded-lg p-3 text-center text-sm">
-                                        Select a player {isSubstituting ? 'from your bench' : 'from the market'}
+                                        Select a player from the market
                                     </div>
                                 )}
                             </div>
@@ -451,22 +486,20 @@ export default function Transfer() {
 
                         {selectedPlayer && selectedSquadPlayer && (
                             <div className="mt-4 flex items-center justify-between">
-                                {!isSubstituting && (
-                                    <div>
-                                        <span className="text-sm">Transfer cost: </span>
-                                        <span className={`font-bold ${selectedPlayer.price > selectedSquadPlayer.price ? 'text-red-300' : 'text-green-300'}`}>
-                                            £{(selectedPlayer.price - selectedSquadPlayer.price).toFixed(1)}M
-                                        </span>
-                                    </div>
-                                )}
+                                <div>
+                                    <span className="text-sm">Transfer cost: </span>
+                                    <span className={`font-bold ${selectedPlayer.price > selectedSquadPlayer.price ? 'text-red-300' : 'text-green-300'}`}>
+                                        £{(selectedPlayer.price - selectedSquadPlayer.price).toFixed(1)}M
+                                    </span>
+                                </div>
                                 <button
-                                    onClick={ handleTransfer}
+                                    onClick={handleTransfer}
                                     disabled={loading}
                                     className={`${
-                                        loading ? 'bg-gray-500' : isSubstituting ? 'bg-green-500 hover:bg-green-600' : 'bg-green-500 hover:bg-green-600'
-                                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center ml-auto`}
+                                        loading ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'
+                                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center`}
                                 >
-                                    <span>{loading ? 'Processing...' : isSubstituting ? 'Complete Substitution' : 'Complete Transfer'}</span>
+                                    <span>{loading ? 'Processing...' : 'Complete Transfer'}</span>
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </button>
                             </div>
@@ -581,7 +614,7 @@ export default function Transfer() {
                             <div className="bg-blue-50 p-8 rounded-lg text-center">
                                 <h3 className="text-gray-500 mb-2">
                                     {mySquadPlayers.length === 0
-                                        ? "No players in your squad yet"
+                                        ? "No players in your squad yet. Please build your squad first."
                                         : "No players match your filters"}
                                 </h3>
                                 {mySquadPlayers.length > 0 && (
@@ -602,27 +635,25 @@ export default function Transfer() {
                     {/* Available Players - Club selection first */}
                     <div className='w-full md:w-1/2'>
                         <div className="bg-blue-50 px-4 py-3 rounded-md mb-4">
-                            <h2 className="font-bold text-lg">{isSubstituting ? 'Bench Players' : 'Transfer Market'}</h2>
+                            <h2 className="font-bold text-lg">Transfer Market</h2>
 
-                            {!isSubstituting && (
-                                <div className="mt-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Select Team
-                                    </label>
-                                    <select
-                                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={selectedClub || ''}
-                                        onChange={(e) => handleClubSelect(e.target.value)}
-                                    >
-                                        <option value="">-- Select a team --</option>
-                                        {clubs.map((club) => (
-                                            <option key={club.id} value={club.id}>
-                                                {club.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+                            <div className="mt-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Select Team
+                                </label>
+                                <select
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={selectedClub || ''}
+                                    onChange={(e) => handleClubSelect(e.target.value)}
+                                >
+                                    <option value="">-- Select a team --</option>
+                                    {clubs.map((club) => (
+                                        <option key={club.id} value={club.id}>
+                                            {club.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
                             <div className="mt-4 flex items-center">
                                 <div className="relative flex-1">
@@ -631,7 +662,7 @@ export default function Transfer() {
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder={isSubstituting ? "Search bench players..." : "Search players..."}
+                                        placeholder="Search players..."
                                         className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -678,128 +709,71 @@ export default function Transfer() {
                             </div>
                         </div>
 
-                        {/* Selected club players or bench players for substitution */}
-                        {isSubstituting ? (
-                            // Show bench players for substitution mode
-                            mySquadPlayers.filter(p => !p.inMatchday).length > 0 ? (
-                                <div className="space-y-3">
-                                    <div className="bg-blue-50 px-4 py-2 rounded-md mb-4 text-sm text-gray-600">
-                                        Available bench players
-                                    </div>
-                                    {mySquadPlayers.filter(p => !p.inMatchday).map(player => (
-                                        <div
-                                            key={player.id}
-                                            className={`bg-blue-50 px-4 py-3 rounded-lg transition-all ${
-                                                selectedPlayer?.id === player.id ? 'ring-2 ring-blue-600' : ''
-                                            } hover:bg-blue-100 cursor-pointer`}
-                                            onClick={() => handlePlayerSelect(player)}
-                                        >
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <div className="flex items-center">
-                                                        <p className='bg-blue-800 text-white font-semibold px-2 py-1 rounded-full w-10 h-10 flex items-center justify-center mr-3'>
-                                                            {player.position?.slice(0, 3) || '???'}
-                                                        </p>
-                                                        <div>
-                                                            <p className='font-semibold text-lg'>{player.name}</p>
-                                                            <p className='text-sm text-gray-600'>{player.team}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex space-x-5 mt-2">
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Value</p>
-                                                            <p className="font-medium">£{player.price}M</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Points</p>
-                                                            <p className="font-medium">{player.points?.current || 0}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {player.image && (
-                                                    <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                                                        <img src={player.image} alt={player.name} className="h-full w-full object-cover" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
+                        {/* Selected club players */}
+                        {selectedClub && filteredPlayers.length > 0 ? (
+                            <div className="space-y-3">
+                                <div className="bg-blue-50 px-4 py-2 rounded-md mb-4 text-sm text-gray-600">
+                                    Showing {filteredPlayers.length} players from {clubs.find(club => club.id === selectedClub)?.name || "selected team"}
                                 </div>
-                            ) : (
-                                <div className="bg-blue-50 p-8 rounded-lg text-center">
-                                    <h3 className="text-gray-500 mb-2">No players available on the bench</h3>
-                                    <p className="text-xs text-gray-400">
-                                        All players are currently in your starting lineup
-                                    </p>
-                                </div>
-                            )
-                        ) : (
-                            // Show transfer market players for transfer mode
-                            selectedClub && filteredPlayers.length > 0 ? (
-                                <div className="space-y-3">
-                                    <div className="bg-blue-50 px-4 py-2 rounded-md mb-4 text-sm text-gray-600">
-                                        Showing {filteredPlayers.length} players from {clubs.find(club => club.id === selectedClub)?.name || "selected team"}
-                                    </div>
 
-                                    {filteredPlayers.map(player => (
-                                        <div
-                                            key={player.id}
-                                            className={`bg-blue-50 px-4 py-3 rounded-lg transition-all ${selectedPlayer?.id === player.id ? 'ring-2 ring-blue-600' : ''
-                                                } hover:bg-blue-100 cursor-pointer`}
-                                            onClick={() => handlePlayerSelect(player)}
-                                        >
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <div className="flex items-center">
-                                                        <p className='bg-blue-800 text-white font-semibold px-2 py-1 rounded-full w-10 h-10 flex items-center justify-center mr-3'>
-                                                            {player.position?.slice(0, 3) || '???'}
-                                                        </p>
-                                                        <div>
-                                                            <p className='font-semibold text-lg'>{player.name}</p>
-                                                            <p className='text-sm text-gray-600'>{player.team}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex space-x-5 mt-2">
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Value</p>
-                                                            <p className="font-medium">£{player.price}M</p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Points</p>
-                                                            <p className="font-medium">{player.points?.current || 0}</p>
-                                                        </div>
+                                {filteredPlayers.map(player => (
+                                    <div
+                                        key={player.id}
+                                        className={`bg-blue-50 px-4 py-3 rounded-lg transition-all ${selectedPlayer?.id === player.id ? 'ring-2 ring-blue-600' : ''
+                                            } hover:bg-blue-100 cursor-pointer`}
+                                        onClick={() => handlePlayerSelect(player)}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <div className="flex items-center">
+                                                    <p className='bg-blue-800 text-white font-semibold px-2 py-1 rounded-full w-10 h-10 flex items-center justify-center mr-3'>
+                                                        {player.position?.slice(0, 3) || '???'}
+                                                    </p>
+                                                    <div>
+                                                        <p className='font-semibold text-lg'>{player.name}</p>
+                                                        <p className='text-sm text-gray-600'>{player.team}</p>
                                                     </div>
                                                 </div>
-                                                {player.image && (
-                                                    <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                                                        <img src={player.image} alt={player.name} className="h-full w-full object-cover" />
+                                                <div className="flex space-x-5 mt-2">
+                                                    <div>
+                                                        <p className="text-xs text-gray-500">Value</p>
+                                                        <p className="font-medium">£{player.price}M</p>
                                                     </div>
-                                                )}
+                                                    <div>
+                                                        <p className="text-xs text-gray-500">Points</p>
+                                                        <p className="font-medium">{player.points?.current || 0}</p>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            {player.image && (
+                                                <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
+                                                    <img src={player.image} alt={player.name} className="h-full w-full object-cover" />
+                                                </div>
+                                            )}
                                         </div>
-                                    ))}
-                                </div>
-                            ) : selectedClub ? (
-                                <div className="bg-blue-50 p-8 rounded-lg text-center">
-                                    <h3 className="text-gray-500 mb-2">No players match your criteria</h3>
-                                    <button
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setFilterPosition('ALL');
-                                        }}
-                                        className="text-blue-600 underline"
-                                    >
-                                        Clear filters
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="bg-blue-50 p-8 rounded-lg text-center">
-                                    <h3 className="text-gray-500 mb-2">Select a team to see available players</h3>
-                                    <p className="text-xs text-gray-400">
-                                        Browse players by team to make transfer decisions
-                                    </p>
-                                </div>
-                            )
+                                    </div>
+                                ))}
+                            </div>
+                        ) : selectedClub ? (
+                            <div className="bg-blue-50 p-8 rounded-lg text-center">
+                                <h3 className="text-gray-500 mb-2">No players match your criteria</h3>
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm('');
+                                        setFilterPosition('ALL');
+                                    }}
+                                    className="text-blue-600 underline"
+                                >
+                                    Clear filters
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="bg-blue-50 p-8 rounded-lg text-center">
+                                <h3 className="text-gray-500 mb-2">Select a team to see available players</h3>
+                                <p className="text-xs text-gray-400">
+                                    Browse players by team to make transfer decisions
+                                </p>
+                            </div>
                         )}
 
                         {/* Player Details */}

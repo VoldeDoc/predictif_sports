@@ -1,8 +1,12 @@
 import React, { useMemo } from 'react';
-import { UserCircle2, AlertCircle } from 'lucide-react';
+import { UserCircle2, AlertCircle, Lock } from 'lucide-react';
 import { useSquad } from '../context/squadContext';
 import { Player, Position } from '@/types';
 
+// Add props interface
+interface SubstitutesListProps {
+  disabled?: boolean;
+}
 
 const FORMATIONS: { [key: string]: number[] } = {
   "4-4-2": [1, 4, 4, 2],
@@ -13,10 +17,9 @@ const FORMATIONS: { [key: string]: number[] } = {
   "3-4-3": [1, 3, 4, 3]
 };
 
-const SubstitutesList: React.FC = () => {
+// Update component to accept props
+const SubstitutesList: React.FC<SubstitutesListProps> = ({ disabled = false }) => {
   const { squad, getSubstitutePlayers, getMatchdayPlayers, toggleMatchdaySelection } = useSquad();
-
-  // Log the passed in squad players for debugging if needed
 
   const substitutes = getSubstitutePlayers();
   const matchdayPlayers = getMatchdayPlayers();
@@ -49,26 +52,28 @@ const SubstitutesList: React.FC = () => {
     }, {} as Record<Position, number>);
   }, [matchdayPlayers]);
 
- // Update the handlePlayerSelection function to accept string IDs
-const handlePlayerSelection = (playerId: string | number) => {
-  // Find player using string comparison to avoid type issues
-  const player = substitutes.find(p => String(p.id) === String(playerId));
-  if (!player) {
-    console.error("Player not found with ID:", playerId);
-    return;
-  }
+  // Update the handlePlayerSelection function to respect disabled state
+  const handlePlayerSelection = (playerId: string | number) => {
+    // Do nothing if disabled
+    if (disabled) return;
+    
+    // Find player using string comparison to avoid type issues
+    const player = substitutes.find(p => String(p.id) === String(playerId));
+    if (!player) {
+      console.error("Player not found with ID:", playerId);
+      return;
+    }
 
+    // Check if adding this player would exceed position limit
+    const currentCount = currentPositionCounts[player.position] || 0;
+    if (currentCount >= positionLimits[player.position]) {
+      alert(`Formation ${formationName} only allows ${positionLimits[player.position]} ${player.position}s`);
+      return;
+    }
 
-  // Check if adding this player would exceed position limit
-  const currentCount = currentPositionCounts[player.position] || 0;
-  if (currentCount >= positionLimits[player.position]) {
-    alert(`Formation ${formationName} only allows ${positionLimits[player.position]} ${player.position}s`);
-    return;
-  }
-
-  // Call toggleMatchdaySelection with the player's original ID (don't convert to number)
-  toggleMatchdaySelection(player.id);
-};
+    // Call toggleMatchdaySelection with the player's original ID (don't convert to number)
+    toggleMatchdaySelection(player.id);
+  };
 
   const getStatusColor = (status: Player['status'] | undefined) => {
     if (!status) return '';
@@ -107,8 +112,16 @@ const handlePlayerSelection = (playerId: string | number) => {
   };
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-semibold mb-3">Choose squad for matchday</h3>
+    <div className={`mt-6 ${disabled ? 'opacity-95' : ''}`}>
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-semibold">Choose squad for matchday</h3>
+        {disabled && (
+          <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded flex items-center">
+            <Lock className="h-3 w-3 mr-1" />
+            Locked
+          </span>
+        )}
+      </div>
 
       {substitutes.length > 0 ? (
         <>
@@ -133,7 +146,9 @@ const handlePlayerSelection = (playerId: string | number) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-2">
             {substitutes.map(player => {
               const currentCount = currentPositionCounts[player.position] || 0;
-              const isDisabled = currentCount >= positionLimits[player.position];
+              // Set disabled if component is disabled or the position limit is reached
+              const isPositionDisabled = currentCount >= positionLimits[player.position];
+              const isPlayerDisabled = disabled || isPositionDisabled;
               const statusColor = getStatusColor(player.status);
               const statusText = getStatusText(player.status);
 
@@ -141,9 +156,9 @@ const handlePlayerSelection = (playerId: string | number) => {
                 <div
                   key={player.id}
                   className={`flex flex-col lg:flex-col items-center p-4 rounded-lg border ${statusColor || 'bg-gray-50'
-                    } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
+                    } ${isPlayerDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-gray-100'
                     }`}
-                  onClick={() => !isDisabled && handlePlayerSelection((player.id))}
+                  onClick={() => !isPlayerDisabled && handlePlayerSelection((player.id))}
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden mb-2">
                     {player.photo ? (
@@ -179,7 +194,9 @@ const handlePlayerSelection = (playerId: string | number) => {
         </>
       ) : (
         <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-lg">
-          No substitutes available. All players are in the matchday squad.
+          {disabled 
+            ? "All players are in the matchday squad and selection is locked." 
+            : "No substitutes available. All players are in the matchday squad."}
         </div>
       )}
     </div>

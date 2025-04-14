@@ -12,19 +12,24 @@ const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
   
   const isSelected = squad.players.some((p: Player) => String(p.id) === String(player.id));
 const isInMatchday = squad.players.some((p: Player) => String(p.id) === String(player.id) && p.inMatchday);
-  
-  const handleClick = () => {
-    if (isSelected) {
-      // If squad is complete, toggle matchday selection
-      if (isSquadComplete()) {
-        toggleMatchdaySelection(String(player.id));
-      } else {
-        removePlayer(String(player.id));
-      }
-    } else if (canAddPlayer(player)) {
-      addPlayer(player);
+
+const handleClick = () => {
+  if (isSelected) {
+    console.log("Player is already selected:", player.name);
+    if (isSquadComplete()) {
+      console.log("Squad is complete. Toggling matchday selection.");
+      toggleMatchdaySelection(String(player.id));
+    } else {
+      console.log("Removing player from squad:", player.name);
+      removePlayer(String(player.id));
     }
-  };
+  } else if (canAddPlayer(player)) {
+    console.log("Adding player to squad:", player.name);
+    addPlayer(player);
+  } else {
+    console.log("Cannot add player to squad:", player.name);
+  }
+};
 
   const getPositionColor = (position: string) => {
     switch(position) {

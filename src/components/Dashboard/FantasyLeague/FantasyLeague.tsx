@@ -65,31 +65,28 @@ export default function FantasyLeagueDash() {
         return null;
     });
 
-    // Check if the user has a squad on component mount
     useEffect(() => {
         const checkForSquad = async () => {
             try {
                 const squadData = await getFantasySquadPlayers();
                 const hasExistingSquad = squadData && 
                     Array.isArray(squadData) && 
-                    (squadData.length > 0 || (Array.isArray(squadData[0]) && squadData[0].length > 0));
-                
+                    squadData.some((group: any) => Array.isArray(group) && group.length > 0);
+    
                 if (hasExistingSquad) {
                     setHasSquad(true);
-                    localStorage.setItem('fantasyHasSquad', JSON.stringify(true));
-                    
-                    // If they have a squad and are on Squad tab, show the Gameweek view
-                    if (activeTab === 'Squad') {
-                        setShowGameweek(true);
-                    }
+                    setShowGameweek(true); // Show Gameweek view if squad exists
+                } else {
+                    setHasSquad(false);
+                    setShowGameweek(false); // Show Squad view if no squad exists
                 }
             } catch (error) {
                 console.error("Error checking for saved squad:", error);
             }
         };
-        
+    
         checkForSquad();
-    }, []);
+    }, [getFantasySquadPlayers]);
 
     // Save showGameweek state to localStorage whenever it changes
     useEffect(() => {
@@ -101,7 +98,6 @@ export default function FantasyLeagueDash() {
         localStorage.setItem('fantasyHasSquad', JSON.stringify(hasSquad));
     }, [hasSquad]);
 
-    // Save selectedPlayer to localStorage when it changes
     useEffect(() => {
         if (selectedPlayer) {
             localStorage.setItem('fantasySelectedPlayer', JSON.stringify(selectedPlayer));

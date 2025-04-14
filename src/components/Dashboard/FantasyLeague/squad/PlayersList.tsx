@@ -274,11 +274,11 @@ const PlayersList: React.FC<PlayersListProps> = ({ players, clubs, onSelectClub,
           value={positionFilter}
           onChange={(e) => setPositionFilter(e.target.value as Position | "All")}
         >
-          <option value="All">All Positions</option>
-          <option value={Position.GK}>{Position.GK}</option>
-          <option value={Position.DEF}>{Position.DEF}</option>
-          <option value={Position.MID}>{Position.MID}</option>
-          <option value={Position.FWD}>{Position.FWD}</option>
+            <option value="All">All Positions</option>
+            <option value="Goalkeeper">Goalkeeper (GK)</option>
+            <option value="Defender">Defender (DEF)</option>
+            <option value="Midfielder">Midfielder (MID)</option>
+            <option value="Forward">Forward (FWD)</option>
         </select>
 
         <input
