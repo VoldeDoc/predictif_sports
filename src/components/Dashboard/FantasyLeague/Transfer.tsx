@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSquad } from './context/squadContext';
 import { Position, Player } from '@/types';
 import { toast } from 'react-toastify';
-import { Search, Filter, RefreshCw, ArrowRight } from 'lucide-react';
+import { Search, Filter, RefreshCw, ArrowRight, Calendar, AlertTriangle } from 'lucide-react';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
 // Define substitution type - also used for transfers since API structure is the same
@@ -24,6 +24,7 @@ export default function Transfer() {
     const [squadSearchTerm, setSquadSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
     const [matchDayData, setMatchDayData] = useState<any>(null);
+    const [matchdayError, setMatchdayError] = useState<string | null>(null);
 
     // State for API data
     const [isLoading, setIsLoading] = useState(true);
@@ -33,19 +34,34 @@ export default function Transfer() {
     const [mySquadPlayers, setMySquadPlayers] = useState<Player[]>([]);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    const remainingBudget = getRemainingBudget?.();
+    const remainingBudget = getRemainingBudget?.() || 0;
 
     useEffect(() => {
         const fetchMatchdayData = async () => {
             try {
+                setIsLoading(true);
                 const matchdayData = await getMatchDay();
-                if (matchdayData && Array.isArray(matchdayData) && matchdayData.length > 0) {
-                    const matchdayResponse = matchdayData[0][0]
-                    setMatchDayData(matchdayResponse.id);
+                
+                if (!matchdayData || !Array.isArray(matchdayData) || matchdayData.length === 0 || 
+                    !Array.isArray(matchdayData[0]) || matchdayData[0].length === 0) {
+                    setMatchdayError("No active matchday found. Transfers are only available during active matchdays.");
+                    return;
                 }
+                
+                const matchdayResponse = matchdayData[0][0];
+                if (!matchdayResponse || !matchdayResponse.id) {
+                    setMatchdayError("Invalid matchday data received. Please try again later.");
+                    return;
+                }
+                
+                setMatchDayData(matchdayResponse.id);
+                console.log("Matchday ID set:", matchdayResponse.id);
+                
             } catch (error) {
                 console.error("Error fetching matchday data:", error);
-                toast.error("Failed to load matchday data. Transfers may not work correctly.");
+                setMatchdayError("Failed to load matchday data. Transfers may not work correctly.");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -63,7 +79,6 @@ export default function Transfer() {
                     throw new Error("Failed to fetch squad data from API");
                 }
 
-
                 // Safely access the players array
                 const playersData = Array.isArray(squadData[0])
                     ? squadData[0]
@@ -72,7 +87,6 @@ export default function Transfer() {
                         : [];
 
                 if (playersData && playersData.length > 0) {
-
                     // Transform API response to match your Player type
                     const transformedPlayers = playersData.map((player: any) => {
                         // Extract price from "£20 million" format if available
@@ -107,9 +121,9 @@ export default function Transfer() {
                                 goals: player.goal || 0,
                                 assists: player.assists || 0,
                                 cleanSheets: player.clean_sheets || 0,
-                                yellowCards: player.yellow_cards || 0,
-                                redCards: player.red_cards || 0,
-                                appearances: player.appearances || 0,
+                                yellowCards: player.yellow_card || 0,
+                                redCards: player.red_card || 0,
+                                appearances: player.appearance || 0,
                                 saves: player.saves || 0,
                                 goalsConceded: player.goals_conceded || 0
                             },
@@ -383,11 +397,43 @@ export default function Transfer() {
         }
     };
 
+    // Show matchday not set error message
+    if (matchdayError) {
+        return (
+            <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
+                <div className="flex justify-center mb-4">
+                    <Calendar className="h-16 w-16 text-orange-500" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-700 mb-2">Transfer Market Unavailable</h2>
+                <p className="text-gray-600 mb-4">{matchdayError}</p>
+                <p className="text-sm text-gray-500 mb-6">
+                    You can only make transfers during active matchday windows. Please check back when the next gameweek begins.
+                </p>
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                        Refresh
+                    </button>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // Show detailed error message when API fails
     if (fetchError && mySquadPlayers.length === 0) {
         return (
             <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md mx-auto mt-10">
-                <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                <div className="text-red-500 text-5xl mb-4">
+                    <AlertTriangle className="h-16 w-16 mx-auto" />
+                </div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-2">Unable to Access Transfer Market</h2>
                 <p className="text-gray-500 mb-4">{fetchError}</p>
 

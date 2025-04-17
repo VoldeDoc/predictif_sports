@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle, RefreshCw } from 'lucide-react';
+import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle, RefreshCw, Calendar } from 'lucide-react';
 import { Player, Position } from '@/types';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
@@ -13,6 +13,7 @@ const FantasyPoints: React.FC = () => {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showingStarters, setShowingStarters] = useState(true);
   const [matchdayDataId, setMatchdayDataId] = useState<string | null>(null);
+  const [noMatchdayFound, setNoMatchdayFound] = useState<boolean>(false);
   const [squadStats, setSquadStats] = useState({
     currentRank: 'N/A',
     previousRank: 'N/A',
@@ -40,12 +41,15 @@ const FantasyPoints: React.FC = () => {
             currentGameWeek: matchdayData.gameweek || '0'
           }));
         } else {
-          setFetchError("No active matchday found. Please wait for the next gameweek.");
+          setNoMatchdayFound(true);
+          setFetchError("No active matchday found. Points will be available when the next gameweek begins.");
         }
       }
       catch (error) {
         console.error("Error fetching matchday data:", error);
         setFetchError("Failed to load matchday data. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -557,7 +561,46 @@ const FantasyPoints: React.FC = () => {
     );
   }
   
-  // If there was an error
+  // If there's no active matchday, show a specialized message
+  if (noMatchdayFound) {
+    return (
+      <div className="container mx-auto pt-6 pb-12 flex items-center justify-center min-h-[70vh]">
+        <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
+          <Calendar className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">No Active Gameweek</h2>
+          <p className="text-gray-600 mb-4">
+            There is currently no active matchday in progress.
+          </p>
+          <div className="my-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="font-medium text-blue-800 mb-2">Fantasy points will be available:</h3>
+            <ul className="text-left text-sm text-gray-600 space-y-2">
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-blue-500 mr-2 mt-0.5"></span>
+                <span>Once the next gameweek starts</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-blue-500 mr-2 mt-0.5"></span>
+                <span>After you've selected your team for the matchday</span>
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-blue-500 mr-2 mt-0.5"></span>
+                <span>When real-life matches start accumulating stats</span>
+              </li>
+            </ul>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md flex items-center justify-center mx-auto"
+          >
+            <RefreshCw size={16} className="mr-2" />
+            Check Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  // If there was another type of error
   if (fetchError) {
     return (
       <div className="container mx-auto pt-6 pb-12 flex items-center justify-center min-h-[70vh]">
