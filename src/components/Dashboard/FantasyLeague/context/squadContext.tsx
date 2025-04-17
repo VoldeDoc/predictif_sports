@@ -191,6 +191,7 @@ const canAddPlayer = (player: Player): boolean => {
     Defender: Position.DEF,
     Midfielder: Position.MID,
     Forward: Position.FWD,
+    GK: Position.GK,
   };
 
   const mappedPosition = positionMap[player.position];
@@ -219,8 +220,14 @@ const addPlayer = (player: Player) => {
       Defender: Position.DEF,
       Midfielder: Position.MID,
       Forward: Position.FWD,
+      GK: Position.GK,
       
     };
+
+    if(squad.players.some(p =>(String(p.id) === String(player.id)))) {
+      console.log("Player already in squad:", player.name);
+      return;
+    }
 
     const mappedPosition = positionMap[player.position];
     if (!mappedPosition) {

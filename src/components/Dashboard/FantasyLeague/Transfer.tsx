@@ -33,21 +33,22 @@ export default function Transfer() {
     const [mySquadPlayers, setMySquadPlayers] = useState<Player[]>([]);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    const remainingBudget = getRemainingBudget?.() ;
+    const remainingBudget = getRemainingBudget?.();
 
     useEffect(() => {
         const fetchMatchdayData = async () => {
             try {
                 const matchdayData = await getMatchDay();
-                console.log(matchdayData);
-                    setMatchDayData(matchdayData[0]);
-                    
+                if (matchdayData && Array.isArray(matchdayData) && matchdayData.length > 0) {
+                    const matchdayResponse = matchdayData[0][0]
+                    setMatchDayData(matchdayResponse.id);
+                }
             } catch (error) {
                 console.error("Error fetching matchday data:", error);
                 toast.error("Failed to load matchday data. Transfers may not work correctly.");
             }
         };
-    
+
         fetchMatchdayData();
     }, []);
 
@@ -57,22 +58,20 @@ export default function Transfer() {
             try {
                 setIsLoading(true);
                 const squadData = await getFantasySquadPlayers();
-                
+
                 if (!squadData) {
                     throw new Error("Failed to fetch squad data from API");
                 }
-                
-                console.log("Raw squad data:", squadData);
+
 
                 // Safely access the players array
-                const playersData = Array.isArray(squadData[0]) 
-                    ? squadData[0] 
-                    : Array.isArray(squadData) 
-                        ? squadData 
+                const playersData = Array.isArray(squadData[0])
+                    ? squadData[0]
+                    : Array.isArray(squadData)
+                        ? squadData
                         : [];
 
                 if (playersData && playersData.length > 0) {
-                    console.log("Processed players data:", playersData.length, "players");
 
                     // Transform API response to match your Player type
                     const transformedPlayers = playersData.map((player: any) => {
@@ -151,7 +150,7 @@ export default function Transfer() {
             try {
                 setIsLoading(true);
                 const teamsResponse = await getTeam("eyJpdiI6IndmQ1R5VEdmM2Ewd1A3MHkwMjA3Y3c9PSIsInZhbHVlIjoiMjJDNnJDVzFtVy9WNnVwU0xFSW5sZz09IiwibWFjIjoiNzQ0Yzk2NGEwYmZiMjMyNzM0ZmJhMDNiZThhMzUzYmRlMGQzNjNhNzc3MDFjZjRiZTY3YTNhM2I2OTk5Y2YzZSIsInRhZyI6IiJ9S");
-                
+
                 if (!teamsResponse) {
                     throw new Error("Failed to fetch clubs from API");
                 }
@@ -159,10 +158,10 @@ export default function Transfer() {
                 console.log("Clubs fetched:", teamsResponse);
 
                 // Safely access the clubs array
-                const clubsData = Array.isArray(teamsResponse[0]) 
-                    ? teamsResponse[0] 
-                    : Array.isArray(teamsResponse) 
-                        ? teamsResponse 
+                const clubsData = Array.isArray(teamsResponse[0])
+                    ? teamsResponse[0]
+                    : Array.isArray(teamsResponse)
+                        ? teamsResponse
                         : [];
 
                 if (clubsData && clubsData.length > 0) {
@@ -211,7 +210,7 @@ export default function Transfer() {
 
         try {
             const playersResponse = await getPlayer(clubId);
-            
+
             if (!playersResponse) {
                 throw new Error("Failed to fetch players from API");
             }
@@ -219,10 +218,10 @@ export default function Transfer() {
             console.log("Players fetched:", playersResponse);
 
             // Safely access the players array
-            const playersData = Array.isArray(playersResponse[0]) 
-                ? playersResponse[0] 
-                : Array.isArray(playersResponse) 
-                    ? playersResponse 
+            const playersData = Array.isArray(playersResponse[0])
+                ? playersResponse[0]
+                : Array.isArray(playersResponse)
+                    ? playersResponse
                     : [];
 
             if (playersData && playersData.length > 0) {
@@ -289,7 +288,6 @@ export default function Transfer() {
     // Filter players by position and search term
     const filteredPlayers = availablePlayers.filter(player => {
         if (!player || !player.name) return false;
-
         const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesPosition = filterPosition === 'ALL' || player.position === filterPosition;
         const notInSquad = !mySquadPlayers.some(squadPlayer => squadPlayer.id === player.id);
@@ -297,6 +295,8 @@ export default function Transfer() {
     });
 
     const handlePlayerSelect = (player: Player) => {
+        console.log(player);
+        
         setSelectedPlayer(player);
     };
 
@@ -309,30 +309,31 @@ export default function Transfer() {
             toast.error("Please select both players for transfer");
             return;
         }
-    
+
         if (selectedPlayer.position !== selectedSquadPlayer.position) {
             toast.error("Players must have the same position for transfer");
             return;
         }
-    
+
         const transferCost = selectedPlayer.price - selectedSquadPlayer.price;
-    
+
         if (transferCost > remainingBudget) {
             toast.error(`Not enough budget for this transfer. Need £${transferCost.toFixed(1)}M more.`);
             return;
         }
-    
+        console.log(matchDayData);
+
         if (!matchDayData) {
             toast.error("Match day information not available. Please try again later.");
             return;
         }
-    
+
         try {
             setLoading(true);
-            
+
             // Convert position to the format expected by the API
             let positionForAPI = "";
-            switch(selectedPlayer.position) {
+            switch (selectedPlayer.position) {
                 case Position.GK:
                     positionForAPI = "GK";
                     break;
@@ -348,35 +349,29 @@ export default function Transfer() {
                 default:
                     positionForAPI = String(selectedPlayer.position);
             }
-            
+
             // Use the substitution API for transfer (same data structure)
             const substitutionData: SubstitutionValues = {
-                game_id: matchDayData.id,
+                game_id: matchDayData,
                 player_squad_id_out: String(selectedSquadPlayer.id),
                 player_squad_id: String(selectedPlayer.id),
                 player_squad_position: positionForAPI
             };
-    
-            console.log("Sending transfer data:", substitutionData);
-            
-            const result = await substitute(substitutionData);
-            
-            // if (!result) {
-            //     throw new Error("No response received from server");
-            // }
 
+            console.log("Sending transfer data:", substitutionData);
+
+            const result = await substitute(substitutionData);
             if (!result) {
-                toast.success("Player transferred successfully");
+                throw new Error("No response received from server");
             }
-            
             console.log("Transfer result:", result);
-            
+
             toast.success(`Successfully transferred in ${selectedPlayer.name}`);
-            
+
             // Reset selections
             setSelectedPlayer(null);
             setSelectedSquadPlayer(null);
-            
+
             // Optionally refresh the page to show updated squad
             window.location.reload();
         } catch (error: any) {
@@ -395,7 +390,7 @@ export default function Transfer() {
                 <div className="text-red-500 text-5xl mb-4">⚠️</div>
                 <h2 className="text-xl font-semibold text-gray-700 mb-2">Unable to Access Transfer Market</h2>
                 <p className="text-gray-500 mb-4">{fetchError}</p>
-                
+
                 <div className="flex flex-col gap-2">
                     <button
                         onClick={() => window.location.reload()}
@@ -495,9 +490,8 @@ export default function Transfer() {
                                 <button
                                     onClick={handleTransfer}
                                     disabled={loading}
-                                    className={`${
-                                        loading ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'
-                                    } text-white px-4 py-2 rounded-lg font-semibold flex items-center`}
+                                    className={`${loading ? 'bg-gray-500' : 'bg-green-500 hover:bg-green-600'
+                                        } text-white px-4 py-2 rounded-lg font-semibold flex items-center`}
                                 >
                                     <span>{loading ? 'Processing...' : 'Complete Transfer'}</span>
                                     <ArrowRight className="ml-2 h-4 w-4" />

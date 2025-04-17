@@ -11,9 +11,15 @@ interface PlayersListProps {
   clubs: any[]; // Club objects from API
   onSelectClub: (clubId: string) => void;
   loading?: boolean;
+  isPlayerInSquad?: (playerId: string | number) => boolean;
 }
 
-const PlayersList: React.FC<PlayersListProps> = ({ players, clubs, onSelectClub, loading = false }) => {
+const PlayersList: React.FC<PlayersListProps> = ({ 
+  players, 
+  clubs, 
+  onSelectClub, 
+  loading = false,
+}) => {
   // Initialize all state from localStorage where available
   const [searchTerm, setSearchTerm] = useState(() => {
     return localStorage.getItem('fantasySearchTerm') || "";
@@ -299,29 +305,40 @@ const PlayersList: React.FC<PlayersListProps> = ({ players, clubs, onSelectClub,
 
       <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
         {filteredPlayers.length > 0 ? (
-          filteredPlayers.map((player) => (
-            <div key={player.id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div className="flex-grow">
-                  <PlayerCard player={player} />
-                </div>
-                <div className="w-full sm:w-auto mt-2 sm:mt-0">
-                  <button
-                    onClick={() => handleViewPlayerDetails(String(player.id))}
-                    disabled={isLoading === String(player.id)}
-                    className="w-full sm:w-auto px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1 disabled:bg-indigo-400"
-                  >
-                    {isLoading === String(player.id) ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
-                    ) : (
-                      <Info size={16} />
-                    )}
-                    {isLoading === String(player.id) ? "Loading..." : "View Details"}
-                  </button>
+          filteredPlayers.map((player) => {
+            // Check if player is already in squad            
+            return (
+              <div 
+                key={player.id} 
+                className={`bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors`}
+              >
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex-grow">
+                    <PlayerCard player={player} />
+                    {/* We don't need to show this separately as the PlayerCard already shows selected status */}
+                  </div>
+                  <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                    {/* View details button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering the PlayerCard click
+                        handleViewPlayerDetails(String(player.id));
+                      }}
+                      disabled={isLoading === String(player.id)}
+                      className="w-full sm:w-auto px-3 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1 disabled:bg-indigo-400"
+                    >
+                      {isLoading === String(player.id) ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></div>
+                      ) : (
+                        <Info size={16} />
+                      )}
+                      {isLoading === String(player.id) ? "Loading..." : "View Details"}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="text-center py-8 text-gray-500">No players found matching your filters.</div>
         )}

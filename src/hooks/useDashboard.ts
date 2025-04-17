@@ -1098,7 +1098,7 @@ const setSquad = async (data: setSquadPlayers) => {
 const getMatchDaySquad = async (id: string) => {
     try {
         setLoading(true);
-        const res = await client.get(`/user/fantasy/getMatchDaySquad${id}`);
+        const res = await client.get(`/user/fantasy/getMatchDaySquad/${id}`);
         return res?.data?.data;
     } catch (error: any) {
         const resError = error.response?.data;

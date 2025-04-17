@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
+import { UserCircle2, ArrowUpRight, TrendingUp, TrendingDown, Minus, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Player, Position } from '@/types';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
@@ -7,12 +7,12 @@ const FantasyPoints: React.FC = () => {
   const { getMatchDay, getMatchDaySquad, getFantasySquadPlayers } = useDashBoardManagement();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [ setMatchdayData] = useState<any>(null);
   const [matchdaySquad, setMatchdaySquad] = useState<Player[]>([]);
   const [benchSquad, setBenchSquad] = useState<Player[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showingStarters, setShowingStarters] = useState(true);
+  const [matchdayDataId, setMatchdayDataId] = useState<string | null>(null);
   const [squadStats, setSquadStats] = useState({
     currentRank: 'N/A',
     previousRank: 'N/A',
@@ -20,94 +20,390 @@ const FantasyPoints: React.FC = () => {
     pointsHistory: { lastChange: 0 }
   });
   
+  // First get the matchday ID
   useEffect(() => {
-    const loadData = async () => {
+    const checkMatchday = async () => {
       try {
         setIsLoading(true);
-        setFetchError(null);
+        const matchdayResponse = await getMatchDay();
         
-        // Step 1: Get active matchday data
-        const matchdays = await getMatchDay();
-        console.log("Matchday API response:", matchdays);
-        
-        if (!matchdays || !Array.isArray(matchdays) || matchdays.length === 0) {
-          setFetchError("No active matchdays found.");
-          return;
+        if (matchdayResponse && 
+            Array.isArray(matchdayResponse) && 
+            matchdayResponse.length > 0 && 
+            Array.isArray(matchdayResponse[0]) &&
+            matchdayResponse[0].length > 0) {
+          
+          const matchdayData = matchdayResponse[0][0];          
+          setMatchdayDataId(matchdayData.id);
+          setSquadStats(prev => ({
+            ...prev,
+            currentGameWeek: matchdayData.gameweek || '0'
+          }));
+        } else {
+          setFetchError("No active matchday found. Please wait for the next gameweek.");
         }
+      }
+      catch (error) {
+        console.error("Error fetching matchday data:", error);
+        setFetchError("Failed to load matchday data. Please try again later.");
+      }
+    };
+    
+    checkMatchday();
+  }, []);
+  
+  // Then fetch both matchday squad and full fantasy squad
+  useEffect(() => {
+    const loadSquadData = async () => {
+      if (!matchdayDataId) return;
+      
+      try {
+        // 1. Get the selected players for current matchday
+        const matchdayResponse = await getMatchDaySquad(matchdayDataId);
+        console.log("Raw matchday response:", matchdayResponse);
         
-        // Use the first matchday (most recent)
-        const currentMatchday = matchdays[0];
-        setMatchdayData(currentMatchday);
-        console.log("Using matchday:", currentMatchday);
+        // 2. Get all players in fantasy squad
+        const allSquadPlayersResponse = await getFantasySquadPlayers();
         
-        // Step 2: Get matchday squad using the matchday ID
-        const matchdaySquadData = await getMatchDaySquad(currentMatchday.id);
-        console.log("Matchday squad data:", matchdaySquadData);
-        
-        if (matchdaySquadData && Array.isArray(matchdaySquadData)) {
-          // Process and prepare the matchday squad data
-          const processedSquad = matchdaySquadData.map((player: any) => ({
-            ...player,
-            inMatchday: true,
-            points: {
-              current: player.points || 0,
-              change: player.points_change || 0,
-              breakdown: player.points_breakdown ? JSON.parse(player.points_breakdown) : null
-            }
+        // Process matchday squad (starting XI)
+        const matchdayPlayers: Player[] = [];
+
+        // Handle the response structure with Array[0].player format
+        if (matchdayResponse && 
+            Array.isArray(matchdayResponse) && 
+            matchdayResponse.length > 0 &&
+            matchdayResponse[0] && 
+            matchdayResponse[0].player && 
+            Array.isArray(matchdayResponse[0].player)) {
+          
+          console.log("Processing players from matchdayResponse[0].player");
+          
+          // Get game information for stats
+          const gameInfo = matchdayResponse[0].game || {};
+          setSquadStats(prev => ({
+            ...prev,
+            currentGameWeek: gameInfo.game_week?.toString() || prev.currentGameWeek,
           }));
           
-          setMatchdaySquad(processedSquad);
+          // Filter out null players and map valid ones
+          const playersData = matchdayResponse[0].player
+            .filter((player: any) => player && player.name !== null)
+            .map((player: any) => {
+              // Map position to Position enum
+              let position = Position.MID; // Default position
+              if (player.position_short === "GK" || player.position === "Goalkeeper") {
+                position = Position.GK;
+              } else if (player.position_short === "DF" || player.position_short === "DEF" || player.position === "Defender") {
+                position = Position.DEF;
+              } else if (player.position_short === "FW" || player.position_short === "FWD" || player.position === "Forward" || player.position === "Striker") {
+                position = Position.FWD;
+              }
+              
+              // Extract price from evaluation (e.g., "£40 million")
+              let price = 0;
+              if (player.evaluation) {
+                const priceMatch = player.evaluation.match(/£(\d+)/);
+                if (priceMatch && priceMatch[1]) {
+                  price = parseFloat(priceMatch[1]);
+                }
+              }
+              
+              return {
+                id: player.player_id || player.id,
+                name: player.name || "Unknown Player",
+                team: player.current_club_name || "Unknown Team",
+                position: position,
+                price: price,
+                points: { 
+                  current: player.player_point || 0, 
+                  total: player.player_point || 0, 
+                  change: 0 
+                },
+                status: { isAvailable: true },
+                image: player.photo || null,
+                selected: true,
+                inMatchday: true,
+                nationality: player.nationality || "Unknown",
+                stats: {
+                  goals: player.goal || 0,
+                  assists: player.assists || 0,
+                  cleanSheets: player.clean_sheets || 0,
+                  yellowCards: player.yellow_card || 0,
+                  redCards: player.red_card || 0,
+                  appearances: player.appearance || 0,
+                  saves: player.saves || 0,
+                  goalsConceded: player.goals_conceded || 0
+                }
+              };
+            });
+          
+          matchdayPlayers.push(...playersData);
           
           // Calculate total points
-          const total = processedSquad.reduce((sum, player) => sum + (player.points?.current || 0), 0);
-          setTotalPoints(total);
+          const totalMatchdayPoints = gameInfo.week_point || 
+            matchdayPlayers.reduce(
+              (sum, player) => sum + (player.points?.current || 0), 0
+            );
           
-          // Step 3: Get all squad players to determine bench
-          const allSquadPlayers = await getFantasySquadPlayers();
-          console.log("All squad players:", allSquadPlayers);
-          
-          if (allSquadPlayers && Array.isArray(allSquadPlayers)) {
-            // Flatten if nested
-            const playersData = Array.isArray(allSquadPlayers[0]) ? allSquadPlayers[0] : allSquadPlayers;
+          setTotalPoints(totalMatchdayPoints);
+        }
+        // Handle the data array in the response (data[0] format)
+        else if (matchdayResponse && 
+            typeof matchdayResponse === 'object' && 
+            matchdayResponse.data && 
+            Array.isArray(matchdayResponse.data) && 
+            matchdayResponse.data.length > 0) {
             
-            // Filter out players that are in the matchday squad to get bench players
-            const matchdayPlayerIds = processedSquad.map(p => p.id.toString());
-            const benchPlayers = playersData.filter(
-              (p: any) => !matchdayPlayerIds.includes(p.id.toString())
-            ).map((player: any) => ({
-              ...player,
-              inMatchday: false,
-              points: {
-                current: 0,
-                change: 0
-              }
+          // Get the first item from the data array
+          const matchdaySquadResponse = matchdayResponse.data[0];
+          
+          // Check for the response structure with game and player properties
+          if (matchdaySquadResponse && 
+              typeof matchdaySquadResponse === 'object' && 
+              matchdaySquadResponse.game && 
+              matchdaySquadResponse.player && 
+              Array.isArray(matchdaySquadResponse.player)) {
+            
+            // Get game information for stats
+            const gameInfo = matchdaySquadResponse.game;
+            setSquadStats(prev => ({
+              ...prev,
+              currentGameWeek: gameInfo.game_week?.toString() || prev.currentGameWeek,
             }));
             
-            setBenchSquad(benchPlayers);
+            // Filter and map players
+            const playersData = matchdaySquadResponse.player
+              .filter((player: any) => player && player.name !== null)
+              .map((player: any) => {
+                // Position mapping logic
+                let position = Position.MID; 
+                if (player.position_short === "GK" || player.position === "Goalkeeper") {
+                  position = Position.GK;
+                } else if (player.position_short === "DF" || player.position_short === "DEF" || player.position === "Defender") {
+                  position = Position.DEF;
+                } else if (player.position_short === "FW" || player.position_short === "FWD" || player.position === "Forward" || player.position === "Striker") {
+                  position = Position.FWD;
+                }
+                
+                // Price extraction
+                let price = 0;
+                if (player.evaluation) {
+                  const priceMatch = player.evaluation.match(/£(\d+)/);
+                  if (priceMatch && priceMatch[1]) {
+                    price = parseFloat(priceMatch[1]);
+                  }
+                }
+                
+                return {
+                  id: player.player_id || player.id,
+                  name: player.name || "Unknown Player",
+                  team: player.current_club_name || "Unknown Team",
+                  position: position,
+                  price: price,
+                  points: { 
+                    current: player.player_point || 0, 
+                    total: player.player_point || 0, 
+                    change: 0 
+                  },
+                  status: { isAvailable: true },
+                  image: player.photo || null,
+                  selected: true,
+                  inMatchday: true,
+                  nationality: player.nationality || "Unknown",
+                  stats: {
+                    goals: player.goal || 0,
+                    assists: player.assists || 0,
+                    cleanSheets: player.clean_sheets || 0,
+                    yellowCards: player.yellow_card || 0,
+                    redCards: player.red_card || 0,
+                    appearances: player.appearance || 0,
+                    saves: player.saves || 0,
+                    goalsConceded: player.goals_conceded || 0
+                  }
+                };
+              });
+            
+            matchdayPlayers.push(...playersData);
+            
+            // Calculate total points
+            const totalMatchdayPoints = matchdaySquadResponse.game.week_point || 
+              matchdayPlayers.reduce(
+                (sum, player) => sum + (player.points?.current || 0), 0
+              );
+            
+            setTotalPoints(totalMatchdayPoints);
           }
+        }
+        // Try alternative response format (direct object with game and player)
+        else if (matchdayResponse && 
+            typeof matchdayResponse === 'object' && 
+            matchdayResponse.game && 
+            matchdayResponse.player && 
+            Array.isArray(matchdayResponse.player)) {
           
-          // Set squad stats (using matchday data where available)
-          setSquadStats({
-            currentRank: currentMatchday.current_rank || 'N/A',
-            previousRank: currentMatchday.previous_rank || 'N/A',
-            currentGameWeek: currentMatchday.game_week?.toString() || '0',
-            pointsHistory: { 
-              lastChange: currentMatchday.points_change || 0
-            }
-          });
-        } else {
-          setFetchError("No players found in your matchday squad.");
+          // Directly use the response object
+          const matchdaySquadResponse = matchdayResponse;
+          
+          // Get game information for stats
+          const gameInfo = matchdaySquadResponse.game;
+          setSquadStats(prev => ({
+            ...prev,
+            currentGameWeek: gameInfo.game_week?.toString() || prev.currentGameWeek,
+          }));
+          
+          // Filter and map players
+          const playersData = matchdaySquadResponse.player
+            .filter((player: any) => player && player.name !== null)
+            .map((player: any) => {
+              // Position mapping logic
+              let position = Position.MID;
+              if (player.position_short === "GK" || player.position === "Goalkeeper") {
+                position = Position.GK;
+              } else if (player.position_short === "DF" || player.position_short === "DEF" || player.position === "Defender") {
+                position = Position.DEF;
+              } else if (player.position_short === "FW" || player.position_short === "FWD" || player.position === "Forward" || player.position === "Striker") {
+                position = Position.FWD;
+              }
+              
+              // Price extraction
+              let price = 0;
+              if (player.evaluation) {
+                const priceMatch = player.evaluation.match(/£(\d+)/);
+                if (priceMatch && priceMatch[1]) {
+                  price = parseFloat(priceMatch[1]);
+                }
+              }
+              
+              return {
+                id: player.player_id || player.id,
+                name: player.name || "Unknown Player",
+                team: player.current_club_name || "Unknown Team",
+                position: position,
+                price: price,
+                points: { 
+                  current: player.player_point || 0, 
+                  total: player.player_point || 0, 
+                  change: 0 
+                },
+                status: { isAvailable: true },
+                image: player.photo || null,
+                selected: true,
+                inMatchday: true,
+                nationality: player.nationality || "Unknown",
+                stats: {
+                  goals: player.goal || 0,
+                  assists: player.assists || 0,
+                  cleanSheets: player.clean_sheets || 0,
+                  yellowCards: player.yellow_card || 0,
+                  redCards: player.red_card || 0,
+                  appearances: player.appearance || 0,
+                  saves: player.saves || 0,
+                  goalsConceded: player.goals_conceded || 0
+                }
+              };
+            });
+          
+          matchdayPlayers.push(...playersData);
+          
+          // Calculate total points
+          const totalMatchdayPoints = matchdaySquadResponse.game.week_point || 
+            matchdayPlayers.reduce(
+              (sum, player) => sum + (player.points?.current || 0), 0
+            );
+          
+          setTotalPoints(totalMatchdayPoints);
+        }
+        
+        // Process full squad to identify bench players
+        const benchPlayers: Player[] = [];
+        if (allSquadPlayersResponse && 
+            Array.isArray(allSquadPlayersResponse) && 
+            allSquadPlayersResponse.length > 0) {
+          
+          // Get the first array if response is nested
+          const squadData = Array.isArray(allSquadPlayersResponse[0]) 
+            ? allSquadPlayersResponse[0] 
+            : allSquadPlayersResponse;
+          
+          if (Array.isArray(squadData)) {
+            // Map all squad players
+            const allPlayers = squadData
+              .filter((player: any) => player && player.name !== null)
+              .map((player: any) => {
+                // Map position to Position enum
+                let position = Position.MID; // Default position
+                if (player.position_short === "GK" || player.position === "Goalkeeper") {
+                  position = Position.GK;
+                } else if (player.position_short === "DEF" || player.position === "Defender") {
+                  position = Position.DEF;
+                } else if (player.position_short === "FWD" || player.position === "Forward" || player.position === "Striker") {
+                  position = Position.FWD;
+                }
+                
+                // Check if this player is in the matchday squad by comparing IDs
+                const isInMatchday = matchdayPlayers.some(mp => {
+                  // Compare various ID formats that might be used
+                  const matchdayPlayerId = mp.id?.toString();
+                  const currentPlayerId = player.id?.toString();
+                  const playerPlayerId = player.player_id?.toString();
+                  
+                  return matchdayPlayerId === currentPlayerId || 
+                        matchdayPlayerId === playerPlayerId;
+                });
+                
+                return {
+                  id: player.id || player.player_id,
+                  name: player.name || "Unknown Player",
+                  team: player.current_club_name || "Unknown Team",
+                  position: position,
+                  price: player.price || 0,
+                  points: { 
+                    current: player.fantasy_points || player.player_point || 0, 
+                    total: player.fantasy_points || player.player_point || 0, 
+                    change: 0 
+                  },
+                  status: { isAvailable: true },
+                  image: player.photo || null,
+                  selected: false,
+                  inMatchday: isInMatchday,
+                  nationality: player.nationality || "Unknown",
+                  stats: {
+                    goals: player.goals || player.goal || 0,
+                    assists: player.assists || 0,
+                    cleanSheets: player.clean_sheets || 0,
+                    yellowCards: player.yellow_cards || player.yellow_card || 0,
+                    redCards: player.red_cards || player.red_card || 0,
+                    appearances: player.appearances || player.appearance || 0,
+                    saves: player.saves || 0,
+                    goalsConceded: player.goals_conceded || 0
+                  }
+                };
+              });
+            
+            // Filter out players who are not in the matchday squad - these are bench players
+            benchPlayers.push(...allPlayers.filter(player => !player.inMatchday));
+          }
+        }
+        
+        console.log("Final matchday players:", matchdayPlayers);
+        setMatchdaySquad(matchdayPlayers);
+        setBenchSquad(benchPlayers);
+        
+        if (matchdayPlayers.length === 0 && benchPlayers.length === 0) {
+          setFetchError("No squad data found for this matchday. Please make sure you've selected your team.");
+        } else if (matchdayPlayers.length === 0) {
+          setFetchError("You haven't selected any starting players for this matchday.");
         }
       } catch (error) {
-        console.error("Error loading fantasy points data:", error);
-        setFetchError("Failed to load fantasy points data. Please try again.");
+        console.error("Error loading squad data:", error);
+        setFetchError("Failed to load your squad data. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
     
-    loadData();
-  }, []);
+    loadSquadData();
+  }, [matchdayDataId]);
   
   const getPositionColor = (position: string) => {
     switch(position) {
@@ -167,7 +463,7 @@ const FantasyPoints: React.FC = () => {
                 )}
                 
                 <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center text-xs text-white font-bold">
-                  {player.id || '?'}
+                  {player.position?.charAt(0) || '?'}
                 </div>
               </div>
               
@@ -201,12 +497,47 @@ const FantasyPoints: React.FC = () => {
                     ))}
                   </div>
                 )}
+                
+                {/* Show performance stats for the player */}
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <div className="grid grid-cols-3 gap-1 text-xs">
+                    {(player.stats?.goals ?? 0) > 0 && (
+                      <div className="text-center bg-gray-50 rounded p-1">
+                        <span className="block font-medium">{player.stats?.goals ?? 0}</span>
+                        <span className="text-gray-500">Goals</span>
+                      </div>
+                    )}
+                    
+                    {(player.stats?.assists ?? 0) > 0 && (
+                      <div className="text-center bg-gray-50 rounded p-1">
+                        <span className="block font-medium">{player.stats?.assists ?? 0}</span>
+                        <span className="text-gray-500">Assists</span>
+                      </div>
+                    )}
+                    
+                    {(player.stats?.cleanSheets ?? 0) > 0 && (
+                      <div className="text-center bg-gray-50 rounded p-1">
+                        <span className="block font-medium">{player.stats?.cleanSheets ?? 0}</span>
+                        <span className="text-gray-500">Clean Sheets</span>
+                      </div>
+                    )}
+                    
+                    {(player.stats?.yellowCards ?? 0) > 0 && (
+                      <div className="text-center bg-gray-50 rounded p-1">
+                        <span className="block font-medium">{player.stats?.yellowCards ?? 0}</span>
+                        <span className="text-gray-500">Yellow Cards</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ))
         ) : (
           <div className="col-span-full bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-            No players found in this category
+            {showingStarters ? 
+              "No players in your starting XI. Please select your team for this matchday." : 
+              "No players on your bench."}
           </div>
         )}
       </div>
@@ -233,15 +564,14 @@ const FantasyPoints: React.FC = () => {
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md">
           <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-700 mb-2">Could Not Load Points</h2>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">Matchweek has not arrived yet</h2>
           <p className="text-gray-600 mb-4">{fetchError}</p>
-          {/* <button
+          <button
             onClick={() => window.location.reload()}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md flex items-center justify-center mx-auto"
           >
             <RefreshCw size={16} className="mr-2" />
             Refresh
-          </button> */}
+          </button>
         </div>
       </div>
     );
@@ -249,7 +579,7 @@ const FantasyPoints: React.FC = () => {
   
   return (
     <div className="container mx-auto pt-6 pb-12">
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-800">
           This Gameweek's Points
         </h1>
@@ -263,7 +593,7 @@ const FantasyPoints: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Starting XI
+            Starting XI ({matchdaySquad.length})
           </button>
           <button 
             onClick={() => setShowingStarters(false)}
@@ -273,7 +603,7 @@ const FantasyPoints: React.FC = () => {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Bench
+            Bench ({benchSquad.length})
           </button>
         </div>
       </div>

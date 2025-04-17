@@ -5,31 +5,42 @@ import { useSquad } from '../context/squadContext';
 
 interface PlayerCardProps {
   player: Player;
+  isInSquad?: boolean;
 }
 
-const PlayerCard: React.FC<PlayerCardProps> = ({ player }) => {
+const PlayerCard: React.FC<PlayerCardProps> = ({ player, isInSquad }) => {
   const { addPlayer, removePlayer, canAddPlayer, squad, toggleMatchdaySelection, isSquadComplete } = useSquad();
   
-  const isSelected = squad.players.some((p: Player) => String(p.id) === String(player.id));
-const isInMatchday = squad.players.some((p: Player) => String(p.id) === String(player.id) && p.inMatchday);
+  // Use the isInSquad prop if provided, otherwise check the squad state
+  const isSelected = isInSquad !== undefined ? isInSquad : 
+    squad.players.some((p: Player) => String(p.id) === String(player.id));
+  
+  const isInMatchday = squad.players.some((p: Player) => 
+    String(p.id) === String(player.id) && p.inMatchday);
 
-const handleClick = () => {
-  if (isSelected) {
-    console.log("Player is already selected:", player.name);
-    if (isSquadComplete()) {
-      console.log("Squad is complete. Toggling matchday selection.");
-      toggleMatchdaySelection(String(player.id));
-    } else {
-      console.log("Removing player from squad:", player.name);
-      removePlayer(String(player.id));
+  const handleClick = () => {
+    // If specifically flagged as in squad from parent but not in context, don't try to add
+    if (isInSquad === true && !squad.players.some(p => String(p.id) === String(player.id))) {
+      console.log("Player already in squad from previous tab. Not modifying:", player.name);
+      return;
     }
-  } else if (canAddPlayer(player)) {
-    console.log("Adding player to squad:", player.name);
-    addPlayer(player);
-  } else {
-    console.log("Cannot add player to squad:", player.name);
-  }
-};
+    
+    if (isSelected) {
+      console.log("Player is already selected:", player.name);
+      if (isSquadComplete()) {
+        console.log("Squad is complete. Toggling matchday selection.");
+        toggleMatchdaySelection(String(player.id));
+      } else {
+        console.log("Removing player from squad:", player.name);
+        removePlayer(String(player.id));
+      }
+    } else if (canAddPlayer(player)) {
+      console.log("Adding player to squad:", player.name);
+      addPlayer(player);
+    } else {
+      console.log("Cannot add player to squad:", player.name);
+    }
+  };
 
   const getPositionColor = (position: string) => {
     switch(position) {

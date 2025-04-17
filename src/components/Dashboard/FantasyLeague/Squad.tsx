@@ -13,12 +13,11 @@ function Squad() {
   const [activeTab, setActiveTab] = useState<"squad" | "players">("squad");
   const { isSquadComplete, squad } = useSquad();
   const { setShowGameweek } = useViewContext();
-  const { getPlayer, getTeam, TransferPlayerIn } = useDashBoardManagement();
+  const { getPlayer, getTeam, TransferPlayerIn} = useDashBoardManagement();
 
   const [clubs, setClubs] = useState<any[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  
   // State for tracking transfers
   const [transferring, setTransferring] = useState(false);
   const [transferProgress, setTransferProgress] = useState(0);
@@ -36,7 +35,6 @@ function Squad() {
     const fetchClubs = async () => {
       try {
         const teamsResponse = await getTeam("eyJpdiI6IndmQ1R5VEdmM2Ewd1A3MHkwMjA3Y3c9PSIsInZhbHVlIjoiMjJDNnJDVzFtVy9WNnVwU0xFSW5sZz09IiwibWFjIjoiNzQ0Yzk2NGEwYmZiMjMyNzM0ZmJhMDNiZThhMzUzYmRlMGQzNjNhNzc3MDFjZjRiZTY3YTNhM2I2OTk5Y2YzZSIsInRhZyI6IiJ9S");
-        console.log("Clubs fetched:", teamsResponse[0]);
         setClubs(teamsResponse[0] || []);
       } catch (error) {
         console.error("Error fetching clubs:", error);
@@ -46,6 +44,7 @@ function Squad() {
     fetchClubs();
   }, []);
 
+
   // Handler for when a club is selected
   const handleClubSelect = async (clubId: string) => {
     setLoading(true);
@@ -54,11 +53,9 @@ function Squad() {
     try {
       // Fetch all players
       const allPlayersResponse = await getPlayer(clubId);
-      console.log("All players response:", allPlayersResponse);
       
       // Find the selected club
       const selectedClub = clubs.find(club => club.id === clubId);
-      console.log("Selected club:", selectedClub);
       
       if (selectedClub && allPlayersResponse && allPlayersResponse[0]) {
         // Filter players by current_club (encrypted ID) matching the club's ID
@@ -66,7 +63,6 @@ function Squad() {
           player.current_club === selectedClub.id
         );
         
-        console.log("Filtered team players by ID:", teamPlayers);
         
         if (teamPlayers && teamPlayers.length > 0) {
           // Map to the Player type with proper price extraction
@@ -90,7 +86,6 @@ function Squad() {
             };
           });
           
-          console.log("Mapped club players:", clubPlayers);
           setPlayers(clubPlayers);
         } else {
           // Try filtering by club name instead of ID
@@ -98,7 +93,6 @@ function Squad() {
             player.current_club_name === selectedClub.name
           );
           
-          console.log("Filtered team players by name:", teamPlayersByName);
           
           if (teamPlayersByName && teamPlayersByName.length > 0) {
             const clubPlayers = teamPlayersByName.map((player: any) => {
@@ -121,7 +115,6 @@ function Squad() {
               };
             });
             
-            console.log("Mapped club players by name:", clubPlayers);
             setPlayers(clubPlayers);
           } else {
             console.log("No players found for this club");
@@ -135,6 +128,10 @@ function Squad() {
       setLoading(false);
     }
   };
+
+  const isPlayerInSquad = (playerId:string | number )=>{
+    return squad.players.some(player => player.id.toString() === playerId.toString())
+  }
 
   // Function to handle batch transfer of all players
   const handleBatchTransfer = async () => {
@@ -192,19 +189,73 @@ function Squad() {
     
     setTransferring(false);
     
-    // If all players transferred successfully or user wants to proceed anyway
+    // If all players transferred successfully
     if (successCount === totalPlayers) {
       toast.success("All players transferred successfully!");
       handleProceedToGameweek();
     } else if (successCount > 0) {
-      const shouldProceed = window.confirm(
-        `Transferred ${successCount} of ${totalPlayers} players. Some players (${failCount}) failed to transfer. Do you want to proceed anyway?`
-      );
-      if (shouldProceed) {
+      toast.info(`Transferred ${successCount} of ${totalPlayers} players. Some players (${failCount}) failed to transfer.`);
+    } else {
+      toast.error("Failed to transfer any players. Please try again.");
+    }
+  };
+
+  // Add a new retry function for failed transfers
+  const handleRetryFailedTransfers = async () => {
+    if (transferResults.failed.length === 0) return;
+    
+    if (!window.confirm(`Retry transferring ${transferResults.failed.length} failed players?`)) {
+      return;
+    }
+
+    setTransferring(true);
+    setTransferProgress(0);
+    
+    // Get only the failed player IDs
+    const failedPlayerIds = squad.players
+      .filter(player => transferResults.failed.includes(player.name))
+      .map(player => player.id.toString());
+    
+    const totalPlayers = failedPlayerIds.length;
+    let successCount = 0;
+    let newFailures: string[] = [];
+
+    for (let i = 0; i < failedPlayerIds.length; i++) {
+      const playerId = failedPlayerIds[i];
+      const playerName = squad.players.find(p => p.id.toString() === playerId)?.name || playerId;
+      
+      try {
+        const result = await TransferPlayerIn(playerId);
+        if (result.status === 200) {
+          successCount++;
+          setTransferResults(prev => ({
+            ...prev,
+            success: [...prev.success, playerName],
+            failed: prev.failed.filter(name => name !== playerName)
+          }));
+          toast.success(`Transferred: ${playerName} (${i+1}/${totalPlayers})`);
+        } else {
+          newFailures.push(playerName);
+          toast.error(`Failed to transfer: ${playerName}`);
+        }
+      } catch (error) {
+        newFailures.push(playerName);
+        toast.error(`Error transferring: ${playerName}`);
+      }
+      
+      setTransferProgress(Math.round(((i + 1) / totalPlayers) * 100));
+    }
+    
+    setTransferring(false);
+    
+    if (successCount === totalPlayers && transferResults.failed.length === totalPlayers) {
+      toast.success("All remaining players transferred successfully!");
+      // Check if ALL players in the squad have now been transferred
+      if (transferResults.success.length + successCount === squad.players.length) {
         handleProceedToGameweek();
       }
     } else {
-      toast.error("Failed to transfer any players. Please try again.");
+      toast.info(`Transferred ${successCount} more players. ${newFailures.length} players still failed.`);
     }
   };
 
@@ -266,6 +317,7 @@ function Squad() {
                 clubs={clubs} 
                 onSelectClub={handleClubSelect}
                 loading={loading}
+                isPlayerInSquad={isPlayerInSquad}
               />
             ) : (
               <SquadView viewMode="squad" />
@@ -287,8 +339,8 @@ function Squad() {
               </div>
             )}
 
-            {/* Transfer results summary */}
-            {!transferring && (transferResults.success.length > 0 || transferResults.failed.length > 0) && (
+            {/* Transfer results summary with action buttons - only show when there are failed transfers */}
+            {!transferring && transferResults.failed.length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-4 mb-4">
                 <h3 className="font-bold text-lg mb-2">Transfer Results</h3>
                 {transferResults.success.length > 0 && (
@@ -297,12 +349,21 @@ function Squad() {
                     <div className="text-sm mt-1 ml-2 text-gray-700">{transferResults.success.join(', ')}</div>
                   </div>
                 )}
-                {transferResults.failed.length > 0 && (
-                  <div>
-                    <span className="font-medium text-red-600">Failed to transfer ({transferResults.failed.length}):</span>
-                    <div className="text-sm mt-1 ml-2 text-gray-700">{transferResults.failed.join(', ')}</div>
-                  </div>
-                )}
+                <div className="mb-4">
+                  <span className="font-medium text-red-600">Failed to transfer ({transferResults.failed.length}):</span>
+                  <div className="text-sm mt-1 ml-2 text-gray-700">{transferResults.failed.join(', ')}</div>
+                </div>
+                
+                {/* Only show retry button for failed transfers */}
+                <div className="flex flex-wrap gap-3 mt-4 justify-end">
+                  <button
+                    onClick={handleRetryFailedTransfers}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md flex items-center gap-2"
+                  >
+                    <RefreshCw size={16} />
+                    <span>Retry Failed Transfers</span>
+                  </button>
+                </div>
               </div>
             )}
 
