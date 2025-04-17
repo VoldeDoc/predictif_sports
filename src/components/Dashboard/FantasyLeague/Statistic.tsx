@@ -2,18 +2,54 @@ import { Position } from '@/types';
 import { useViewContext } from './FantasyLeague';
 import { useEffect } from 'react';
 
+// Define interface for player data to fix TypeScript errors
+interface PlayerData {
+  id?: string;
+  player_id?: string;
+  name?: string;
+  photo?: string;
+  position?: string;
+  position_short?: string;
+  current_club_name?: string;
+  current_club?: {
+    current_club_name?: string;
+    appearance?: number;
+    goal?: number;
+    assists?: number;
+    clean_sheets?: number;
+    red_card?: number;
+    yellow_card?: number;
+  };
+  evaluation?: string;
+  nationality?: string;
+  appearance?: number;
+  goal?: number;
+  assists?: number;
+  clean_sheets?: number;
+  red_card?: number;
+  yellow_card?: number;
+  bio?: any; // This can be either a string or an object
+  dob?: string;
+  height?: string;
+  weight?: string;
+  earning?: string;
+}
+
 export default function FantasyStatistic() {
     const { selectedPlayer } = useViewContext();
     
+    // Add type assertion for selectedPlayer
+    const typedPlayer = selectedPlayer as PlayerData | null;
+    
     // Log full player data for debugging
     useEffect(() => {
-        if (selectedPlayer) {
-            console.log("Selected player data:", selectedPlayer);
+        if (typedPlayer) {
+            console.log("Selected player data:", typedPlayer);
         }
-    }, [selectedPlayer]);
+    }, [typedPlayer]);
 
     // If no player is selected, show a message
-    if (!selectedPlayer) {
+    if (!typedPlayer) {
         return (
             <div className="text-center py-20">
                 <h3 className="text-xl font-semibold text-gray-700">No player selected</h3>
@@ -23,15 +59,17 @@ export default function FantasyStatistic() {
     }
 
     // Extract bio data - first check if bio is an object or directly in the player object
-    const bioData = typeof selectedPlayer.bio === 'object' && selectedPlayer.bio !== null 
-        ? selectedPlayer.bio 
-        : selectedPlayer;
+    const bioData = typeof typedPlayer.bio === 'object' && typedPlayer.bio !== null 
+        ? typedPlayer.bio as PlayerData
+        : typedPlayer;
 
     // Extract current club data
-    const clubData = selectedPlayer.current_club || {};
+    const clubData = typedPlayer.current_club || {};
 
     // Map API position format to our Position enum
-    const getPosition = (positionStr: string): Position => {
+    const getPosition = (positionStr?: string): Position => {
+        if (!positionStr) return Position.MID;
+        
         const positionMap: Record<string, Position> = {
             'GK': Position.GK,
             'Goalkeeper': Position.GK,
@@ -48,7 +86,7 @@ export default function FantasyStatistic() {
     };
 
     // Parse price from evaluation (e.g., "£20 million" -> 20)
-    const parsePrice = (evaluation: string): number => {
+    const parsePrice = (evaluation?: string): number => {
         if (!evaluation) return 0;
         const match = evaluation.match(/\d+/);
         return match ? parseInt(match[0]) : 0;
@@ -56,20 +94,20 @@ export default function FantasyStatistic() {
 
     // Create a player object from API data that matches our expected format
     const player = {
-        id: selectedPlayer.id || selectedPlayer.player_id || bioData.player_id || '',
-        name: selectedPlayer.name || bioData.name || 'Unknown Player',
-        image: selectedPlayer.photo || bioData.photo || '',
-        position: getPosition(selectedPlayer.position_short || bioData.position_short || selectedPlayer.position || bioData.position),
-        team: selectedPlayer.current_club_name || clubData.current_club_name || '',
-        price: parsePrice(selectedPlayer.evaluation || bioData.evaluation),
-        nationality: selectedPlayer.nationality || bioData.nationality || 'gb',        
+        id: typedPlayer.id || typedPlayer.player_id || bioData.player_id || '',
+        name: typedPlayer.name || bioData.name || 'Unknown Player',
+        image: typedPlayer.photo || bioData.photo || '',
+        position: getPosition(typedPlayer.position_short || bioData.position_short || typedPlayer.position || bioData.position),
+        team: typedPlayer.current_club_name || clubData.current_club_name || '',
+        price: parsePrice(typedPlayer.evaluation || bioData.evaluation),
+        nationality: typedPlayer.nationality || bioData.nationality || 'gb',        
         stats: {
-            appearances: selectedPlayer.appearance || clubData.appearance || 0,
-            goals: selectedPlayer.goal || clubData.goal || 0,
-            assists: selectedPlayer.assists || clubData.assists || 0,
-            cleanSheets: selectedPlayer.clean_sheets || clubData.clean_sheets || 0,
-            redCards: selectedPlayer.red_card || clubData.red_card || 0,
-            yellowCards: selectedPlayer.yellow_card || clubData.yellow_card || 0,
+            appearances: typedPlayer.appearance || clubData.appearance || 0,
+            goals: typedPlayer.goal || clubData.goal || 0,
+            assists: typedPlayer.assists || clubData.assists || 0,
+            cleanSheets: typedPlayer.clean_sheets || clubData.clean_sheets || 0,
+            redCards: typedPlayer.red_card || clubData.red_card || 0,
+            yellowCards: typedPlayer.yellow_card || clubData.yellow_card || 0,
             saves: 0,
             goalsConceded: 0,
             penaltySaves: 0,
@@ -83,17 +121,17 @@ export default function FantasyStatistic() {
     };
 
     // Extract personal details, checking both main object and bio object
-    const dob = bioData.dob || selectedPlayer.dob || "Not available";
-    const height = bioData.height || selectedPlayer.height || "Not available";
-    const weight = bioData.weight || selectedPlayer.weight || "Not available";
-    const earning = bioData.earning || selectedPlayer.earning || "Not available";
+    const dob = bioData.dob || typedPlayer.dob || "Not available";
+    const height = bioData.height || typedPlayer.height || "Not available";
+    const weight = bioData.weight || typedPlayer.weight || "Not available";
+    const earning = bioData.earning || typedPlayer.earning || "Not available";
     
     // For bio content, construct from available data if no actual bio text is available
     let bioContent = '';
     try {
         // Check if there's a direct bio string
-        if (typeof selectedPlayer.bio === 'string') {
-            bioContent = selectedPlayer.bio;
+        if (typeof typedPlayer.bio === 'string') {
+            bioContent = typedPlayer.bio;
         } else {
             // Create a biography from available data
             bioContent = `${player.name} is a professional footballer who plays as a ${bioData.position || player.position} for ${player.team}. `;
@@ -360,10 +398,16 @@ export default function FantasyStatistic() {
                             <p>Current Season</p>
                         </div>
                     </div>
+
+                    {/* Bio section */}
+                    <div className="bg-blue-50 rounded-lg p-8 mt-5">
+                        <h3 className="font-bold text-2xl mb-4">Player Bio</h3>
+                        <p className="text-gray-700">
+                            {bioContent || "No biography available for this player."}
+                        </p>
+                    </div>
                 </div>
             </div>
-
-         
         </div>
     );
 }
