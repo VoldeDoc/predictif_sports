@@ -1,8 +1,8 @@
 import Tabs from "@/pages/Ui/tab";
 import Info from "./Info/Info";
 import MatchLineup from "./Lineup/Lineup";
-import Table from "./Table/Table";
-import News from "./News/News";
+// import Table from "./Table/Table";
+// import News from "./News/News";
 import H2H from "./H2H/H2H";
 interface MatchInfoProps {
     matchDetails: {
@@ -23,7 +23,7 @@ interface MatchInfoProps {
 }
 export default function MatchInfo({ matchDetails }: MatchInfoProps) {
 
-    const tabs3 = ["Info", "Prediction", "Lineups", "Table", "News", "H2H"];
+    const tabs3 = ["Info", "Prediction", "Lineups",  "H2H"];
 
     // Home & Away Team Data
     const homeTeam = {
@@ -90,10 +90,7 @@ export default function MatchInfo({ matchDetails }: MatchInfoProps) {
                         <MatchLineup homeFormation={homeTeam.formation} awayFormation={awayTeam.formation} homePlayers={homeTeam.players} awayPlayers={awayTeam.players} />
                     </div>
                 );
-            case "Table":
-                return <Table />
-            case "News":
-                return <News />
+           
             case "H2H":
                 return <H2H />
             default:

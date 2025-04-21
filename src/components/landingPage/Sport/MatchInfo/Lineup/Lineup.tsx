@@ -129,7 +129,7 @@ interface MatchLineupProps {
   awayPlayers: Player[];
 }
 
-const MatchLineup: React.FC<MatchLineupProps> = ({ homeFormation, awayFormation, homePlayers, awayPlayers }) => {
+const  MatchLineup: React.FC<MatchLineupProps> = ({ homeFormation, awayFormation, homePlayers, awayPlayers }) => {
   return (
     <SoccerField
       homeFormation={{ formation: homeFormation, players: homePlayers, isHomeTeam: true }}
