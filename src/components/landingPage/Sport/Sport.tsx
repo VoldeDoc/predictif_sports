@@ -354,7 +354,7 @@ export default function Sports() {
                 <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-20">
                   
                 </div>
-            </div>
+        </div>
             <div className='py-14 sm:py-10 px-8 sm:px-16 '>
                 <div className="md:hidden mb-4 flex justify-between items-center">
                     <h1 className='text-xl font-bold'>Sports</h1>

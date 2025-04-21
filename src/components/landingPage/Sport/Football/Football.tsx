@@ -18,19 +18,18 @@ type MatchDetail = {
     awayscore?: string;
     game_start_date: string;
     game_start_time: string;
-    match_type?: "Latest Match" | "Live Match" | "Coming Match";
+    match_type?: "Latest Match" | "Coming Match";
 };
 
 type MatchDetailsType = {
     "Latest Match": MatchDetail[];
-    "Live Match": MatchDetail[];
     "Coming Match": MatchDetail[];
 };
 
 const Football: React.FC = () => {
     const { getUpcomingMatchPublic, getResultMatchPublic, getTodayMatchPublic, getMatchDetail } = useDashBoardManagement();
     const [selectedMatch, setSelectedMatch] = useState<MatchDetail | null>(null);
-    const tabs2 = ["Latest Match", "Live Match", "Coming Match"];
+    const tabs2 = ["Latest Match", "Coming Match"];
     const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
     const [loadingUpcomingPubl, setLoadingUpcomingPublic] = useState(true);
     const [resultMatches, setResultMatches] = useState<any[]>([]);
@@ -160,8 +159,6 @@ const Football: React.FC = () => {
             loadingUpcomingPubl,
             resultMatches,
             loadingResultPublic,
-            todayMatches,
-            loadingTodayPublic
         ),
         [upcomingMatches, resultMatches, todayMatches, loadingUpcomingPubl, loadingResultPublic, loadingTodayPublic]);
 
@@ -200,8 +197,6 @@ const RenderSecondContent = (
     loadingUpcomingPublic: boolean,
     resultMatches: any[],
     loadingResultPublic: boolean,
-    todayMatches: any[],
-    loadingTodayPublic: boolean
 ): JSX.Element => {
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -292,35 +287,7 @@ const RenderSecondContent = (
             match_type: "Latest Match" as const
         } as MatchDetail));
 
-    const liveMatchDetails = loadingTodayPublic
-        ? [{
-            id: "loading",
-            time: "Loading...",
-            team1: "Loading...",
-            team2: "Loading...",
-            score: "-",
-            homelogo: "",
-            awaylogo: "",
-            homescore: "-",
-            awayscore: "-",
-            game_start_date: new Date().toISOString().split('T')[0],
-            game_start_time: "loading",
-            match_type: "Live Match" as const
-        }]
-        : todayMatches.map(match => ({
-            id: match.id,
-            time: match.game_start_time,
-            team1: match.home_club_name,
-            team2: match.away_club_name,
-            score: `${match.home_score} - ${match.away_score}`,
-            homelogo: match.home_club_logo,
-            awaylogo: match.away_club_logo,
-            homescore: match.home_score.toString(),
-            awayscore: match.away_score.toString(),
-            game_start_date: match.game_start_date,
-            game_start_time: match.game_start_time,
-            match_type: "Live Match" as const
-        } as MatchDetail));
+   
 
     const comingMatchDetails = loadingUpcomingPublic
         ? [{
@@ -344,7 +311,6 @@ const RenderSecondContent = (
 
     const matchDetails = {
         "Latest Match": latestMatchDetails,
-        "Live Match": liveMatchDetails,
         "Coming Match": comingMatchDetails,
     };
 

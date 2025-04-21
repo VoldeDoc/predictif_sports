@@ -2,16 +2,27 @@ import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
-const links = [
+// Define TypeScript interface for link structure
+interface NavbarLink {
+  title: string;
+  url: string;
+  dropdown?: { title: string; url: string }[];
+}
+
+const links: NavbarLink[] = [
   {
     title: "Sports",
-    url: "/sports",},
-  { title: "News",
-     url: "/experts",
-     dropdown:[
-    { title: "The boot Room", url: "/home" },
-    { title: "Strategic Analysis", url: "/home2" },
-  ] },
+    url: "/sports",
+  },
+  { 
+    title: "News",
+    url: "/experts",
+    // Dropdown removed but kept as commented reference
+    // dropdown: [
+    //   { title: "The boot Room", url: "/home" },
+    //   { title: "Strategic Analysis", url: "/home2" },
+    // ]
+  },
   { title: "Scores", url: "/" },
   { title: "Forum", url: "/strategies" },
   { title: "Head2Head", url: "/head" },
@@ -36,7 +47,7 @@ export default function NavbarLinks() {
                 <NavLink
                   to={link.url}
                   className={({ isActive }) =>
-                    `px-4 py-2  font-bold text-black ${
+                    `px-4 py-2 font-bold text-black ${
                       isActive ? "text-blue-500" : ""
                     }`
                   }
@@ -72,7 +83,7 @@ export default function NavbarLinks() {
               key={index}
               to={link.url}
               className={({ isActive }) =>
-                `px-4 py-2  font-bold text-black ${
+                `px-4 py-2 font-bold text-black ${
                   isActive ? "text-blue-500" : ""
                 }`
               }

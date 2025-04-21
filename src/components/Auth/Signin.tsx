@@ -1,7 +1,7 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { apple, google, logo, signin_img } from "../../../public";
+import {  logo, signin_img } from "../../../public";
 import Textinput from "../Ui/Textinput";
 import Checkbox from "../Ui/CheckBox";
 import { useState } from "react";
@@ -137,12 +137,12 @@ const SigninComponent = () => {
           />
         </form>
         <div className="flex flex-col justify-center items-center gap-5 mx-auto">
-          <div className="text-gray-500"> or continue with</div>
-          <div className=" flex items-center gap-4">
+          {/* <div className="text-gray-500"> or continue with</div> */}
+          {/* <div className=" flex items-center gap-4">
             {" "}
             <img src={apple} alt="applw" width={30} height={30} />
             <img src={google} alt="logo" width={30} height={30} />
-          </div>
+          </div> */}
         </div>
       </div>
 

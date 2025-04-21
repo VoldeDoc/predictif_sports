@@ -9,7 +9,7 @@ export default function Home() {
                 <div className="container-sm ">
                     <div className="bg-[#00008B] pt-32 sm:px-16 px-8 pb-4">
                         <div className="text-center pb-7 sm:mr-32 mr-0">
-                            <button className="rounded-2xl bg-white text-black-500 px-2 py-2 text-xs mb-5 " > <span className="text-[#B22234] font-bold">o</span> Fully Integrated Sport Prediction Apps</button>
+                            <button className="rounded-2xl bg-white text-black-500 px-2 py-2 text-xs mb-5 " > <span className="text-[#B22234] font-bold">o</span> Fully Integrated AI Predictive Sport System</button>
                         </div>
                         <div className="flex flex-col sm:flex-row justify-between sm:space-x-4 space-x-0 space-y-7">
 
@@ -18,7 +18,7 @@ export default function Home() {
                             </div>
                             <div>
                                 <TypingEffect />
-                                <p className="text-white text-sm">Predictivo™ assists thousands of game-loving bettors and</p>
+                                <p className="text-white text-sm">Predictif Sport™ assists thousands of game-loving bettors and</p>
                                 <p className="text-white text-sm">traders in making smarter, data-driven betting decisions every day.</p>
                             </div>
 

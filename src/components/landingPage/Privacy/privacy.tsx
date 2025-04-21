@@ -3,6 +3,11 @@ import LandingPageLayout from "@/components/Layout/LandingPageLayout";
 export default function Privacy() {
     return (
         <LandingPageLayout>
+              <div className="container-sm">
+                <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-20">
+                  
+                </div>
+            </div>
             <div className="container mx-auto px-4 py-36 max-w-4xl">
                 <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
                 <p className="text-sm mb-8">Effective Date: 28 March 2025</p>
