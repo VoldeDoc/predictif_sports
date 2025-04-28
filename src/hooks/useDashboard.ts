@@ -1140,6 +1140,8 @@ const substitute  = async (data:SubstitutionValues) =>{
     }
 
 
+   
+
     return {
         loading,
         username,
@@ -1212,7 +1214,7 @@ const substitute  = async (data:SubstitutionValues) =>{
         setSquad,
         getMatchDaySquad,
         setFormation,
-        substitute
+        substitute,
     };
 }
 

@@ -98,6 +98,25 @@ function useAuth() {
 
   }
 
+  const deleteUserAccount = async () =>{
+    try{
+        setLoading(true)
+        const res = await client.post('/deleteAccount')
+        localStorage.removeItem("token");
+        dispatch(setToken(""));
+        dispatch(setUser(null));
+        return res?.data?.data
+    }
+    catch (error:any){
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+    }
+    finally{
+        setLoading(false)
+    }
+    }
+
   const forgetPasswordSendOtpMail = async (data: EmailForgetPasswordDataValues) => {
     try {
       setLoading(true);
@@ -175,6 +194,7 @@ function useAuth() {
     forgetPassword,
     changePasswordSendOtpMail,
     changePassword,
+    deleteUserAccount,
   }
 
 }

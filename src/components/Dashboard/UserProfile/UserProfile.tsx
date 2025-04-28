@@ -3,7 +3,8 @@ import { AuthLayout } from '@/components/Layout/layout';
 import useDashBoardManagement from '@/hooks/useDashboard';
 import { toast } from 'react-toastify';
 import Loader from '@/pages/Ui/loader';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '@/hooks/useAuth';
 
 interface Plan {
   id: number;
@@ -33,12 +34,19 @@ interface Player {
 
 function UserProfile() {
   const { getUserPlan, username, getClubFollowed, unFollowClub, getPlayerFollowed, unFollowPlayer } = useDashBoardManagement();
+  const { deleteUserAccount } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // const [subscriptionActive, setSubscriptionActive] = useState(false);
+
+  // Account deactivation states
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deactivateButtonEnabled, setDeactivateButtonEnabled] = useState(false);
+  const navigage = useNavigate()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,6 +76,12 @@ function UserProfile() {
     fetchData();
   }, []);
 
+  // Check if the confirmation text matches the required phrase
+  useEffect(() => {
+    const requiredText = 'deactivate account';
+    setDeactivateButtonEnabled(confirmText.toLowerCase() === requiredText);
+  }, [confirmText]);
+
   const handleRemoveClub = async (id: string) => {
     toast.promise(
       unFollowClub(id).then(async () => {
@@ -96,17 +110,43 @@ function UserProfile() {
     );
   };
 
+  const handleOpenDeactivateModal = () => {
+    setShowDeactivateModal(true);
+  };
+
+  const handleCloseDeactivateModal = () => {
+    setShowDeactivateModal(false);
+    setConfirmText('');
+    setDeactivateButtonEnabled(false);
+  };
+
+  const handleDeactivateAccount = async () => {
+    if (deactivateButtonEnabled) {
+      try {
+        // Call the API to deactivate the account
+        await deleteUserAccount() // Replace with actual API call
+        toast.success("Account deactivated successfully.");
+        handleCloseDeactivateModal();
+        navigage('/')
+      } catch (error) {
+        toast.error("Failed to deactivate account.");
+      }
+    } else {
+      toast.error("Please type 'deactivate account' to confirm.");
+    }
+  };
+
   return (
     <AuthLayout>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-       
+
         <div className="bg-white p-10 rounded-lg shadow-2xl max-w-3xl w-full">
-        <div>
-          <button></button>
-        <button onClick={() => window.history.back()} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-          Back
-        </button>
-        </div>
+          <div>
+            <button></button>
+            <button onClick={() => window.history.back()} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+              Back
+            </button>
+          </div>
           <div className="text-center mb-10">
             <h1 className="text-3xl font-extrabold text-gray-900">Welcome, {username}</h1>
             <p className="text-gray-600 mt-2">Here is your account overview</p>
@@ -203,10 +243,73 @@ function UserProfile() {
                   )}
                 </div>
               </section>
+
+              {/* Account Deactivation Section */}
+              <section className="border-t pt-10">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6">Account Management</h2>
+                <div className="bg-red-50 p-6 rounded-lg border border-red-200">
+                  <h3 className="text-xl font-bold text-red-600 mb-3">Deactivate Your Account</h3>
+                  <p className="text-gray-700 mb-4">
+                    Warning: Deactivating your account will remove all your data and cannot be undone.
+                    All your subscriptions, followed clubs, and players will be permanently deleted.
+                  </p>
+                  <button
+                    onClick={handleOpenDeactivateModal}
+                    className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Deactivate Account
+                  </button>
+                </div>
+              </section>
             </>
           )}
         </div>
       </div>
+
+      {/* Deactivation Modal */}
+      {showDeactivateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h3 className="text-2xl font-bold text-red-600 mb-4">Are you sure?</h3>
+            <p className="text-gray-700 mb-6">
+              This action cannot be undone. To confirm, please type <strong>"deactivate account"</strong> in the field below.
+            </p>
+
+            <div className="mb-6">
+              <label htmlFor="confirmDeactivate" className="block text-sm font-medium text-gray-700 mb-2">
+                Confirmation text:
+              </label>
+              <input
+                type="text"
+                id="confirmDeactivate"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                className="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 p-3 border"
+                placeholder="Type 'deactivate account' to confirm"
+              />
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                onClick={handleCloseDeactivateModal}
+                className="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeactivateAccount}
+                disabled={!deactivateButtonEnabled}
+                className={`px-6 py-2 rounded-lg text-white ${deactivateButtonEnabled
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-red-300 cursor-not-allowed'
+                  } transition-colors`}
+              >
+                Deactivate Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

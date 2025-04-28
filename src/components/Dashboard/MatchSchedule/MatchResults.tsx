@@ -39,6 +39,7 @@ export default function MatchTable() {
         (async () => {
             try {
                 const data = await getMatchAlert();
+                console.log("Match Data:", data); 
                 const extractedData = data.flatMap((entry: any) =>
                     entry.map((item: any) => item.meta_data).flat()
                 );
