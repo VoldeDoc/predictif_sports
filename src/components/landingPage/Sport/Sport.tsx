@@ -47,6 +47,8 @@ export default function Sports() {
     // Selection states
     const [activeRegionId, setActiveRegionId] = useState<string>("");
     const [activeCountryId, setActiveCountryId] = useState<string>("");
+    const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
+    const [selectedLeagueName, setSelectedLeagueName] = useState<string | null>(null);
 
     // Get initial tab from localStorage
     const initialTab = localStorage.getItem('sportsActiveTab') || "Football";
@@ -71,11 +73,15 @@ export default function Sports() {
         setView('regions');
         setActiveRegionId("");
         setActiveCountryId("");
+        setSelectedLeagueId(null);
+        setSelectedLeagueName(null);
     };
     
     const navigateToCountries = () => {
         setView('countries');
         setActiveCountryId("");
+        setSelectedLeagueId(null);
+        setSelectedLeagueName(null);
     };
 
     // Prevent body scroll when mobile sidebar is open
@@ -172,11 +178,26 @@ export default function Sports() {
         setActiveRegionId(regionId);
         setActiveCountryId("");
         setLeagues([]);
+        setSelectedLeagueId(null);
+        setSelectedLeagueName(null);
     };
     
     // Handle country selection
     const handleCountrySelect = (countryId: string) => {
         setActiveCountryId(countryId);
+        setSelectedLeagueId(null);
+        setSelectedLeagueName(null);
+        
+        // Auto-hide mobile sidebar after selection
+        if (window.innerWidth < 768) {
+            setShowMobileSidebar(false);
+        }
+    };
+    
+    // Handle league selection
+    const handleLeagueSelect = (league: League) => {
+        setSelectedLeagueId(league.id);
+        setSelectedLeagueName(league.name);
         
         // Auto-hide mobile sidebar after selection
         if (window.innerWidth < 768) {
@@ -201,7 +222,13 @@ export default function Sports() {
         mountedComponents.forEach((tab) => {
             switch (tab) {
                 case "Football":
-                    components[tab] = <Football key="football" />;
+                    components[tab] = (
+                        <Football 
+                            key="football" 
+                            leagueId={selectedLeagueId || undefined}
+                            leagueName={selectedLeagueName || undefined}
+                        />
+                    );
                     break;
                 case "Basketball":
                     components[tab] = <Basketball key="basketball" />;
@@ -227,12 +254,16 @@ export default function Sports() {
             }
         });
         return components;
-    }, [mountedComponents]);
+    }, [mountedComponents, selectedLeagueId, selectedLeagueName]);
 
     const handleTabChange = useCallback((tab: string) => {
         const newTab = tab as Tab;
         setActiveTab(newTab);
         localStorage.setItem('sportsActiveTab', newTab);
+
+        // Reset league selection when changing sport tab
+        setSelectedLeagueId(null);
+        setSelectedLeagueName(null);
 
         // Add new tab to mounted components
         setMountedComponents(prev => {
@@ -324,7 +355,10 @@ export default function Sports() {
                                 {leagues.map((league) => (
                                     <li
                                         key={league.id}
-                                        className="flex items-center p-2 hover:bg-blue-50 rounded cursor-pointer"
+                                        onClick={() => handleLeagueSelect(league)}
+                                        className={`flex items-center p-2 hover:bg-blue-50 rounded cursor-pointer ${
+                                            selectedLeagueId === league.id ? 'bg-blue-100 font-bold text-blue-600' : ''
+                                        }`}
                                     >
                                         {league.logo && (
                                             <img 
@@ -354,7 +388,7 @@ export default function Sports() {
                 <div className="bg-[#00008B] sm:pt-16 pt-7 sm:px-16 px-8 pb-20">
                   
                 </div>
-        </div>
+            </div>
             <div className='py-14 sm:py-10 px-8 sm:px-16 '>
                 <div className="md:hidden mb-4 flex justify-between items-center">
                     <h1 className='text-xl font-bold'>Sports</h1>
@@ -497,6 +531,26 @@ export default function Sports() {
                             ))}
                         </div>
                         {renderContent(activeTab)}
+
+                        {/* Selected league info */}
+                        {selectedLeagueId && selectedLeagueName && (
+                            <div className="md:hidden mt-4 bg-blue-50 p-3 rounded-md">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-blue-800 font-medium">
+                                        Selected: {selectedLeagueName}
+                                    </p>
+                                    <button 
+                                        onClick={() => {
+                                            setSelectedLeagueId(null);
+                                            setSelectedLeagueName(null);
+                                        }}
+                                        className="text-blue-800 hover:text-blue-600"
+                                    >
+                                        <FaTimes size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

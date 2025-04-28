@@ -965,6 +965,57 @@ function useDashBoardManagement() {
         }
     }
 
+    const getCountryRegionLeagueByIdUpcoming = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing/public/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getCountryRegionLeagueByIdLatest = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing/public/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+    const getCountryRegionLeagueByIdUpcomingPrivate = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing/user/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
+    const getCountryRegionLeagueByIdLatestPrivate = async (id: string) => {
+        try {
+            setLoading(true)
+            const res = await client.get(`/user/getMatchAlertUpComing/user/${id}`)
+            return res?.data.data
+        } catch (error: any) {
+            const resError = error.response?.data;
+            const errorMessage = resError?.message || resError?.data || "An error occured"
+            console.error(errorMessage);
+
+        }
+    }
+
     const getPlayersByLeague = async () => {
         try {
             setLoading(true)
@@ -1139,8 +1190,37 @@ const substitute  = async (data:SubstitutionValues) =>{
 } 
     }
 
+const getUpcomingMatchPrivate = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertUpComing/user`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
 
-   
+    }
+    finally {
+        setLoading(false)
+    }
+}
+const getResultMatchPrivate = async () => {
+    try {
+        setLoading(true)
+        const res = await client.get(`/user/getMatchAlertResult/user/`)
+        return res?.data.data
+    } catch (error: any) {
+        const resError = error.response?.data;
+        const errorMessage = resError?.message || resError?.data || "An error occured"
+        console.error(errorMessage);
+
+    }
+    finally {
+        setLoading(false)
+    }
+}
+
 
     return {
         loading,
@@ -1215,6 +1295,12 @@ const substitute  = async (data:SubstitutionValues) =>{
         getMatchDaySquad,
         setFormation,
         substitute,
+        getCountryRegionLeagueByIdUpcoming,
+        getCountryRegionLeagueByIdLatest,
+        getCountryRegionLeagueByIdUpcomingPrivate,
+        getCountryRegionLeagueByIdLatestPrivate,
+        getUpcomingMatchPrivate,
+        getResultMatchPrivate,
     };
 }
 

@@ -9,8 +9,6 @@ import MLB from '@/components/landingPage/Sport/MLB/MLB';
 import Cricket from '@/components/landingPage/Sport/Cricket/cricket';
 import F1 from '@/components/landingPage/Sport/F1/F1';
 import Tennis from '@/components/landingPage/Sport/Tennis/Tennis';
-// import SearchSection from '@/components/landingPage/Sport/Tools/searchSection';
-// import LeaguesList from '@/components/landingPage/Sport/Tools/LeagueList';
 import useDashBoardManagement from '@/hooks/useDashboard';
 
 // Define interfaces for API responses
@@ -52,6 +50,9 @@ export default function DashSports() {
     const [activeRegionId, setActiveRegionId] = useState<string>("");
     const [activeCountryId, setActiveCountryId] = useState<string>("");
     
+    // Add selected league state
+    const [selectedLeague, setSelectedLeague] = useState<{ id: string; name: string } | null>(null);
+    
     // Get initial tab from localStorage
     const initialTab = localStorage.getItem('sportsActiveTab') || "Football";
     const tabs = ["Football", "Basketball", "NFL", "Rugby", "MLB", "Cricket", "F1", "Tennis"] as const;
@@ -64,11 +65,13 @@ export default function DashSports() {
         setView('regions');
         setActiveRegionId("");
         setActiveCountryId("");
+        setSelectedLeague(null); // Clear selected league when navigating back
     };
     
     const navigateToCountries = () => {
         setView('countries');
         setActiveCountryId("");
+        setSelectedLeague(null); // Clear selected league when navigating back
     };
 
     // DEFINE LABELS
@@ -176,17 +179,37 @@ export default function DashSports() {
         loadLeagues();
     }, [activeCountryId, activeTab]);
 
+    // Clear selected league when changing tabs
+    useEffect(() => {
+        setSelectedLeague(null);
+    }, [activeTab]);
 
     const handleRegionSelect = (regionId: string) => {
         console.log("Region selected:", regionId);
         setActiveRegionId(regionId);
         setActiveCountryId("");
         setLeagues([]);
+        setSelectedLeague(null);
     };
     
     const handleCountrySelect = (countryId: string) => {
         console.log("Country selected:", countryId);
         setActiveCountryId(countryId);
+        setSelectedLeague(null);
+        // Auto-hide sidebar on mobile after selection
+        if (window.innerWidth < 1024) {
+            setShowSidebar(false);
+        }
+    };
+
+    // Add league selection handler
+    const handleLeagueSelect = (league: League) => {
+        console.log("League selected:", league);
+        setSelectedLeague({
+            id: league.id,
+            name: league.name
+        });
+        
         // Auto-hide sidebar on mobile after selection
         if (window.innerWidth < 1024) {
             setShowSidebar(false);
@@ -209,7 +232,14 @@ export default function DashSports() {
         mountedComponents.forEach((tab) => {
             switch (tab) {
                 case "Football":
-                    result[tab] = <DashBoardFootball key="football" />;
+                    // Pass league props to DashBoardFootball component
+                    result[tab] = (
+                        <DashBoardFootball 
+                            key="football" 
+                            leagueId={selectedLeague?.id} 
+                            leagueName={selectedLeague?.name} 
+                        />
+                    );
                     break;
                 case "Basketball":
                     result[tab] = <Basketball key="basketball" />;
@@ -235,12 +265,15 @@ export default function DashSports() {
             }
         });
         return result;
-    }, [mountedComponents]);
+    }, [mountedComponents, selectedLeague]); // Add selectedLeague as dependency
 
     const handleTabChange = useCallback((tab: string) => {
         const newTab = tab as Tab;
         setActiveTab(newTab);
         localStorage.setItem('sportsActiveTab', newTab);
+        
+        // Reset selected league when changing sports
+        setSelectedLeague(null);
         
         // Add new tab to mounted components
         setMountedComponents(prev => {
@@ -331,6 +364,21 @@ export default function DashSports() {
                             </div>
                         </div>
                         
+                        {/* Selected league indicator */}
+                        {selectedLeague && (
+                            <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-blue-800">Selected: {selectedLeague.name}</span>
+                                    <button 
+                                        onClick={() => setSelectedLeague(null)}
+                                        className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100"
+                                    >
+                                        <FaTimes size={14} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        
                         {/* Desktop sidebar content */}
                         {loading ? (
                             <div className="flex justify-center items-center py-10">
@@ -349,7 +397,7 @@ export default function DashSports() {
                                                     <button 
                                                         key={region.id} 
                                                         onClick={() => handleRegionSelect(region.id)}
-                                                        className="w-full py-3 lpx-4 text-left hover:bg-white hover:shadow-md rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                        className="w-full py-3 px-4 text-left hover:bg-white hover:shadow-md rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
                                                     >
                                                         {region.label}
                                                     </button>
@@ -403,9 +451,14 @@ export default function DashSports() {
                                         {leagues && leagues.length > 0 ? (
                                             <ul className="space-y-2">
                                                 {leagues.map((league) => (
-                                                    <li 
-                                                        key={league.id} 
-                                                        className="flex items-center p-3 hover:bg-white hover:shadow-md rounded-md transition-all duration-200 cursor-pointer"
+                                                    <button
+                                                        key={league.id}
+                                                        onClick={() => handleLeagueSelect(league)}
+                                                        className={`w-full text-left flex items-center p-3 rounded-md transition-all duration-200
+                                                            ${selectedLeague?.id === league.id 
+                                                                ? 'bg-blue-100 border-blue-300 border shadow-sm' 
+                                                                : 'hover:bg-white hover:shadow-md'
+                                                            }`}
                                                     >
                                                         {league.logo && (
                                                             <div className="w-7 h-7 flex-shrink-0 mr-3">
@@ -417,7 +470,7 @@ export default function DashSports() {
                                                             </div>
                                                         )}
                                                         <span className="truncate">{league.name}</span>
-                                                    </li>
+                                                    </button>
                                                 ))}
                                             </ul>
                                         ) : (
@@ -449,6 +502,21 @@ export default function DashSports() {
                             </div>
                             
                             <div className="p-4">
+                                {/* Selected league indicator for mobile */}
+                                {selectedLeague && (
+                                    <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-medium text-blue-800">Selected: {selectedLeague.name}</span>
+                                            <button 
+                                                onClick={() => setSelectedLeague(null)}
+                                                className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100"
+                                            >
+                                                <FaTimes size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            
                                 {/* Mobile Navigation breadcrumbs */}
                                 <div className="flex flex-wrap items-center mb-4 text-sm">
                                     {view !== 'regions' && (
@@ -555,9 +623,14 @@ export default function DashSports() {
                                                 {leagues && leagues.length > 0 ? (
                                                     <ul className="space-y-2">
                                                         {leagues.map((league) => (
-                                                            <li 
+                                                            <button 
                                                                 key={league.id} 
-                                                                className="flex items-center p-4 hover:bg-blue-50 rounded-md transition-all duration-200 cursor-pointer border border-gray-100"
+                                                                onClick={() => handleLeagueSelect(league)}
+                                                                className={`w-full text-left flex items-center p-4 rounded-md transition-all duration-200 border border-gray-100
+                                                                    ${selectedLeague?.id === league.id 
+                                                                        ? 'bg-blue-100 border-blue-300' 
+                                                                        : 'hover:bg-blue-50'
+                                                                    }`}
                                                             >
                                                                 {league.logo && (
                                                                     <div className="w-8 h-8 flex-shrink-0 mr-3">
@@ -569,7 +642,7 @@ export default function DashSports() {
                                                                     </div>
                                                                 )}
                                                                 <span className="font-medium">{league.name}</span>
-                                                            </li>
+                                                            </button>
                                                         ))}
                                                     </ul>
                                                 ) : (

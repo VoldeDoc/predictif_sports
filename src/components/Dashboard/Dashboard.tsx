@@ -44,7 +44,7 @@ const getGreeting = (timeZone: string) => {
 };
 
 const Dashboard = () => {
-  const { getClubFollowed, getPlayerFollowed, getMyStrategies, getNewsEvent, getUpcomingMatch,getResultMatch } = useDashBoardManagement();
+  const { getClubFollowed, getPlayerFollowed, getMyStrategies, getNewsEvent, getUpcomingMatchPrivate,getResultMatchPrivate } = useDashBoardManagement();
   const userdata = useSelector((state: RootState) => state.auth?.user);
   const username = userdata?.username;
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -117,8 +117,8 @@ const Dashboard = () => {
           getMyStrategies("stop"),
           getMyStrategies("expired"),
           getNewsEvent(),
-          getUpcomingMatch(),
-          getResultMatch()
+          getUpcomingMatchPrivate(),
+          getResultMatchPrivate()
         ]);
 
         // Set club followed data

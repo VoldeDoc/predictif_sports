@@ -6,6 +6,7 @@ import useDashBoardManagement from '@/hooks/useDashboard';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '@/styles/date-picker.css'
+
 type MatchDetail = {
     id: string;
     time: string;
@@ -26,103 +27,127 @@ type MatchDetailsType = {
     "Coming Match": MatchDetail[];
 };
 
-const Football: React.FC = () => {
-    const { getUpcomingMatchPublic, getResultMatchPublic, getTodayMatchPublic, getMatchDetail } = useDashBoardManagement();
+interface FootballProps {
+    leagueId?: string;
+    leagueName?: string;
+}
+
+const Football: React.FC<FootballProps> = ({ leagueId, leagueName }) => {
+    const {
+        getMatchDetail,
+        getCountryRegionLeagueByIdUpcoming,
+        getCountryRegionLeagueByIdLatest
+    } = useDashBoardManagement();
+
     const [selectedMatch, setSelectedMatch] = useState<MatchDetail | null>(null);
     const tabs2 = ["Latest Match", "Coming Match"];
     const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
     const [loadingUpcomingPubl, setLoadingUpcomingPublic] = useState(true);
     const [resultMatches, setResultMatches] = useState<any[]>([]);
     const [loadingResultPublic, setLoadingResultPublic] = useState(true);
-    const [todayMatches, setTodayMatches] = useState<any[]>([]);
-    const [loadingTodayPublic, setLoadingTodayPublic] = useState(true);
     const [matchDetails, setMatchDetails] = useState<any>(null);
     const initialTab = localStorage.getItem('footballActiveTab') || "Latest Match";
-    const [activeFootballTab, setActiveFootballTab] = useState(initialTab);
     const [isMounted, setIsMounted] = useState(false);
+    
+    // View mode state - either 'league' or 'waiting'
+    // We've removed 'general' since the general API calls are no longer available
+    const [viewMode, setViewMode] = useState<'league' | 'waiting'>(
+        leagueId ? 'league' : 'waiting'
+    );
+
     const sortMatchesByDateTime = (matches: any[]) => {
+        if (!matches || !Array.isArray(matches)) return [];
         return [...matches].sort((a, b) => {
             const dateTimeA = new Date(`${a.game_start_date}T${a.game_start_time}`);
             const dateTimeB = new Date(`${b.game_start_date}T${b.game_start_time}`);
             return dateTimeA.getTime() - dateTimeB.getTime();
         });
     };
+
     const fetchFunctions = useMemo(() => ({
         fetchUpcomingMatches: async () => {
-            if (upcomingMatches.length > 0) return;
             try {
-                const response = await getUpcomingMatchPublic();
-                const sortedMatches = sortMatchesByDateTime(response[0]);
-                setUpcomingMatches(sortedMatches);
+                // Only fetch if we have a league
+                if (leagueId) {
+                    setLoadingUpcomingPublic(true);
+                    const response = await getCountryRegionLeagueByIdUpcoming(leagueId);
+                    setViewMode('league');
+                    
+                    if (response && Array.isArray(response[0])) {
+                        const sortedMatches = sortMatchesByDateTime(response[0]);
+                        setUpcomingMatches(sortedMatches);
+                    } else {
+                        setUpcomingMatches([]);
+                    }
+                } else {
+                    // No league selected, clear matches
+                    setUpcomingMatches([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch upcoming matches", error);
+                setUpcomingMatches([]);
             } finally {
                 setLoadingUpcomingPublic(false);
             }
         },
         fetchResultMatches: async () => {
-            if (resultMatches.length > 0) return;
             try {
-                const response = await getResultMatchPublic();
-                const sortedMatches = sortMatchesByDateTime(response[0]);
-                setResultMatches(sortedMatches);
+                // Only fetch if we have a league
+                if (leagueId) {
+                    setLoadingResultPublic(true);
+                    const response = await getCountryRegionLeagueByIdLatest(leagueId);
+                    setViewMode('league');
+                    
+                    if (response && Array.isArray(response[0])) {
+                        const sortedMatches = sortMatchesByDateTime(response[0]);
+                        setResultMatches(sortedMatches);
+                    } else {
+                        setResultMatches([]);
+                    }
+                } else {
+                    // No league selected, clear matches
+                    setResultMatches([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch result matches", error);
+                setResultMatches([]);
             } finally {
                 setLoadingResultPublic(false);
             }
-        },
-        fetchTodayMatches: async () => {
-            if (todayMatches.length > 0) return;
-            try {
-                const response = await getTodayMatchPublic();
-                const sortedMatches = sortMatchesByDateTime(response[0]);
-                setTodayMatches(sortedMatches);
-            } catch (error) {
-                console.error("Failed to fetch today's matches", error);
-            } finally {
-                setLoadingTodayPublic(false);
-            }
         }
-    }), [getUpcomingMatchPublic, getResultMatchPublic, getTodayMatchPublic, upcomingMatches.length, resultMatches.length, todayMatches.length]);
+    }), [
+        getCountryRegionLeagueByIdUpcoming,
+        getCountryRegionLeagueByIdLatest,
+        leagueId
+    ]);
+
+    // Reset data when league changes
+    useEffect(() => {
+        setUpcomingMatches([]);
+        setResultMatches([]);
+        setIsMounted(false);
+        setSelectedMatch(null);
+        
+        // Set view mode based on whether a league is selected
+        setViewMode(leagueId ? 'league' : 'waiting');
+    }, [leagueId]);
 
     // Initialize data
     useEffect(() => {
-        if (!isMounted) {
+        if (!isMounted && leagueId) {
             const initializeData = async () => {
                 await Promise.all([
                     fetchFunctions.fetchUpcomingMatches(),
-                    fetchFunctions.fetchResultMatches(),
-                    fetchFunctions.fetchTodayMatches()
+                    fetchFunctions.fetchResultMatches()
                 ]);
                 setIsMounted(true);
             };
             initializeData();
         }
-    }, [isMounted, fetchFunctions]);
+    }, [isMounted, fetchFunctions, leagueId]);
 
-    // Refresh function for manual updates
-    const refreshData = async () => {
-        setLoadingUpcomingPublic(true);
-        setLoadingResultPublic(true);
-        setLoadingTodayPublic(true);
-
-        await Promise.all([
-            fetchFunctions.fetchUpcomingMatches(),
-            fetchFunctions.fetchResultMatches(),
-            fetchFunctions.fetchTodayMatches()
-        ]);
-    };
-    // Auto-refresh for live matches
-    useEffect(() => {
-        if (activeFootballTab === "Live Match") {
-            const interval = setInterval(refreshData, 60000);
-            return () => clearInterval(interval);
-        }
-    }, [activeFootballTab]);
-
+   
     const handleTabChange = (tab: string) => {
-        setActiveFootballTab(tab);
         localStorage.setItem('footballActiveTab', tab);
     };
 
@@ -136,7 +161,7 @@ const Football: React.FC = () => {
                     ...response[0],
                     meta_data: {
                         ...response[0].meta_data,
-                        match_type: activeTab as "Latest Match" | "Live Match" | "Coming Match"
+                        match_type: activeTab as "Latest Match" | "Coming Match"
                     }
                 };
                 setMatchDetails(matchDetailsWithType);
@@ -160,30 +185,46 @@ const Football: React.FC = () => {
             resultMatches,
             loadingResultPublic,
         ),
-        [upcomingMatches, resultMatches, todayMatches, loadingUpcomingPubl, loadingResultPublic, loadingTodayPublic]);
+        [upcomingMatches, resultMatches, loadingUpcomingPubl, loadingResultPublic]);
 
     return (
         <div>
             <div className="space-x-5">
-                <div className=' '>
-                    <h1 className='font-bold text-xl'>Football Match </h1>
-                    <div className="mt-4">
-                        {selectedMatch ? (
-                            <>
-                                <button onClick={handleBackClick} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded mb-3">
-                                    Back
-                                </button>
-                                <MatchInfo matchDetails={matchDetails} />
-                            </>
-                        ) : (
+                <div>
+                    <div className="flex justify-between items-center">
+                        <h1 className='font-bold text-xl'>
+                            {leagueId ? `${leagueName || 'League'} Matches` : 'Football'}
+                        </h1>
+                    </div>
+                    
+                    {/* Show empty state when in waiting mode */}
+                    {viewMode === 'waiting' ? (
+                        <div className="flex flex-col items-center justify-center mt-10 p-6 bg-gray-50 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                            <h2 className="text-xl font-semibold text-gray-700 mt-4">Please select a league</h2>
+                            <p className="text-gray-500 mt-2 text-center">
+                                Choose a league from the sidebar to see football matches.
+                            </p>
+                        </div>
+                    ) : selectedMatch ? (
+                        <>
+                            <button onClick={handleBackClick} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded mb-3">
+                                Back
+                            </button>
+                            <MatchInfo matchDetails={matchDetails} />
+                        </>
+                    ) : (
+                        <div className="mt-4">
                             <Tabs
                                 tabs={tabs2}
                                 defaultTab={initialTab}
                                 onTabChange={handleTabChange}
                                 renderContent={memoizedRenderContent}
                             />
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -287,12 +328,20 @@ const RenderSecondContent = (
             match_type: "Latest Match" as const
         } as MatchDetail));
 
-   
-
     const comingMatchDetails = loadingUpcomingPublic
         ? [{
-            id: "loading", time: "Loading...", team1: "Loading...", team2: "Loading...", score: "vs", homelogo: "", awaylogo: "", homescore: undefined, awayscore: undefined, game_start_date: new Date().toISOString().split('T')[0],
-            game_start_time: "loading", match_type: "Coming Match" as const
+            id: "loading",
+            time: "Loading...",
+            team1: "Loading...",
+            team2: "Loading...",
+            score: "vs",
+            homelogo: "",
+            awaylogo: "",
+            homescore: undefined,
+            awayscore: undefined,
+            game_start_date: new Date().toISOString().split('T')[0],
+            game_start_time: "loading",
+            match_type: "Coming Match" as const
         }]
         : upcomingMatches.map(match => ({
             id: match.id,
@@ -314,170 +363,179 @@ const RenderSecondContent = (
         "Coming Match": comingMatchDetails,
     };
 
-    const groupedMatches = groupMatchesByDate(matchDetails[activeTab]);
+    // Filter out loading placeholders for grouping
+    const matchesForGrouping = matchDetails[activeTab].filter(match => match.id !== "loading");
+    const groupedMatches = groupMatchesByDate(matchesForGrouping);
     const dates = Object.keys(groupedMatches).sort((a, b) =>
         new Date(a).getTime() - new Date(b).getTime()
     );
 
     useEffect(() => {
+        if (dates.length === 0) return;
+
         const today = new Date();
         let closestDate = dates.find(date => new Date(date) >= today) || dates[0];
         if (!selectedDate || !groupedMatches[selectedDate]) {
             setSelectedDate(closestDate);
         }
-    }, [dates, activeTab, groupedMatches]);
+    }, [dates, activeTab, groupedMatches, selectedDate]);
 
     return (
         <div>
             <div className='bg-[#FBFBFB] py-4 px-4'>
                 <h1 className='font-bold'>{activeTab.toUpperCase()}</h1>
 
-                {/* Date selector */}
-                <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
-                    {/* Fix: Show dates starting from today or nearest date */}
-                    {dates.sort((a, b) => {
-                        const today = new Date();
-                        const diffA = Math.abs(new Date(a).getTime() - today.getTime());
-                        const diffB = Math.abs(new Date(b).getTime() - today.getTime());
-                        return diffA - diffB;
-                    }).slice(0, visibleDates).map(date => (
-                        <button
-                            key={date}
-                            onClick={() => setSelectedDate(date)}
-                            className={`px-4 py-2 rounded-full whitespace-nowrap
-                                ${selectedDate === date
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 hover:bg-gray-200'
-                                }`}
-                        >
-                            {new Date(date).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                            })}
-                        </button>
-                    ))}
-
-                    {/* Calendar button */}
-                    <div className="relative" ref={datePickerRef}>
-                        <button
-                            onClick={() => {
-                                setShowDatePicker(!showDatePicker);
-                            }}
-                            className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 whitespace-nowrap"
-                        >
-                            More Dates
-                        </button>
-
-                        {showDatePicker && (
-                            <div
-                                className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-start justify-center"
-                                onClick={(e) => {
-                                    if (e.target === e.currentTarget) {
-                                        setShowDatePicker(false);
-                                    }
-                                }}
+                {/* Date selector - only show if there are dates */}
+                {dates.length > 0 && (
+                    <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+                        {dates.sort((a, b) => {
+                            const today = new Date();
+                            const diffA = Math.abs(new Date(a).getTime() - today.getTime());
+                            const diffB = Math.abs(new Date(b).getTime() - today.getTime());
+                            return diffA - diffB;
+                        }).slice(0, visibleDates).map(date => (
+                            <button
+                                key={date}
+                                onClick={() => setSelectedDate(date)}
+                                className={`px-4 py-2 rounded-full whitespace-nowrap
+                                    ${selectedDate === date
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-100 hover:bg-gray-200'
+                                    }`}
                             >
-                                <div
-                                    className="mt-20 bg-white shadow-lg rounded-md p-2 border"
-                                    onClick={(e) => e.stopPropagation()}
-                                    style={{
-                                        minWidth: '300px',
-                                        maxHeight: '80vh',
-                                        overflow: 'auto'
-                                    }}
+                                {new Date(date).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })}
+                            </button>
+                        ))}
+
+                        {/* Calendar button - only show if there are more dates than visible */}
+                        {dates.length > visibleDates && (
+                            <div className="relative" ref={datePickerRef}> 
+                                <button 
+                                    onClick={() => setShowDatePicker(!showDatePicker)}
+                                    className="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 whitespace-nowrap"
                                 >
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h3 className="font-semibold">Select Date</h3>
-                                        <button
-                                            onClick={() => setShowDatePicker(false)}
-                                            className="text-gray-500 hover:text-gray-700"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                    <DatePicker
-                                        selected={selectedDate ? new Date(selectedDate) : new Date()}
-                                        onChange={(date: Date | null) => {
-                                            if (date) {
-                                                const formattedDate = date.toISOString().split('T')[0];
-                                                if (dates.includes(formattedDate)) {
-                                                    setSelectedDate(formattedDate);
-                                                } else {
-                                                    const closestDate = dates.reduce((prev, curr) => {
-                                                        return Math.abs(new Date(curr).getTime() - date.getTime()) <
-                                                            Math.abs(new Date(prev).getTime() - date.getTime())
-                                                            ? curr : prev;
-                                                    });
-                                                    setSelectedDate(closestDate);
-                                                }
+                                    More Dates
+                                </button>
+
+                                {showDatePicker && (
+                                    <div
+                                        className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-start justify-center"
+                                        onClick={(e) => {
+                                            if (e.target === e.currentTarget) {
                                                 setShowDatePicker(false);
                                             }
                                         }}
-                                        inline
-                                        minDate={dates.length > 0 ? new Date(dates[0]) : undefined}
-                                        maxDate={dates.length > 0 ? new Date(dates[dates.length - 1]) : undefined}
-                                        highlightDates={dates.map(date => new Date(date))}
-                                        yearDropdownItemNumber={10}
-                                        showYearDropdown
-                                        scrollableYearDropdown
-                                        filterDate={(date) => {
-                                            const dateStr = date.toISOString().split('T')[0];
-                                            return dates.includes(dateStr);
-                                        }}
-                                        calendarClassName="custom-datepicker"
-                                    />
-                                </div>
+                                    >
+                                        <div
+                                            className="mt-20 bg-white shadow-lg rounded-md p-2 border"
+                                            onClick={(e) => e.stopPropagation()}
+                                            style={{
+                                                minWidth: '300px',
+                                                maxHeight: '80vh',
+                                                overflow: 'auto'
+                                            }}
+                                        >
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h3 className="font-semibold">Select Date</h3>
+                                                <button
+                                                    onClick={() => setShowDatePicker(false)}
+                                                    className="text-gray-500 hover:text-gray-700"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                            <DatePicker
+                                                selected={selectedDate ? new Date(selectedDate) : new Date()}
+                                                onChange={(date: Date | null) => {
+                                                    if (date) {
+                                                        const formattedDate = date.toISOString().split('T')[0];
+                                                        if (dates.includes(formattedDate)) {
+                                                            setSelectedDate(formattedDate);
+                                                        } else {
+                                                            const closestDate = dates.reduce((prev, curr) => {
+                                                                return Math.abs(new Date(curr).getTime() - date.getTime()) <
+                                                                    Math.abs(new Date(prev).getTime() - date.getTime())
+                                                                    ? curr : prev;
+                                                            });
+                                                            setSelectedDate(closestDate);
+                                                        }
+                                                        setShowDatePicker(false);
+                                                    }
+                                                }}
+                                                inline
+                                                minDate={dates.length > 0 ? new Date(dates[0]) : undefined}
+                                                maxDate={dates.length > 0 ? new Date(dates[dates.length - 1]) : undefined}
+                                                highlightDates={dates.map(date => new Date(date))}
+                                                yearDropdownItemNumber={10}
+                                                showYearDropdown
+                                                scrollableYearDropdown
+                                                filterDate={(date) => {
+                                                    const dateStr = date.toISOString().split('T')[0];
+                                                    return dates.includes(dateStr);
+                                                }}
+                                                calendarClassName="custom-datepicker"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                </div>
+                )}
             </div>
 
-            {matchDetails[activeTab].length === 0 ? (
-    <div className="flex justify-center items-center py-8">
-        <p className="text-gray-500 text-lg">No matches currently available</p>
-    </div>
-) : selectedDate ? (
-    <div className="mt-4">
-        {groupedMatches[selectedDate] && groupedMatches[selectedDate].length > 0 ? (
-            groupedMatches[selectedDate].map((match, index) => (
-                <MatchDetails
-                    key={`${match.id}-${index}`}
-                    id={match.id}
-                    time={match.game_start_time}
-                    team1={match.team1}
-                    team2={match.team2}
-                    score={match.score}
-                    homelogo={match.homelogo}
-                    awaylogo={match.awaylogo}
-                    homescore={match.homescore}
-                    awayscore={match.awayscore}
-                    game_start_date={match.game_start_date}
-                    game_start_time={match.game_start_time}
-                    index={index}
-                    onClick={() => handleMatchClick(match as MatchDetail, activeTab)}
-                />
-            ))
-        ) : (
-            <div className="flex justify-center items-center py-8">
-                <p className="text-gray-500 text-lg">
-                    No matches available for {new Date(selectedDate).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric'
-                    })}
-                </p>
-            </div>
-        )}
-    </div>
-) : (
-    <div className="flex justify-center items-center py-8">
-        <p className="text-gray-500 text-lg">Please select a date to view matches</p>
-    </div>
-)}
+            {loadingUpcomingPublic || loadingResultPublic ? (
+                <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+                    <span className="ml-3 text-blue-800 font-medium">Loading matches...</span>
+                </div>
+            ) : matchDetails[activeTab].length === 0 ? (
+                <div className="flex justify-center items-center py-8">
+                    <p className="text-gray-500 text-lg">No matches currently available</p>
+                </div>
+            ) : selectedDate && groupedMatches[selectedDate] && groupedMatches[selectedDate].length > 0 ? (
+                <div className="mt-4">
+                    {groupedMatches[selectedDate].map((match, index) => (
+                        <MatchDetails
+                            key={`${match.id}-${index}`}
+                            id={match.id}
+                            time={match.game_start_time}
+                            team1={match.team1}
+                            team2={match.team2}
+                            score={match.score}
+                            homelogo={match.homelogo}
+                            awaylogo={match.awaylogo}
+                            homescore={match.homescore}
+                            awayscore={match.awayscore}
+                            game_start_date={match.game_start_date}
+                            game_start_time={match.game_start_time}
+                            index={index}
+                            onClick={() => handleMatchClick(match as MatchDetail, activeTab)}
+                        />
+                    ))}
+                </div>
+            ) : dates.length > 0 ? (
+                <div className="flex justify-center items-center py-8">
+                    <p className="text-gray-500 text-lg">
+                        No matches available for {selectedDate && new Date(selectedDate).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                        })}
+                    </p>
+                </div>
+            ) : (
+                <div className="flex justify-center items-center py-8">
+                    <p className="text-gray-500 text-lg">No matches available</p>
+                </div>
+            )}
         </div>
     );
-}
+};
+
 export default Football;
