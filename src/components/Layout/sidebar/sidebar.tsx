@@ -1,7 +1,7 @@
 import { Dispatch, forwardRef, SetStateAction } from "react";
 import {
   Squares2X2Icon,
-  BookOpenIcon,
+  // BookOpenIcon,
   UsersIcon,
   CommandLineIcon,
   SparklesIcon,
@@ -22,11 +22,11 @@ const MENU_ITEMS = [
     icon: Squares2X2Icon,
     path: "/dashboard",
   },
-  {
-    name: "Predictive Copier",
-    icon: BookOpenIcon,
-    path: "/predictivo-copier",
-  },
+  // {
+  //   name: "Predictive Copier",
+  //   icon: BookOpenIcon,
+  //   path: "/predictivo-copier",
+  // },
   // {
   //   name: "PreMatch Alerts",
   //   icon: CalendarDaysIcon,
